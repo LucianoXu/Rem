@@ -49,6 +49,10 @@ class AstInit(Ast):
         self._eqvar = eqvar
 
     @property
+    def qvar(self) -> QVar:
+        return self._eqvar.eval()   # type: ignore
+
+    @property
     def definite(self) -> bool:
         return True
     
@@ -64,6 +68,10 @@ class AstUnitary(Ast):
             raise ValueError("The operator '" + str(eU) + "' for unitary statement is not unitary.")
         
         self._eU = eU
+
+    @property
+    def U(self) -> IQOpt:
+        return self._eU.eval()  # type: ignore
 
     @property
     def definite(self) -> bool:
@@ -82,6 +90,10 @@ class AstAssert(Ast):
             raise ValueError("The operator '" + str(eP) + "' for assertion statement is not projective.")
         
         self._eP = eP
+
+    @property
+    def P(self) -> IQOpt:
+        return self._eP.eval()  # type: ignore
 
     @property
     def definite(self) -> bool:
@@ -117,6 +129,14 @@ class AstSeq(Ast):
         self._S0 = S0
         self._S1 = S1
 
+    @property
+    def S0(self) -> Ast:
+        return self._S0
+
+    @property
+    def S1(self) -> Ast:
+        return self._S1
+    
     @property
     def definite(self) -> bool:
         return self._S0.definite and self._S1.definite

@@ -1,22 +1,16 @@
 
 import qpv2
 
-code = '''
-    abort;
-    skip;
-    [q] :=0 ;
-    H[p];
-    assert Pp[p];
-    [ pre: Pp[p], post: P1[p]];
-    ( skip _ 0.52 \\otimes H[p] );
-    if P1[q] then
-        CX[q p]
-    else
-        while Pm[p] do
-            H[p]
-        end
-    end
-'''
 
-res = qpv2.parser.parse(code)
-print(res)
+
+rho0 = qpv2.OPTParser.parse("Pm[q]").eval()
+print(rho0)
+
+code = '''
+    [p] :=0
+'''
+prog = qpv2.parser.parse(code)
+print(prog)
+
+rho_out = qpv2.calc(prog, rho0, 10)
+print(rho_out)
