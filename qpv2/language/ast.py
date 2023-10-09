@@ -64,7 +64,7 @@ class AstUnitary(Ast):
         expr_type_check(eU, IQOpt)
 
         # check whether this is a unitary
-        if not eU.eval().qval.is_unitary:
+        if not eU.eval().qval.is_unitary:   # type: ignore
             raise ValueError("The operator '" + str(eU) + "' for unitary statement is not unitary.")
         
         self._eU = eU
@@ -86,7 +86,7 @@ class AstAssert(Ast):
         expr_type_check(eP, IQOpt)
 
         # check whether this is a projector
-        if not eP.eval().qval.is_projector:
+        if not eP.eval().qval.is_projector: # type: ignore
             raise ValueError("The operator '" + str(eP) + "' for assertion statement is not projective.")
         
         self._eP = eP
@@ -109,9 +109,9 @@ class AstPres(Ast):
         expr_type_check(eQ, IQOpt)
 
         # check whether P and Q are projectors
-        if not eP.eval().qval.is_projector:
+        if not eP.eval().qval.is_projector: # type: ignore
             raise ValueError("The operator '" + str(eP) + "' for assertion statement is not projective.")
-        if not eQ.eval().qval.is_projector:
+        if not eQ.eval().qval.is_projector: # type: ignore
             raise ValueError("The operator '" + str(eQ) + "' for assertion statement is not projective.")
         
         self._eP = eP
@@ -156,6 +156,19 @@ class AstProb(Ast):
         self._p = p
 
     @property
+    def S0(self) -> Ast:
+        return self._S0
+
+    @property
+    def S1(self) -> Ast:
+        return self._S1
+    
+    @property
+    def p(self) -> float:
+        return self._p
+
+
+    @property
     def definite(self) -> bool:
         return self._S0.definite and self._S1.definite
     
@@ -172,12 +185,26 @@ class AstIf(Ast):
         expr_type_check(eP, IQOpt)
 
         # check whether P is a projector
-        if not eP.eval().qval.is_projector:
+        if not eP.eval().qval.is_projector: # type: ignore
             raise ValueError("The operator '" + str(eP) + "' for assertion statement is not projective.")
         
         self._eP = eP
         self._S1 = S1
         self._S0 = S0
+    
+    @property
+    def P(self) -> IQOpt:
+        return self._eP.eval()  # type: ignore
+    
+    @property
+    def S1(self) -> Ast:
+        return self._S1
+
+    @property
+    def S0(self) -> Ast:
+        return self._S0
+
+
 
     @property
     def definite(self) -> bool:
@@ -197,11 +224,19 @@ class AstWhile(Ast):
         expr_type_check(eP, IQOpt)
 
         # check whether P is a projector
-        if not eP.eval().qval.is_projector:
+        if not eP.eval().qval.is_projector: # type: ignore
             raise ValueError("The operator '" + str(eP) + "' for assertion statement is not projective.")
         
         self._eP = eP
         self._S = S
+
+    @property
+    def P(self) -> IQOpt:
+        return self._eP.eval()  # type: ignore
+
+    @property
+    def S(self) -> Ast:
+        return self._S
     
     @property
     def definite(self) -> bool:
