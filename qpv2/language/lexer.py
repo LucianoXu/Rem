@@ -19,6 +19,8 @@ reserved = {
 # refinement rule names
 
     'RSKIP'     : 'RSKIP',
+    'RIMPLY'    : 'RIMPLY',
+    'RSEQ'      : 'RSEQ',
 }
 
 reserved.update(OPTlexer.reserved)

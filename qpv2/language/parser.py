@@ -9,13 +9,15 @@ from .ast import *
 from ..qplcomp import parser as OPTparser
 
 precedence = (
+    ('left', '>'),
     ('right', ';'), # sequential composition is right-associated
 ) + OPTparser.precedence
 
 
 def p_prog(p):
     '''
-    statement   : ABORT
+    statement   : '{' statement '}'
+                | ABORT
                 | SKIP
                 | eqvar ASSIGN0
                 | eiqopt
@@ -27,8 +29,12 @@ def p_prog(p):
                 | WHILE eiqopt DO statement END
                 | refinement
     '''
+    #parentheses
+    if len(p) == 4 and p[1] == '{':
+        p[0] = p[2]
+
     # abort
-    if p[1] == 'abort':
+    elif p[1] == 'abort':
         p[0] = AstAbort()
 
     # skip
@@ -77,12 +83,19 @@ def p_prog(p):
 from .refinement import *
 def p_refinement(p):
     '''
-    refinement  : '{' statement '=' RSKIP '=' '>' statement '}'
+    refinement  : statement '=' RSKIP '=' '>' statement
+                | statement '=' RIMPLY '=' '>' statement
+                | statement '=' RSEQ '=' '>' statement
     '''
-    if p[4] == 'RSKIP':
-        p[0] = RSKIP(p[2], p[7], [])
+    if p[3] == 'RSKIP':
+        p[0] = RSKIP(p[1], p[6], [])
+    elif p[3] == 'RIMPLY':
+        p[0] = RIMPLY(p[1], p[6], [])
+    elif p[3] == 'RSEQ':
+        p[0] = RSEQ(p[1], p[6], [])
     else:
         raise Exception()
+        
     
     
 

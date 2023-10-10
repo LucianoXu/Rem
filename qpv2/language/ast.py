@@ -1,4 +1,4 @@
-
+from __future__ import annotations
 from ..qplcomp import Expr, QVar, IQOpt, expr_type_check
 
 INDENT = "  "
@@ -17,6 +17,21 @@ class Ast:
 
     def __str__(self) -> str:
         return self.prefix_str()
+    
+    @property
+    def extract(self) -> Ast:
+        '''
+        Extract the refinement result as a program syntax (without refinement proofs).
+        '''
+        raise NotImplementedError()
+    
+    @property
+    def proof_root(self) -> Ast:
+        '''
+        Return the root program syntax. Used in linking refinement proofs.
+        '''
+        raise NotImplementedError()
+
 
 class AstAbort(Ast):
     def __init__(self):
@@ -28,6 +43,12 @@ class AstAbort(Ast):
     
     def prefix_str(self, prefix="") -> str:
         return prefix + "abort"
+    @property
+    def extract(self) -> Ast:
+        return self
+    @property
+    def proof_root(self) -> Ast:
+        return self
 
 
 class AstSkip(Ast):
@@ -41,6 +62,13 @@ class AstSkip(Ast):
     def prefix_str(self, prefix="") -> str:
         return prefix + "skip"
     
+    @property
+    def extract(self) -> Ast:
+        return self
+    @property
+    def proof_root(self) -> Ast:
+        return self
+
 
 class AstInit(Ast):
     def __init__(self, eqvar : Expr):
@@ -57,6 +85,14 @@ class AstInit(Ast):
     
     def prefix_str(self, prefix="") -> str:
         return prefix + str(self._eqvar) + ":=0"
+    
+    @property
+    def extract(self) -> Ast:
+        return self
+    @property
+    def proof_root(self) -> Ast:
+        return self
+
     
 class AstUnitary(Ast):
     def __init__(self, eU : Expr):
@@ -79,6 +115,14 @@ class AstUnitary(Ast):
     def prefix_str(self, prefix="") -> str:
         return prefix + str(self._eU)
     
+    @property
+    def extract(self) -> Ast:
+        return self
+    @property
+    def proof_root(self) -> Ast:
+        return self
+
+    
 
 class AstAssert(Ast):
     def __init__(self, eP : Expr):
@@ -100,6 +144,14 @@ class AstAssert(Ast):
     
     def prefix_str(self, prefix="") -> str:
         return prefix + "assert " + str(self._eP)
+    
+    @property
+    def extract(self) -> Ast:
+        return self
+    @property
+    def proof_root(self) -> Ast:
+        return self
+
     
 
 class AstPres(Ast):
@@ -131,6 +183,14 @@ class AstPres(Ast):
     
     def prefix_str(self, prefix="") -> str:
         return prefix + "[ pre: " + str(self._eP) + ", post: " + str(self._eQ) + " ]"
+    
+    @property
+    def extract(self) -> Ast:
+        return self
+    @property
+    def proof_root(self) -> Ast:
+        return self
+
 
 class AstSeq(Ast):
     def __init__(self, S0 : Ast, S1 : Ast):
@@ -152,6 +212,13 @@ class AstSeq(Ast):
     def prefix_str(self, prefix="") -> str:
         return self._S0.prefix_str(prefix) + ";\n" + self._S1.prefix_str(prefix)
     
+    @property
+    def extract(self) -> Ast:
+        return AstSeq(self._S0.extract, self._S1.extract)
+    @property
+    def proof_root(self) -> Ast:
+        return AstSeq(self._S0.proof_root, self._S1.proof_root)
+
 
 class AstProb(Ast):
     def __init__(self, S0 : Ast, S1 : Ast, p : float):
@@ -186,6 +253,14 @@ class AstProb(Ast):
         res += self._S1.prefix_str(prefix + INDENT) + "\n"
         res += prefix + ")"
         return res
+    
+    @property
+    def extract(self) -> Ast:
+        return AstProb(self._S0.extract, self._S1.extract, self._p)
+    @property
+    def proof_root(self) -> Ast:
+        return AstProb(self._S0.proof_root, self._S1.proof_root, self._p)
+
     
 
 class AstIf(Ast):
@@ -226,6 +301,14 @@ class AstIf(Ast):
         res += prefix + "end"
         return res
 
+    @property
+    def extract(self) -> Ast:
+        return AstIf(self._eP, self._S1.extract, self._S0.extract)
+    @property
+    def proof_root(self) -> Ast:
+        return AstIf(self._eP, self._S0.proof_root, self._S1.proof_root)
+
+
 
 class AstWhile(Ast):
     def __init__(self, eP : Expr, S : Ast):
@@ -256,4 +339,10 @@ class AstWhile(Ast):
         res += prefix + "end"
         return res
 
+    @property
+    def extract(self) -> Ast:
+        return AstWhile(self._eP, self._S.extract)
+    @property
+    def proof_root(self) -> Ast:
+        return AstWhile(self._eP, self._S.proof_root)
 

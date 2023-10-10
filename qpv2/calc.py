@@ -14,20 +14,34 @@ ESet0 = QSOpt([P0, E10])
 
 def calc(prog : Ast, rho : IQOpt) -> IQOpt:
     '''
-    Calculate the execution result of program `prog` on input state `rho`.
-
-    Returns: `IQOpt`, the result of execution.
+    The method for initiating a execution calculation.
+    Check of program and input state is implemented here.
     '''
+
     rho.rho_extend = True
 
+    extracted_prog = prog.extract
+
     # check whether the program can be calculated
-    if not prog.definite:
+    if not extracted_prog.definite:
         raise ValueError("This program is not definite therefore cannot calculate.")
     
     # check whether rho is a partial density
     if not rho.qval.is_pdo:
         raise ValueError("The input rho is not a partial density operator.")
     
+    return calc_iter(extracted_prog, rho)
+    
+
+
+def calc_iter(prog : Ast, rho : IQOpt) -> IQOpt:
+    '''
+    Calculate the execution result of program `prog` on input state `rho`.
+
+    Returns: `IQOpt`, the result of execution.
+    '''
+    rho.rho_extend = True
+
     # return zero if the input is zero
     if rho == IQOpt.zero(is_rho=True):
         return IQOpt.zero(is_rho=True)
@@ -54,22 +68,22 @@ def calc(prog : Ast, rho : IQOpt) -> IQOpt:
         return P @ rho @ P
     
     elif isinstance(prog, AstSeq):
-        rho1 = calc(prog.S0, rho)
-        return calc(prog.S1, rho1)
+        rho1 = calc_iter(prog.S0, rho)
+        return calc_iter(prog.S1, rho1)
     
     elif isinstance(prog, AstProb):
-        rho_0 = calc(prog.S0, rho)
-        rho_1 = calc(prog.S1, rho)
+        rho_0 = calc_iter(prog.S0, rho)
+        rho_1 = calc_iter(prog.S1, rho)
         return prog.p * rho_0 + (1 - prog.p) * rho_1
     
     elif isinstance(prog, AstIf):
         # branch of res == 1
         P = prog.P
-        rho_1 = calc(prog.S1, P @ rho @ P)
+        rho_1 = calc_iter(prog.S1, P @ rho @ P)
         
         # branch of res == 0
         P_comp = ~ P
-        rho_0 = calc(prog.S0, P_comp @ rho @ P_comp)
+        rho_0 = calc_iter(prog.S0, P_comp @ rho @ P_comp)
 
         return rho_1 + rho_0
     
@@ -82,7 +96,7 @@ def calc(prog : Ast, rho : IQOpt) -> IQOpt:
 
         # branch of `continue`
         new_prog = AstSeq(prog.S, prog)
-        rho_continue = calc(new_prog, P @ rho @ P)
+        rho_continue = calc_iter(new_prog, P @ rho @ P)
 
         return rho_break + rho_continue
     
