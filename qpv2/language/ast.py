@@ -4,7 +4,6 @@ from ..qplcomp import Expr, QVar, IQOpt, expr_type_check
 INDENT = "  "
 
 class Ast:
-    pass
 
     @property
     def definite(self) -> bool:
@@ -116,6 +115,15 @@ class AstPres(Ast):
         
         self._eP = eP
         self._eQ = eQ
+
+    @property
+    def P(self) -> IQOpt:
+        return self._eP.eval()  # type: ignore
+
+    @property
+    def Q(self) -> IQOpt:
+        return self._eQ.eval()  # type: ignore
+
 
     @property
     def definite(self) -> bool:

@@ -15,13 +15,17 @@ reserved = {
     'do'        : 'DO',
     'pre'       : 'PRE',
     'post'      : 'POST',
+
+# refinement rule names
+
+    'RSKIP'     : 'RSKIP',
 }
 
 reserved.update(OPTlexer.reserved)
 
 tokens = ['ASSIGN0', 'FLOATNUM'] + list(reserved.values()) + OPTlexer.tokens
 
-literals = ['(', ')', '_', '[', ']', ';', ',', ':'] + OPTlexer.literals
+literals = ['(', ')', '_', '[', ']', ';', ',', ':', '=', '>', '{', '}'] + OPTlexer.literals
 
 t_OTIMES = OPTlexer.t_OTIMES
 t_DAGGER = OPTlexer.t_DAGGER

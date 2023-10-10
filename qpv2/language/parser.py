@@ -8,7 +8,9 @@ from .ast import *
 
 from ..qplcomp import parser as OPTparser
 
-precedence = OPTparser.precedence
+precedence = (
+    ('right', ';'), # sequential composition is right-associated
+) + OPTparser.precedence
 
 
 def p_prog(p):
@@ -23,6 +25,7 @@ def p_prog(p):
                 | '(' statement '_' FLOATNUM OTIMES statement ')'
                 | IF eiqopt THEN statement ELSE statement END
                 | WHILE eiqopt DO statement END
+                | refinement
     '''
     # abort
     if p[1] == 'abort':
@@ -60,11 +63,27 @@ def p_prog(p):
     elif p.slice[1].type == 'IF':
         p[0] = AstIf(p[2], p[4], p[6])
 
+    # while
     elif p.slice[1].type == 'WHILE':
         p[0] = AstWhile(p[2], p[4])
 
+    # refinement
+    elif p.slice[1].type == 'refinement':
+        p[0] = p[1]
+
     else:
         raise Exception()
+    
+from .refinement import *
+def p_refinement(p):
+    '''
+    refinement  : '{' statement '=' RSKIP '=' '>' statement '}'
+    '''
+    if p[4] == 'RSKIP':
+        p[0] = RSKIP(p[2], p[7], [])
+    else:
+        raise Exception()
+    
     
 
 p_eiqopt = OPTparser.p_eiqopt
