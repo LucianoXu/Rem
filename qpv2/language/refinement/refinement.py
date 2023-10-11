@@ -2,6 +2,7 @@
 from typing import List
 
 from qpv2.language.ast import Ast
+from qpv2.qplcomp import IQOpt
 
 from ...qplcomp import Expr
 from ...sugar import type_check
@@ -20,8 +21,9 @@ class Refinement(Ast):
 
     And we can even parse this refinement proof!
     '''
-    def __init__(self, Spre : Ast, Spost : Ast, parals : List[Expr]):
-        type_check(Spre, Ast)
+    def __init__(self, Spre : AstPres, Spost : Ast, parals : List[Expr]):
+        type_check(Spre, AstPres)
+        
         type_check(Spost, Ast)
         type_check(parals, list)
 
@@ -36,14 +38,16 @@ class Refinement(Ast):
         Check whether the rule applied here is valid.
         Raise an error when it is not.
         '''
-        raise NotImplementedError()
+        # check whether wlp relation is satisfied
+        if not self._Spre.P <= self._Spost.wlp(self._Spre.Q):
+            raise ValueError("The relation P <= wlp.S.Q is not satisfied.")
     
     @property
     def rule_name(self) -> str:
         '''
         The name of the rule.
         '''
-        raise NotImplementedError()
+        return ""
 
     @property
     def rule_sig(self) -> str:
@@ -53,7 +57,7 @@ class Refinement(Ast):
         '''
         res = self.rule_name
         if len(self._parals) == 0:
-            res += "[]"
+            pass
         else:
             res += "[" + str(self._parals[0])
             for i in range(1, len(self._parals)):
@@ -78,7 +82,7 @@ class Refinement(Ast):
     
     def prefix_str(self, prefix = "") -> str:
         res = self._Spre.prefix_str(prefix) + "\n"
-        res += prefix + INDENT + "= " + self.rule_sig + " => {\n"
+        res += prefix + INDENT + "=" + self.rule_sig + "=> {\n"
         res += self._Spost.prefix_str(prefix) + " }"
         return res
     
@@ -89,4 +93,7 @@ class Refinement(Ast):
     @property
     def proof_root(self) -> Ast:
         return self.Spre.extract
+    
+    def wlp(self, post: IQOpt) -> IQOpt:
+        return self.extract.wlp(post)
 

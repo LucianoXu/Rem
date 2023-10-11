@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+from qpv2.qplcomp import IQOpt
 from ..qplcomp import Expr, QVar, IQOpt, expr_type_check
 
 INDENT = "  "
@@ -31,6 +33,12 @@ class Ast:
         Return the root program syntax. Used in linking refinement proofs.
         '''
         raise NotImplementedError()
+    
+    def wlp(self, post : IQOpt) -> IQOpt:
+        '''
+        Calculate the weakest liberal precondition.
+        '''
+        raise NotImplementedError()
 
 
 class AstAbort(Ast):
@@ -49,6 +57,9 @@ class AstAbort(Ast):
     @property
     def proof_root(self) -> Ast:
         return self
+    
+    def wlp(self, post: IQOpt) -> IQOpt:
+        return IQOpt.identity(False)
 
 
 class AstSkip(Ast):
@@ -68,6 +79,9 @@ class AstSkip(Ast):
     @property
     def proof_root(self) -> Ast:
         return self
+    
+    def wlp(self, post: IQOpt) -> IQOpt:
+        return post
 
 
 class AstInit(Ast):
@@ -92,6 +106,9 @@ class AstInit(Ast):
     @property
     def proof_root(self) -> Ast:
         return self
+    
+    def wlp(self, post: IQOpt) -> IQOpt:
+        return post.initwlp(self.qvar)
 
     
 class AstUnitary(Ast):
@@ -122,6 +139,9 @@ class AstUnitary(Ast):
     def proof_root(self) -> Ast:
         return self
 
+    def wlp(self, post: IQOpt) -> IQOpt:
+        U = self.U
+        return U.dagger() @ post @ U
     
 
 class AstAssert(Ast):
@@ -151,6 +171,9 @@ class AstAssert(Ast):
     @property
     def proof_root(self) -> Ast:
         return self
+    
+    def wlp(self, post: IQOpt) -> IQOpt:
+        return self.P.Sasaki_imply(post)
 
     
 
@@ -190,6 +213,14 @@ class AstPres(Ast):
     @property
     def proof_root(self) -> Ast:
         return self
+    
+    def wlp(self, post: IQOpt) -> IQOpt:
+        if post == IQOpt.identity(False):
+            return IQOpt.identity(False)
+        elif self.Q <= post:
+            return self.P
+        else:
+            return IQOpt.zero(False)
 
 
 class AstSeq(Ast):
@@ -219,6 +250,8 @@ class AstSeq(Ast):
     def proof_root(self) -> Ast:
         return AstSeq(self._S0.proof_root, self._S1.proof_root)
 
+    def wlp(self, post: IQOpt) -> IQOpt:
+        return self.S0.wlp(self.S1.wlp(post))
 
 class AstProb(Ast):
     def __init__(self, S0 : Ast, S1 : Ast, p : float):
@@ -261,6 +294,8 @@ class AstProb(Ast):
     def proof_root(self) -> Ast:
         return AstProb(self._S0.proof_root, self._S1.proof_root, self._p)
 
+    def wlp(self, post: IQOpt) -> IQOpt:
+        return self.S0.wlp(post) & self.S1.wlp(post)
     
 
 class AstIf(Ast):
@@ -308,6 +343,9 @@ class AstIf(Ast):
     def proof_root(self) -> Ast:
         return AstIf(self._eP, self._S0.proof_root, self._S1.proof_root)
 
+    def wlp(self, post: IQOpt) -> IQOpt:
+        return self.P.Sasaki_imply(self.S1.wlp(post)) &\
+              (~ self.P).Sasaki_imply(self.S0.wlp(post))
 
 
 class AstWhile(Ast):
@@ -345,4 +383,18 @@ class AstWhile(Ast):
     @property
     def proof_root(self) -> Ast:
         return AstWhile(self._eP, self._S.proof_root)
+    
+    def wlp(self, post: IQOpt) -> IQOpt:
+        flag = True
+        Rn = post
+        Rn_1 = post
+
+        # this is guaranteed to terminate
+        while flag:
+            Rn = Rn_1
+            Rn_1 = self.P.Sasaki_imply(self.S.wlp(Rn)) & (~ self.P).Sasaki_imply(post)
+
+            flag = Rn == Rn_1
+
+        return Rn
 
