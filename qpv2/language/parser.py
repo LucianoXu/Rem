@@ -22,7 +22,7 @@ def p_prog(p):
                 | eqvar ASSIGN0
                 | eiqopt
                 | ASSERT eiqopt
-                | '[' PRE ':' eiqopt ',' POST ':' eiqopt ']'
+                | prescription
                 | statement ';' statement
                 | '(' statement '_' FLOATNUM OTIMES statement ')'
                 | IF eiqopt THEN statement ELSE statement END
@@ -54,8 +54,8 @@ def p_prog(p):
         p[0] = AstAssert(p[2])
 
     # prescription
-    elif len(p) == 10 and p.slice[2].type == 'PRE':
-        p[0] = AstPres(p[4], p[8])
+    elif p.slice[1].type == 'prescription':
+        p[0] = p[1]
 
     # sequential composition
     elif len(p) == 4 and p.slice[2].type == ';':
@@ -80,12 +80,18 @@ def p_prog(p):
     else:
         raise Exception()
     
+def p_prescription(p):
+    '''
+    prescription    : '[' PRE ':' eiqopt ',' POST ':' eiqopt ']'
+    '''
+    p[0] = AstPres(p[4], p[8])
+    
 from .refinement import *
 def p_refinement(p):
     '''
-    refinement  : statement '=' RSKIP '=' '>' statement
-                | statement '=' RIMPLY '=' '>' statement
-                | statement '=' RSEQ '=' '>' statement
+    refinement  : prescription '=' RSKIP '=' '>' statement
+                | prescription '=' RIMPLY '=' '>' statement
+                | prescription '=' RSEQ '=' '>' statement
     '''
     if p[3] == 'RSKIP':
         p[0] = RSKIP(p[1], p[6], [])

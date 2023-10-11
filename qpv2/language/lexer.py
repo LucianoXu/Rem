@@ -33,6 +33,8 @@ t_OTIMES = OPTlexer.t_OTIMES
 t_DAGGER = OPTlexer.t_DAGGER
 t_DISJUNCT = OPTlexer.t_DISJUNCT
 t_CONJUNCT = OPTlexer.t_CONJUNCT
+t_SASAKI_IMPLY = OPTlexer.t_SASAKI_IMPLY
+t_SASAKI_CONJUNCT = OPTlexer.t_SASAKI_CONJUNCT
 t_ASSIGN0 = r":=0"
 
 # use // or /* */ to comment
