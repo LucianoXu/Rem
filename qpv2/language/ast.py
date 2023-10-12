@@ -386,15 +386,15 @@ class AstWhile(Ast):
     
     def wlp(self, post: IQOpt) -> IQOpt:
         flag = True
-        Rn = post
-        Rn_1 = post
+        Rn = IQOpt.identity(False)
+        Rn_1 = IQOpt.identity(False)
 
         # this is guaranteed to terminate
         while flag:
             Rn = Rn_1
             Rn_1 = self.P.Sasaki_imply(self.S.wlp(Rn)) & (~ self.P).Sasaki_imply(post)
 
-            flag = Rn == Rn_1
+            flag = not Rn == Rn_1
 
         return Rn
 

@@ -89,13 +89,13 @@ def p_prescription(p):
 from .refinement import *
 def p_refinement(p):
     '''
-    refinement  : prescription '=' '=' '>' statement
-                | prescription '=' RSKIP '=' '>' statement
-                | prescription '=' RIMPLY '=' '>' statement
-                | prescription '=' RSEQ '=' '>' statement
+    refinement  : statement '=' '=' '>' statement
+                | statement '=' RSKIP '=' '>' statement
+                | statement '=' RIMPLY '=' '>' statement
+                | statement '=' RSEQ '=' '>' statement
     '''
     if len(p) == 6 and p[2] == '=' and p[3] == '=' and p[4] == '>':
-        p[0] = Refinement(p[1], p[5], [])
+        p[0] = RPres(p[1], p[5], [])
     elif p[3] == 'RSKIP':
         p[0] = RSKIP(p[1], p[6], [])
     elif p[3] == 'RIMPLY':

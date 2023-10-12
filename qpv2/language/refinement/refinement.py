@@ -21,8 +21,8 @@ class Refinement(Ast):
 
     And we can even parse this refinement proof!
     '''
-    def __init__(self, Spre : AstPres, Spost : Ast, parals : List[Expr]):
-        type_check(Spre, AstPres)
+    def __init__(self, Spre : Ast, Spost : Ast, parals : List[Expr]):
+        type_check(Spre, Ast)
         
         type_check(Spost, Ast)
         type_check(parals, list)
@@ -38,16 +38,14 @@ class Refinement(Ast):
         Check whether the rule applied here is valid.
         Raise an error when it is not.
         '''
-        # check whether wlp relation is satisfied
-        if not self._Spre.P <= self._Spost.wlp(self._Spre.Q):
-            raise ValueError("The relation P <= wlp.S.Q is not satisfied.")
+        raise NotImplementedError()
     
     @property
     def rule_name(self) -> str:
         '''
         The name of the rule.
         '''
-        return ""
+        raise NotImplementedError()
 
     @property
     def rule_sig(self) -> str:
@@ -97,3 +95,53 @@ class Refinement(Ast):
     def wlp(self, post: IQOpt) -> IQOpt:
         return self.extract.wlp(post)
 
+
+
+
+class RPres(Refinement):
+    '''
+    Refinement from prescriptions. Validity check conducted by wlp calculation.
+    '''
+    def __init__(self, Spre : AstPres, Spost : Ast, parals : List[Expr]):
+        type_check(Spre, AstPres)
+        
+        type_check(Spost, Ast)
+        type_check(parals, list)
+
+        self._Spre = Spre
+        self._Spost = Spost
+        self._parals = parals
+
+        self.validity_check()
+
+    def validity_check(self) -> None:
+        '''
+        Check whether the rule applied here is valid.
+        Raise an error when it is not.
+        '''
+        # check whether wlp relation is satisfied
+        if not self._Spre.P <= self._Spost.wlp(self._Spre.Q):
+            raise ValueError("The relation P <= wlp.S.Q is not satisfied.")
+    
+    @property
+    def rule_name(self) -> str:
+        '''
+        The name of the rule.
+        '''
+        return ""
+
+    @property
+    def rule_sig(self) -> str:
+        '''
+        The signature of the rule applied for this refinement relation.
+        It will looks like : 'RULE0(para0, para1, ...)'
+        '''
+        res = self.rule_name
+        if len(self._parals) == 0:
+            pass
+        else:
+            res += "[" + str(self._parals[0])
+            for i in range(1, len(self._parals)):
+                res += ", " + str(self._parals[i])
+            res += "]"
+        return res
