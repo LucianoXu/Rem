@@ -2,16 +2,16 @@
 from __future__ import annotations
 import ply.yacc as yacc
 
-from .lexer import tokens, lexer
+from .lexer import tokens
 
 from .ast import *
 
-from ..qplcomp import parser as OPTparser
+from ..qplcomp import parser_def
 
 precedence = (
     ('left', '>'),
     ('right', ';'), # sequential composition is right-associated
-) + OPTparser.precedence
+) + parser_def.precedence
 
 
 def p_prog(p):
@@ -107,14 +107,7 @@ def p_refinement(p):
         
     
     
-
-p_eiqopt = OPTparser.p_eiqopt
-p_variable = OPTparser.p_variable
-p_eqopt = OPTparser.p_eqopt
-p_eqvar = OPTparser.p_eqvar
-p_qvar = OPTparser.p_qvar
-p_qvar_pre = OPTparser.p_qvar_pre
-
+from ..qplcomp.qexpr.parser_def import p_eiqopt, p_eqopt, p_eqvar, p_num, p_qvar, p_qvar_pre, p_output, p_variable
 
 def p_error(p):
     if p is None:
