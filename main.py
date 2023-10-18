@@ -3,10 +3,10 @@ import numpy as np
 
 import qpv2
 
-from qpv2.qplcomp.qval import predefined
-from qpv2.qplcomp import Parser, QOpt
+from qplcomp.qval import predefined
+from qplcomp import Parser, QOpt
 
-from qpv2.qplcomp.qexpr.eqopt import EQOpt
+from qplcomp.qexpr.eqopt import EQOpt
 
 Parser.Global["Rztheta"] = EQOpt(QOpt(predefined.Rz(np.arccos(3/5))), Parser.Global)
 

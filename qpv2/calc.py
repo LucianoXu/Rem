@@ -6,7 +6,7 @@ from typing import Tuple
 
 from .language import *
 import numpy as np
-from .qplcomp import QOpt, IQOpt, QSOpt, IQSOpt
+from qplcomp import QOpt, IQOpt, QSOpt, IQSOpt
 
 P0 = QOpt(np.array([[1., 0.], [0., 0.]]))
 E10 = QOpt(np.array([[0., 1.], [0., 0.]]))

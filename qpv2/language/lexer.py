@@ -1,9 +1,9 @@
 
 import ply.lex as lex
 
-from ..qplcomp import lexer_def
+from qplcomp import lexer_def
 
-from ..qplcomp.qexpr.lexer_def import *
+from qplcomp.qexpr.lexer_def import *
 
 reserved = {
     'abort'     : 'ABORT',

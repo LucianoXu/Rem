@@ -2,9 +2,9 @@
 from typing import List
 
 from qpv2.language.ast import Ast
-from qpv2.qplcomp import IQOpt
+from qplcomp import IQOpt
 
-from ...qplcomp import Expr
+from qplcomp import Expr
 from ...sugar import type_check
 from ..ast import *
 

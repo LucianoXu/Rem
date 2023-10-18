@@ -6,7 +6,7 @@ from .lexer import tokens
 
 from .ast import *
 
-from ..qplcomp import parser_def
+from qplcomp import parser_def
 
 precedence = (
     ('left', '>'),
@@ -107,7 +107,7 @@ def p_refinement(p):
         
     
     
-from ..qplcomp.qexpr.parser_def import p_eiqopt, p_eqopt, p_eqvar, p_num, p_qvar, p_qvar_pre, p_output, p_variable
+from qplcomp.qexpr.parser_def import p_eiqopt, p_eqopt, p_eqvar, p_num, p_qvar, p_qvar_pre, p_output, p_variable
 
 def p_error(p):
     if p is None:

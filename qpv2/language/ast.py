@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from qpv2.qplcomp import IQOpt
-from ..qplcomp import Expr, QVar, IQOpt, expr_type_check
+from qplcomp import IQOpt
+from qplcomp import Expr, QVar, IQOpt, expr_type_check
 
 INDENT = "  "
 
