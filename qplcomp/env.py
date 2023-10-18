@@ -24,13 +24,12 @@ class Expr:
     The type checking is implemented in the construction of Expr.
     '''
 
-    def __init__(self, env : Env):
+    def __init__(self):
         '''
         parameter env: ever expression lives in some particular environment.
 
         TODO #2
         '''
-        self._env = env
     
     @property
     def T(self) -> None | Type:
@@ -49,15 +48,14 @@ class Expr:
     
 class Variable(Expr):
     '''
-    The class for variables. Variables can be of any type, and can be replaced by alpha-reduction.
+    The class for variables. Variables can be of any type, and can be replaced by beta-reduction.
     '''
-    def __init__(self, id : str, env : Env, T : None | Type = None):
+    def __init__(self, id : str, T : None | Type = None):
         '''
         Construct a Variable expression.
 
         The type of it can be `None`, meaning that it's type is not determined yet.
         '''
-        super().__init__(env)
 
         if not isinstance(id, str):
             raise TypeError("The id should be a string.")
@@ -73,14 +71,14 @@ class Variable(Expr):
         if self._T is not None:
             return self._T
         
-        elif self._id in self._env:
-            return self._env[self._id].T
+        elif self._id in Env():
+            return Env()[self._id].T
         
         else:
             return None
 
     def eval(self):
-        val = self._env[self._id].eval()
+        val = Env()[self._id].eval()
 
         if self.T is not None:
             if not isinstance(val, self.T):
@@ -90,7 +88,6 @@ class Variable(Expr):
     
     def __str__(self) -> str:
         return self._id
-
 
 
 def expr_type_check(expr : Expr, target_type : Type) -> None:
@@ -103,15 +100,25 @@ def expr_type_check(expr : Expr, target_type : Type) -> None:
 class Env:
     '''
     The environment relates variable (string) to their definitions.
+    singleton model
     '''
-    def __init__(self) -> None:
+    __instance : Env | None = None
+    def __new__(cls):
         '''
         Initializing an empty value environment.
         '''
-        self._lib : Dict[str, Expr] = {}
+        if cls.__instance is None:
+            cls.__instance = object.__new__(cls)
+            cls.__instance._lib = {}
+            # the number for auto naming
+            cls.__instance._numbering = 0
+        return cls.__instance
 
-        # the number for auto naming
-        self._numbering = 0
+
+    def __init__(self) -> None:
+
+        self._lib : Dict[str, Expr]
+        self._numbering : int
 
     def get_name(self, prefix : str = DEFAULT_PREFIX) -> str:
         '''

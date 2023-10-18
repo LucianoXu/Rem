@@ -17,8 +17,7 @@ class EQSOpt(Expr):
     Terminal.
     '''
 
-    def __init__(self, qso : QSOpt, env : Env):
-        super().__init__(env)
+    def __init__(self, qso : QSOpt):
 
         type_check(qso, QSOpt)
         self._qso = qso
@@ -50,8 +49,7 @@ class EQSOptAdd(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, soA : Expr, soB : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, soA : Expr, soB : Expr):
 
         type_check(soA, Expr)
         expr_type_check(soA, QSOpt)

@@ -12,8 +12,7 @@ class EQVar(Expr):
 
     Terminal.
     '''
-    def __init__(self, qvar : QVar, env : Env):
-        super().__init__(env)
+    def __init__(self, qvar : QVar):
 
         type_check(qvar, QVar)
         self._qvar = qvar

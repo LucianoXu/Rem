@@ -39,33 +39,22 @@ from .eqso import EQSOpt
 
 
 
-def get_default_env() -> Env:
+def prepare_env() -> None:
     '''
-    Return the environment with predefined quantum values.
+    Append the environment with predefined quantum values.
     '''
     env = Env()
     for key in qvallib:
         val = qvallib[key]
         if isinstance(val, QOpt):
-            env[key] = EQOpt(val, env)
+            env[key] = EQOpt(val)
         elif isinstance(val, QSOpt):
-            env[key] = EQSOpt(val, env)
+            env[key] = EQSOpt(val)
         else:
             raise Exception("Unexpected Exception.")
 
-    return env
-
 
 class Parser:
-    Global : Env = get_default_env()
-
-    @staticmethod
-    def set_global_env(env : Env) -> None:
-        '''
-        Set the Global environment
-        '''
-        type_check(env, Env)
-        ParsingEnv.env = env
 
     @staticmethod
     def parse(code : str) -> Expr:
@@ -78,4 +67,3 @@ class Parser:
 
 # assign the environment for parser
 from . import parser_def
-parser_def.ParsingEnv.env = Parser.Global

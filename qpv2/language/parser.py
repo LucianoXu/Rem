@@ -1,5 +1,7 @@
 
 from __future__ import annotations
+from typing import Tuple
+
 import ply.yacc as yacc
 
 from .lexer import tokens
@@ -14,6 +16,18 @@ precedence = (
 ) + parser_def.precedence
 
 
+def type_match(p, types: Tuple[str, ...]) -> bool:
+    '''
+    The method to check whether the sentence match the corresponding types.
+    '''
+    if len(p) != len(types) + 1:
+        return False
+    
+    for i in range(len(types)):
+        if p.slice[i + 1].type != types[i]:
+            return False
+    return True
+
 def p_prog(p):
     '''
     statement   : '{' statement '}'
@@ -27,7 +41,7 @@ def p_prog(p):
                 | '(' statement '_' FLOATNUM OTIMES statement ')'
                 | IF eiqopt THEN statement ELSE statement END
                 | WHILE eiqopt DO statement END
-                | refinement
+                | statement '=' '=' '>' statement
     '''
     #parentheses
     if len(p) == 4 and p[1] == '{':
@@ -74,9 +88,9 @@ def p_prog(p):
         p[0] = AstWhile(p[2], p[4])
 
     # refinement
-    elif p.slice[1].type == 'refinement':
+    elif type_match(p, ("statement", '=', '=', '>', "statement")):
+        p[1].refine(p[5])
         p[0] = p[1]
-
     else:
         raise Exception()
     
@@ -85,26 +99,6 @@ def p_prescription(p):
     prescription    : '[' PRE ':' eiqopt ',' POST ':' eiqopt ']'
     '''
     p[0] = AstPres(p[4], p[8])
-    
-from .refinement import *
-def p_refinement(p):
-    '''
-    refinement  : statement '=' '=' '>' statement
-                | statement '=' RSKIP '=' '>' statement
-                | statement '=' RIMPLY '=' '>' statement
-                | statement '=' RSEQ '=' '>' statement
-    '''
-    if len(p) == 6 and p[2] == '=' and p[3] == '=' and p[4] == '>':
-        p[0] = RPres(p[1], p[5], [])
-    elif p[3] == 'RSKIP':
-        p[0] = RSKIP(p[1], p[6], [])
-    elif p[3] == 'RIMPLY':
-        p[0] = RIMPLY(p[1], p[6], [])
-    elif p[3] == 'RSEQ':
-        p[0] = RSEQ(p[1], p[6], [])
-    else:
-        raise Exception()
-        
     
     
 from qplcomp.qexpr.parser_def import p_eiqopt, p_eqopt, p_eqvar, p_num, p_qvar, p_qvar_pre, p_output, p_variable

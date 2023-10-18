@@ -22,9 +22,6 @@ def type_match(p, types: Tuple[str, ...]) -> bool:
             return False
     return True
 
-class ParsingEnv:
-    env : Env = Env()
-
 
 ############################################################
 # parsing rules
@@ -53,7 +50,7 @@ def p_variable(p):
     '''
     variable    : ID
     '''
-    p[0] = Variable(p[1], ParsingEnv.env)
+    p[0] = Variable(p[1])
 
 
 from .eiqopt import *
@@ -80,37 +77,37 @@ def p_eiqopt(p):
     if type_match(p, ('IQOPT', 'variable')):
         p[0] = p[2]
     elif type_match(p, ('eqopt', 'eqvar')):
-        p[0] = EIQOpt(p[1], p[2], ParsingEnv.env)
+        p[0] = EIQOpt(p[1], p[2])
     elif type_match(p, ('(', 'eiqopt', ')')):
         p[0] = p[2]
     elif type_match(p, ('(', '-', 'eiqopt', ')')):
-        p[0] = EIQOptNeg(p[3], ParsingEnv.env)
+        p[0] = EIQOptNeg(p[3])
     elif type_match(p, ('eiqopt', '+', 'eiqopt')):
-        p[0] = EIQOptAdd(p[1], p[3], ParsingEnv.env)
+        p[0] = EIQOptAdd(p[1], p[3])
     elif type_match(p, ('eiqopt', '-', 'eiqopt')):
-        p[0] = EIQOptSub(p[1], p[3], ParsingEnv.env)
+        p[0] = EIQOptSub(p[1], p[3])
     elif type_match(p, ('num', '*', 'eiqopt')):
-        p[0] = EIQOptScale(p[1], p[3], ParsingEnv.env)
+        p[0] = EIQOptScale(p[1], p[3])
     elif type_match(p, ('num', 'eiqopt')):
-        p[0] = EIQOptScale(p[1], p[2], ParsingEnv.env)
+        p[0] = EIQOptScale(p[1], p[2])
     elif type_match(p, ('eiqopt', '*', 'eiqopt')):
-        p[0] = EIQOptMul(p[1], p[3], ParsingEnv.env)
+        p[0] = EIQOptMul(p[1], p[3])
     elif type_match(p, ('eiqopt', 'eiqopt')):
-        p[0] = EIQOptMul(p[1], p[2], ParsingEnv.env)
+        p[0] = EIQOptMul(p[1], p[2])
     elif type_match(p, ('eiqopt', 'DAGGER')):
-        p[0] = EIQOptDagger(p[1], ParsingEnv.env)
+        p[0] = EIQOptDagger(p[1])
     elif type_match(p, ('eiqopt', 'OTIMES', 'eiqopt')):
-        p[0] = EIQOptTensor(p[1], p[3], ParsingEnv.env)
+        p[0] = EIQOptTensor(p[1], p[3])
     elif type_match(p, ('eiqopt', 'DISJUNCT', 'eiqopt')):
-        p[0] = EIQOptDisjunct(p[1], p[3], ParsingEnv.env)
+        p[0] = EIQOptDisjunct(p[1], p[3])
     elif type_match(p, ('eiqopt', 'CONJUNCT', 'eiqopt')):
-        p[0] = EIQOptConjunct(p[1], p[3], ParsingEnv.env)
+        p[0] = EIQOptConjunct(p[1], p[3])
     elif type_match(p, ('eiqopt', 'COMPLEMENT')):
-        p[0] = EIQOptComplement(p[1], ParsingEnv.env)
+        p[0] = EIQOptComplement(p[1])
     elif type_match(p, ('eiqopt', 'SASAKI_IMPLY', 'eiqopt')):
-        p[0] = EIQOptSasakiImply(p[1], p[3], ParsingEnv.env)
+        p[0] = EIQOptSasakiImply(p[1], p[3])
     elif type_match(p, ('eiqopt', 'SASAKI_CONJUNCT', 'eiqopt')):
-        p[0] = EIQOptSasakiConjunct(p[1], p[3], ParsingEnv.env)
+        p[0] = EIQOptSasakiConjunct(p[1], p[3])
     else:
         raise Exception()
 
@@ -140,35 +137,35 @@ def p_eqopt(p):
     elif type_match(p, ('(', 'eqopt', ')')):
         p[0] = p[2]
     elif type_match(p, ('(', '-', 'eqopt', ')')):
-        p[0] = EQOptNeg(p[3], ParsingEnv.env)
+        p[0] = EQOptNeg(p[3])
     elif type_match(p, ('eqopt', '+', 'eqopt')):
-        p[0] = EQOptAdd(p[1], p[3], ParsingEnv.env)
+        p[0] = EQOptAdd(p[1], p[3])
     elif type_match(p, ('eqopt', '-', 'eqopt')):
-        p[0] = EQOptSub(p[1], p[3], ParsingEnv.env)
+        p[0] = EQOptSub(p[1], p[3])
     elif type_match(p, ('num', '*', 'eqopt')):
-        p[0] = EQOptScale(p[1], p[3], ParsingEnv.env)
+        p[0] = EQOptScale(p[1], p[3])
     elif type_match(p, ('num', 'eqopt')):
-        p[0] = EQOptScale(p[1], p[2], ParsingEnv.env)
+        p[0] = EQOptScale(p[1], p[2])
     elif type_match(p, ('eqopt', '*', 'eqopt')):
-        p[0] = EQOptMul(p[1], p[3], ParsingEnv.env)
+        p[0] = EQOptMul(p[1], p[3])
     elif type_match(p, ('eqopt', 'eqopt')):
-        p[0] = EQOptMul(p[1], p[2], ParsingEnv.env)
+        p[0] = EQOptMul(p[1], p[2])
     elif type_match(p, ('eqopt', 'DAGGER')):
-        p[0] = EQOptDagger(p[1], ParsingEnv.env)
+        p[0] = EQOptDagger(p[1])
     elif type_match(p, ('eqopt', 'OTIMES', 'eqopt')):
-        p[0] = EQOptTensor(p[1], p[3], ParsingEnv.env)
+        p[0] = EQOptTensor(p[1], p[3])
     elif type_match(p, ('eqopt', 'DISJUNCT', 'eqopt')):
-        p[0] = EQOptDisjunct(p[1], p[3], ParsingEnv.env)
+        p[0] = EQOptDisjunct(p[1], p[3])
     elif type_match(p, ('eqopt', 'CONJUNCT', 'eqopt')):
-        p[0] = EQOptConjunct(p[1], p[3], ParsingEnv.env)
+        p[0] = EQOptConjunct(p[1], p[3])
     elif type_match(p, ('eqopt', 'COMPLEMENT')):
-        p[0] = EQOptComplement(p[1], ParsingEnv.env)
+        p[0] = EQOptComplement(p[1])
     elif type_match(p, ('eqopt', 'SASAKI_IMPLY', 'eqopt')):
-        p[0] = EQOptSasakiImply(p[1], p[3], ParsingEnv.env)
+        p[0] = EQOptSasakiImply(p[1], p[3])
     elif type_match(p, ('eqopt', 'SASAKI_CONJUNCT', 'eqopt')):
-        p[0] = EQOptSasakiConjunct(p[1], p[3], ParsingEnv.env)
+        p[0] = EQOptSasakiConjunct(p[1], p[3])
     # elif len(p) == 5 and p.slice[1].type == 'eqso':
-    #     p[0] = EQSOptApply(p[1], p[3], ParsingEnv.env)
+    #     p[0] = EQSOptApply(p[1], p[3])
     else:
         raise Exception()
 
@@ -177,7 +174,7 @@ def p_eqvar(p):
     '''
     eqvar   : qvar
     '''
-    p[0] = EQVar(p[1], ParsingEnv.env)
+    p[0] = EQVar(p[1])
 
 from ..qval import QVar
 def p_qvar(p):

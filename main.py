@@ -4,15 +4,17 @@ import numpy as np
 import qpv2
 
 from qplcomp.qval import predefined
-from qplcomp import Parser, QOpt
+from qplcomp import Parser, QOpt, Env
 
 from qplcomp.qexpr.eqopt import EQOpt
 
-Parser.Global["Rztheta"] = EQOpt(QOpt(predefined.Rz(np.arccos(3/5))), Parser.Global)
+qpv2.Prover()
+
+Env()["Rztheta"] = EQOpt(QOpt(predefined.Rz(np.arccos(3/5))))
 
 Inv = Parser.parse('''((I \\otimes I - P00)[q0 q1] \\otimes Omega[t t']) \\vee (P00[q0 q1] \\otimes (Rztheta[t] Omega[t t'] Rztheta[t]^\\dagger))''')
 
-Parser.Global["Inv"] = Inv
+Env()["Inv"] = Inv
 
 code = '''
     [pre : Omega[t t'], post: Rztheta[t] Omega[t t'] Rztheta[t]^\\dagger]

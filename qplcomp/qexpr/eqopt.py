@@ -17,8 +17,7 @@ class EQOpt(Expr):
     Terminal.
     '''
 
-    def __init__(self, qopt : QOpt, env : Env):
-        super().__init__(env)
+    def __init__(self, qopt : QOpt):
 
         type_check(qopt, QOpt)
         self._qopt = qopt
@@ -48,8 +47,7 @@ class EQOptAdd(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, optA : Expr, optB : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, optA : Expr, optB : Expr):
 
         type_check(optA, Expr)
         expr_type_check(optA, QOpt)
@@ -83,8 +81,7 @@ class EQOptNeg(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, opt : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, opt : Expr):
 
         type_check(opt, Expr)
         expr_type_check(opt, QOpt)
@@ -115,8 +112,7 @@ class EQOptSub(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, optA : Expr, optB : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, optA : Expr, optB : Expr):
 
         type_check(optA, Expr)
         expr_type_check(optA, QOpt)
@@ -152,8 +148,7 @@ class EQOptMul(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, optA : Expr, optB : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, optA : Expr, optB : Expr):
 
         type_check(optA, Expr)
         expr_type_check(optA, QOpt)
@@ -189,8 +184,7 @@ class EQOptScale(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, c : complex, opt : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, c : complex, opt : Expr):
 
         type_check(c, (complex, float))
         self._c = c
@@ -224,8 +218,7 @@ class EQOptDagger(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, opt : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, opt : Expr):
 
         type_check(opt, Expr)
         expr_type_check(opt, QOpt)
@@ -258,8 +251,7 @@ class EQOptTensor(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, optA : Expr, optB : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, optA : Expr, optB : Expr):
 
         type_check(optA, Expr)
         expr_type_check(optA, QOpt)
@@ -295,8 +287,7 @@ class EQOptDisjunct(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, optA : Expr, optB : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, optA : Expr, optB : Expr):
 
         type_check(optA, Expr)
         expr_type_check(optA, QOpt)
@@ -331,8 +322,7 @@ class EQOptConjunct(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, optA : Expr, optB : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, optA : Expr, optB : Expr):
 
         type_check(optA, Expr)
         expr_type_check(optA, QOpt)
@@ -367,8 +357,7 @@ class EQOptComplement(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, opt : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, opt : Expr):
 
         type_check(opt, Expr)
         expr_type_check(opt, QOpt)
@@ -401,8 +390,7 @@ class EQOptSasakiImply(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, optA : Expr, optB : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, optA : Expr, optB : Expr):
 
         type_check(optA, Expr)
         expr_type_check(optA, QOpt)
@@ -437,8 +425,7 @@ class EQOptSasakiConjunct(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, optA : Expr, optB : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, optA : Expr, optB : Expr):
 
         type_check(optA, Expr)
         expr_type_check(optA, QOpt)
@@ -473,8 +460,7 @@ class EQSOptApply(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, so : Expr, opt : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, so : Expr, opt : Expr):
 
         type_check(so, Expr)
         expr_type_check(so, QSOpt)

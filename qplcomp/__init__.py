@@ -15,7 +15,7 @@ from . import qexpr
 from .env import Expr, Env, expr_type_check
 
 from .qexpr import Parser
-from .qexpr import get_default_env
+from .qexpr import prepare_env
 
 
 from .qval import QVar

@@ -7,6 +7,18 @@ INDENT = "  "
 
 class Ast:
 
+    def __init__(self):
+        '''
+        This `SRefined` attribute can refer to the subsequent refined programs for this program. If `None`, then the current program is used.
+        '''
+        self.SRefined : Ast | None = None
+
+    def refine(self, SRefined : Ast) -> None:
+        '''
+        refine with `SRefined` and check the validity.
+        '''
+        raise NotImplementedError()
+
     @property
     def definite(self) -> bool:
         '''
@@ -14,8 +26,21 @@ class Ast:
         '''
         raise NotImplementedError()
     
-    def prefix_str(self, prefix = "") -> str:
+    def prefix_str_current_only(self, prefix = "") -> str:
+        '''
+        return the formatted program (without the `SRefined` part)
+        '''
         raise NotImplementedError()
+
+    
+    def prefix_str(self, prefix = "") -> str:
+        res = self.prefix_str_current_only(prefix)
+        if self.SRefined is None:
+            return res
+        else:
+            res += "\n" + prefix + INDENT + "==> {\n"
+            res += self.SRefined.prefix_str(prefix) + " }"
+            return res
 
     def __str__(self) -> str:
         return self.prefix_str()
@@ -25,14 +50,10 @@ class Ast:
         '''
         Extract the refinement result as a program syntax (without refinement proofs).
         '''
-        raise NotImplementedError()
-    
-    @property
-    def proof_root(self) -> Ast:
-        '''
-        Return the root program syntax. Used in linking refinement proofs.
-        '''
-        raise NotImplementedError()
+        if self.SRefined is not None:
+            return self.SRefined.extract
+        else:
+            return self
     
     def wlp(self, post : IQOpt) -> IQOpt:
         '''
@@ -43,20 +64,14 @@ class Ast:
 
 class AstAbort(Ast):
     def __init__(self):
-        pass
+        super().__init__()
 
     @property
     def definite(self) -> bool:
         return True
     
-    def prefix_str(self, prefix="") -> str:
+    def prefix_str_current_only(self, prefix="") -> str:
         return prefix + "abort"
-    @property
-    def extract(self) -> Ast:
-        return self
-    @property
-    def proof_root(self) -> Ast:
-        return self
     
     def wlp(self, post: IQOpt) -> IQOpt:
         return IQOpt.identity(False)
@@ -64,21 +79,14 @@ class AstAbort(Ast):
 
 class AstSkip(Ast):
     def __init__(self):
-        pass
+        super().__init__()
 
     @property
     def definite(self) -> bool:
         return True
     
-    def prefix_str(self, prefix="") -> str:
+    def prefix_str_current_only(self, prefix="") -> str:
         return prefix + "skip"
-    
-    @property
-    def extract(self) -> Ast:
-        return self
-    @property
-    def proof_root(self) -> Ast:
-        return self
     
     def wlp(self, post: IQOpt) -> IQOpt:
         return post
@@ -86,6 +94,7 @@ class AstSkip(Ast):
 
 class AstInit(Ast):
     def __init__(self, eqvar : Expr):
+        super().__init__()
         expr_type_check(eqvar, QVar)
         self._eqvar = eqvar
 
@@ -97,15 +106,8 @@ class AstInit(Ast):
     def definite(self) -> bool:
         return True
     
-    def prefix_str(self, prefix="") -> str:
+    def prefix_str_current_only(self, prefix="") -> str:
         return prefix + str(self._eqvar) + ":=0"
-    
-    @property
-    def extract(self) -> Ast:
-        return self
-    @property
-    def proof_root(self) -> Ast:
-        return self
     
     def wlp(self, post: IQOpt) -> IQOpt:
         return post.initwlp(self.qvar)
@@ -113,6 +115,7 @@ class AstInit(Ast):
     
 class AstUnitary(Ast):
     def __init__(self, eU : Expr):
+        super().__init__()
         expr_type_check(eU, IQOpt)
 
         # check whether this is a unitary
@@ -129,15 +132,8 @@ class AstUnitary(Ast):
     def definite(self) -> bool:
         return True
     
-    def prefix_str(self, prefix="") -> str:
+    def prefix_str_current_only(self, prefix="") -> str:
         return prefix + str(self._eU)
-    
-    @property
-    def extract(self) -> Ast:
-        return self
-    @property
-    def proof_root(self) -> Ast:
-        return self
 
     def wlp(self, post: IQOpt) -> IQOpt:
         U = self.U
@@ -146,6 +142,7 @@ class AstUnitary(Ast):
 
 class AstAssert(Ast):
     def __init__(self, eP : Expr):
+        super().__init__()
         expr_type_check(eP, IQOpt)
 
         # check whether this is a projector
@@ -162,15 +159,8 @@ class AstAssert(Ast):
     def definite(self) -> bool:
         return True
     
-    def prefix_str(self, prefix="") -> str:
+    def prefix_str_current_only(self, prefix="") -> str:
         return prefix + "assert " + str(self._eP)
-    
-    @property
-    def extract(self) -> Ast:
-        return self
-    @property
-    def proof_root(self) -> Ast:
-        return self
     
     def wlp(self, post: IQOpt) -> IQOpt:
         return self.P.Sasaki_imply(post)
@@ -179,6 +169,7 @@ class AstAssert(Ast):
 
 class AstPres(Ast):
     def __init__(self, eP : Expr, eQ : Expr):
+        super().__init__()
         expr_type_check(eP, IQOpt)
         expr_type_check(eQ, IQOpt)
 
@@ -200,20 +191,23 @@ class AstPres(Ast):
         return self._eQ.eval()  # type: ignore
 
 
+    def refine(self, SRefined: Ast) -> None:
+        '''
+        For prescriptions, it checks the weakest precondition.
+        '''
+        if not self.P <= SRefined.wlp(self.Q):
+            raise ValueError("The relation P <= wlp.S.Q is not satisfied.")
+        
+        self.SRefined = SRefined
+
     @property
     def definite(self) -> bool:
         return False
     
-    def prefix_str(self, prefix="") -> str:
+    def prefix_str_current_only(self, prefix="") -> str:
         return prefix + "[ pre: " + str(self._eP) + ", post: " + str(self._eQ) + " ]"
-    
-    @property
-    def extract(self) -> Ast:
-        return self
-    @property
-    def proof_root(self) -> Ast:
-        return self
-    
+
+
     def wlp(self, post: IQOpt) -> IQOpt:
         if post == IQOpt.identity(False):
             return IQOpt.identity(False)
@@ -225,6 +219,7 @@ class AstPres(Ast):
 
 class AstSeq(Ast):
     def __init__(self, S0 : Ast, S1 : Ast):
+        super().__init__()
         self._S0 = S0
         self._S1 = S1
 
@@ -240,21 +235,22 @@ class AstSeq(Ast):
     def definite(self) -> bool:
         return self._S0.definite and self._S1.definite
     
-    def prefix_str(self, prefix="") -> str:
+    def prefix_str_current_only(self, prefix="") -> str:
         return self._S0.prefix_str(prefix) + ";\n" + self._S1.prefix_str(prefix)
     
     @property
     def extract(self) -> Ast:
-        return AstSeq(self._S0.extract, self._S1.extract)
-    @property
-    def proof_root(self) -> Ast:
-        return AstSeq(self._S0.proof_root, self._S1.proof_root)
-
+        if self.SRefined is not None:
+            return self.SRefined.extract
+        else:
+            return AstSeq(self.S0.extract, self.S1.extract)
+    
     def wlp(self, post: IQOpt) -> IQOpt:
         return self.S0.wlp(self.S1.wlp(post))
 
 class AstProb(Ast):
     def __init__(self, S0 : Ast, S1 : Ast, p : float):
+        super().__init__()
         self._S0 = S0
         self._S1 = S1
         
@@ -280,7 +276,7 @@ class AstProb(Ast):
     def definite(self) -> bool:
         return self._S0.definite and self._S1.definite
     
-    def prefix_str(self, prefix="") -> str:
+    def prefix_str_current_only(self, prefix="") -> str:
         res = prefix + "(\n" + self._S0.prefix_str(prefix + INDENT) + "\n"
         res += prefix + "_" + str(self._p) + "⊗\n"
         res += self._S1.prefix_str(prefix + INDENT) + "\n"
@@ -289,17 +285,18 @@ class AstProb(Ast):
     
     @property
     def extract(self) -> Ast:
-        return AstProb(self._S0.extract, self._S1.extract, self._p)
-    @property
-    def proof_root(self) -> Ast:
-        return AstProb(self._S0.proof_root, self._S1.proof_root, self._p)
-
+        if self.SRefined is not None:
+            return self.SRefined.extract
+        else:
+            return AstProb(self.S0.extract, self.S1.extract, self.p)
+        
     def wlp(self, post: IQOpt) -> IQOpt:
         return self.S0.wlp(post) & self.S1.wlp(post)
     
 
 class AstIf(Ast):
     def __init__(self, eP : Expr, S1 : Ast, S0 : Ast):
+        super().__init__()
         expr_type_check(eP, IQOpt)
 
         # check whether P is a projector
@@ -328,7 +325,7 @@ class AstIf(Ast):
     def definite(self) -> bool:
         return self._S1.definite and self._S0.definite
     
-    def prefix_str(self, prefix="") -> str:
+    def prefix_str_current_only(self, prefix="") -> str:
         res = prefix + "if " + str(self._eP) + " then\n"
         res += self._S1.prefix_str(prefix + INDENT) + "\n"
         res += prefix + "else\n"
@@ -338,10 +335,10 @@ class AstIf(Ast):
 
     @property
     def extract(self) -> Ast:
-        return AstIf(self._eP, self._S1.extract, self._S0.extract)
-    @property
-    def proof_root(self) -> Ast:
-        return AstIf(self._eP, self._S0.proof_root, self._S1.proof_root)
+        if self.SRefined is not None:
+            return self.SRefined.extract
+        else:
+            return AstIf(self._eP, self.S1.extract, self.S0.extract)
 
     def wlp(self, post: IQOpt) -> IQOpt:
         return self.P.Sasaki_imply(self.S1.wlp(post)) &\
@@ -350,6 +347,7 @@ class AstIf(Ast):
 
 class AstWhile(Ast):
     def __init__(self, eP : Expr, S : Ast):
+        super().__init__()
         expr_type_check(eP, IQOpt)
 
         # check whether P is a projector
@@ -371,7 +369,7 @@ class AstWhile(Ast):
     def definite(self) -> bool:
         return self._S.definite
     
-    def prefix_str(self, prefix="") -> str:
+    def prefix_str_current_only(self, prefix="") -> str:
         res = prefix + "while " + str(self._eP) + " do\n"
         res += self._S.prefix_str(prefix + INDENT) + "\n"
         res += prefix + "end"
@@ -379,11 +377,11 @@ class AstWhile(Ast):
 
     @property
     def extract(self) -> Ast:
-        return AstWhile(self._eP, self._S.extract)
-    @property
-    def proof_root(self) -> Ast:
-        return AstWhile(self._eP, self._S.proof_root)
-    
+        if self.SRefined is not None:
+            return self.SRefined.extract
+        else:
+            return AstWhile(self._eP, self.S.extract)
+
     def wlp(self, post: IQOpt) -> IQOpt:
         flag = True
         Rn = IQOpt.identity(False)

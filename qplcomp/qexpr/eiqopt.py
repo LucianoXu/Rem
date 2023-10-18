@@ -18,8 +18,7 @@ class EIQOpt(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, qopt : Expr, qvar : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, qopt : Expr, qvar : Expr):
 
         expr_type_check(qopt, QOpt)
         self._qopt = qopt
@@ -52,8 +51,7 @@ class EIQOptAdd(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, ioptA : Expr, ioptB : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, ioptA : Expr, ioptB : Expr):
 
         type_check(ioptA, Expr)
         expr_type_check(ioptA, IQOpt)
@@ -88,8 +86,7 @@ class EIQOptNeg(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, iopt : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, iopt : Expr):
 
         type_check(iopt, Expr)
         expr_type_check(iopt, IQOpt)
@@ -119,8 +116,7 @@ class EIQOptSub(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, ioptA : Expr, ioptB : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, ioptA : Expr, ioptB : Expr):
 
         type_check(ioptA, Expr)
         expr_type_check(ioptA, IQOpt)
@@ -156,8 +152,7 @@ class EIQOptScale(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, c : complex, iopt : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, c : complex, iopt : Expr):
 
         type_check(c, (complex, float))
         self._c = c
@@ -192,8 +187,7 @@ class EIQOptMul(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, ioptA : Expr, ioptB : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, ioptA : Expr, ioptB : Expr):
 
         type_check(ioptA, Expr)
         expr_type_check(ioptA, IQOpt)
@@ -229,8 +223,7 @@ class EIQOptDagger(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, iopt : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, iopt : Expr):
 
         type_check(iopt, Expr)
         expr_type_check(iopt, IQOpt)
@@ -262,8 +255,7 @@ class EIQOptTensor(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, ioptA : Expr, ioptB : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, ioptA : Expr, ioptB : Expr):
 
         type_check(ioptA, Expr)
         expr_type_check(ioptA, IQOpt)
@@ -300,8 +292,7 @@ class EIQOptDisjunct(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, ioptA : Expr, ioptB : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, ioptA : Expr, ioptB : Expr):
 
         type_check(ioptA, Expr)
         expr_type_check(ioptA, IQOpt)
@@ -336,8 +327,7 @@ class EIQOptConjunct(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, ioptA : Expr, ioptB : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, ioptA : Expr, ioptB : Expr):
 
         type_check(ioptA, Expr)
         expr_type_check(ioptA, IQOpt)
@@ -373,8 +363,7 @@ class EIQOptComplement(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, iopt : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, iopt : Expr):
 
         type_check(iopt, Expr)
         expr_type_check(iopt, IQOpt)
@@ -407,8 +396,7 @@ class EIQOptSasakiImply(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, ioptA : Expr, ioptB : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, ioptA : Expr, ioptB : Expr):
 
         type_check(ioptA, Expr)
         expr_type_check(ioptA, IQOpt)
@@ -443,8 +431,7 @@ class EIQOptSasakiConjunct(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, ioptA : Expr, ioptB : Expr, env : Env):
-        super().__init__(env)
+    def __init__(self, ioptA : Expr, ioptB : Expr):
 
         type_check(ioptA, Expr)
         expr_type_check(ioptA, IQOpt)

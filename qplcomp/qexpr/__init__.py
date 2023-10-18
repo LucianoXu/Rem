@@ -8,4 +8,4 @@ A quantum expression is a quantum operator with the corresponding quantum variab
 '''
 
 from .parsing_build import Parser
-from .parsing_build import get_default_env
+from .parsing_build import prepare_env
