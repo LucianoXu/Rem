@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Type
 
 from qplcomp import IQOpt
 from qplcomp import Expr, QVar, IQOpt, expr_type_check
@@ -7,40 +8,16 @@ INDENT = "  "
 
 class Ast:
 
-    def __init__(self):
-        '''
-        This `SRefined` attribute can refer to the subsequent refined programs for this program. If `None`, then the current program is used.
-        '''
-        self.SRefined : Ast | None = None
-
-    def refine(self, SRefined : Ast) -> None:
-        '''
-        refine with `SRefined` and check the validity.
-        '''
-        raise NotImplementedError()
-
     @property
     def definite(self) -> bool:
         '''
         Whether this program is definite. In other words, whether there is no prescription statements in this program.
         '''
         raise NotImplementedError()
-    
-    def prefix_str_current_only(self, prefix = "") -> str:
-        '''
-        return the formatted program (without the `SRefined` part)
-        '''
-        raise NotImplementedError()
 
     
     def prefix_str(self, prefix = "") -> str:
-        res = self.prefix_str_current_only(prefix)
-        if self.SRefined is None:
-            return res
-        else:
-            res += "\n" + prefix + INDENT + "==> {\n"
-            res += self.SRefined.prefix_str(prefix) + " }"
-            return res
+        raise NotImplementedError()
 
     def __str__(self) -> str:
         return self.prefix_str()
@@ -50,10 +27,13 @@ class Ast:
         '''
         Extract the refinement result as a program syntax (without refinement proofs).
         '''
-        if self.SRefined is not None:
-            return self.SRefined.extract
-        else:
-            return self
+        raise NotImplementedError()
+    
+    def get_prescription(self) -> list[AstPres]:
+        '''
+        Return the unsolved prescriptions.
+        '''
+        raise NotImplementedError()
     
     def wlp(self, post : IQOpt) -> IQOpt:
         '''
@@ -64,29 +44,39 @@ class Ast:
 
 class AstAbort(Ast):
     def __init__(self):
-        super().__init__()
+        pass
 
     @property
     def definite(self) -> bool:
         return True
     
-    def prefix_str_current_only(self, prefix="") -> str:
+    def prefix_str(self, prefix="") -> str:
         return prefix + "abort"
     
+    def get_prescription(self) -> list[AstPres]:
+        return []
+
     def wlp(self, post: IQOpt) -> IQOpt:
         return IQOpt.identity(False)
 
 
 class AstSkip(Ast):
     def __init__(self):
-        super().__init__()
+        pass
 
     @property
     def definite(self) -> bool:
         return True
     
-    def prefix_str_current_only(self, prefix="") -> str:
+    def prefix_str(self, prefix="") -> str:
         return prefix + "skip"
+    
+    @property
+    def extract(self) -> Ast:
+        return self
+
+    def get_prescription(self) -> list[AstPres]:
+        return []
     
     def wlp(self, post: IQOpt) -> IQOpt:
         return post
@@ -94,7 +84,6 @@ class AstSkip(Ast):
 
 class AstInit(Ast):
     def __init__(self, eqvar : Expr):
-        super().__init__()
         expr_type_check(eqvar, QVar)
         self._eqvar = eqvar
 
@@ -106,8 +95,15 @@ class AstInit(Ast):
     def definite(self) -> bool:
         return True
     
-    def prefix_str_current_only(self, prefix="") -> str:
+    def prefix_str(self, prefix="") -> str:
         return prefix + str(self._eqvar) + ":=0"
+
+    @property
+    def extract(self) -> Ast:
+        return self
+
+    def get_prescription(self) -> list[AstPres]:
+        return []
     
     def wlp(self, post: IQOpt) -> IQOpt:
         return post.initwlp(self.qvar)
@@ -115,7 +111,6 @@ class AstInit(Ast):
     
 class AstUnitary(Ast):
     def __init__(self, eU : Expr):
-        super().__init__()
         expr_type_check(eU, IQOpt)
 
         # check whether this is a unitary
@@ -132,8 +127,15 @@ class AstUnitary(Ast):
     def definite(self) -> bool:
         return True
     
-    def prefix_str_current_only(self, prefix="") -> str:
+    def prefix_str(self, prefix="") -> str:
         return prefix + str(self._eU)
+
+    @property
+    def extract(self) -> Ast:
+        return self
+
+    def get_prescription(self) -> list[AstPres]:
+        return []
 
     def wlp(self, post: IQOpt) -> IQOpt:
         U = self.U
@@ -142,7 +144,6 @@ class AstUnitary(Ast):
 
 class AstAssert(Ast):
     def __init__(self, eP : Expr):
-        super().__init__()
         expr_type_check(eP, IQOpt)
 
         # check whether this is a projector
@@ -159,9 +160,16 @@ class AstAssert(Ast):
     def definite(self) -> bool:
         return True
     
-    def prefix_str_current_only(self, prefix="") -> str:
+    def prefix_str(self, prefix="") -> str:
         return prefix + "assert " + str(self._eP)
     
+    @property
+    def extract(self) -> Ast:
+        return self
+
+    def get_prescription(self) -> list[AstPres]:
+        return []
+
     def wlp(self, post: IQOpt) -> IQOpt:
         return self.P.Sasaki_imply(post)
 
@@ -169,7 +177,11 @@ class AstAssert(Ast):
 
 class AstPres(Ast):
     def __init__(self, eP : Expr, eQ : Expr):
-        super().__init__()
+        '''
+        This `SRefined` attribute can refer to the subsequent refined programs for this program. If `None`, then the current program is used.
+        '''
+        self.SRefined : Ast | None = None
+
         expr_type_check(eP, IQOpt)
         expr_type_check(eQ, IQOpt)
 
@@ -204,10 +216,26 @@ class AstPres(Ast):
     def definite(self) -> bool:
         return False
     
-    def prefix_str_current_only(self, prefix="") -> str:
-        return prefix + "[ pre: " + str(self._eP) + ", post: " + str(self._eQ) + " ]"
+    def prefix_str(self, prefix="") -> str:
+        res = prefix + "[ pre: " + str(self._eP) + ", post: " + str(self._eQ) + " ]"
+        if self.SRefined is None:
+            return res
+        else:
+            res += "\n" + prefix + INDENT + "==> {\n"
+            res += self.SRefined.prefix_str(prefix) + " }"
+            return res
 
 
+    @property
+    def extract(self) -> Ast:
+        if self.SRefined is not None:
+            return self.SRefined.extract
+        else:
+            return self
+
+    def get_prescription(self) -> list[AstPres]:
+        return [self]
+    
     def wlp(self, post: IQOpt) -> IQOpt:
         if post == IQOpt.identity(False):
             return IQOpt.identity(False)
@@ -219,7 +247,6 @@ class AstPres(Ast):
 
 class AstSeq(Ast):
     def __init__(self, S0 : Ast, S1 : Ast):
-        super().__init__()
         self._S0 = S0
         self._S1 = S1
 
@@ -235,22 +262,21 @@ class AstSeq(Ast):
     def definite(self) -> bool:
         return self._S0.definite and self._S1.definite
     
-    def prefix_str_current_only(self, prefix="") -> str:
+    def prefix_str(self, prefix="") -> str:
         return self._S0.prefix_str(prefix) + ";\n" + self._S1.prefix_str(prefix)
     
     @property
     def extract(self) -> Ast:
-        if self.SRefined is not None:
-            return self.SRefined.extract
-        else:
-            return AstSeq(self.S0.extract, self.S1.extract)
+        return AstSeq(self.S0.extract, self.S1.extract)
+    
+    def get_prescription(self) -> list[AstPres]:
+        return self.S0.get_prescription() + self.S1.get_prescription()
     
     def wlp(self, post: IQOpt) -> IQOpt:
         return self.S0.wlp(self.S1.wlp(post))
 
 class AstProb(Ast):
     def __init__(self, S0 : Ast, S1 : Ast, p : float):
-        super().__init__()
         self._S0 = S0
         self._S1 = S1
         
@@ -276,7 +302,7 @@ class AstProb(Ast):
     def definite(self) -> bool:
         return self._S0.definite and self._S1.definite
     
-    def prefix_str_current_only(self, prefix="") -> str:
+    def prefix_str(self, prefix="") -> str:
         res = prefix + "(\n" + self._S0.prefix_str(prefix + INDENT) + "\n"
         res += prefix + "_" + str(self._p) + "⊗\n"
         res += self._S1.prefix_str(prefix + INDENT) + "\n"
@@ -285,18 +311,17 @@ class AstProb(Ast):
     
     @property
     def extract(self) -> Ast:
-        if self.SRefined is not None:
-            return self.SRefined.extract
-        else:
-            return AstProb(self.S0.extract, self.S1.extract, self.p)
+        return AstProb(self.S0.extract, self.S1.extract, self.p)
         
+    def get_prescription(self) -> list[AstPres]:
+        return self.S0.get_prescription() + self.S1.get_prescription()
+
     def wlp(self, post: IQOpt) -> IQOpt:
         return self.S0.wlp(post) & self.S1.wlp(post)
     
 
 class AstIf(Ast):
     def __init__(self, eP : Expr, S1 : Ast, S0 : Ast):
-        super().__init__()
         expr_type_check(eP, IQOpt)
 
         # check whether P is a projector
@@ -320,12 +345,11 @@ class AstIf(Ast):
         return self._S0
 
 
-
     @property
     def definite(self) -> bool:
         return self._S1.definite and self._S0.definite
     
-    def prefix_str_current_only(self, prefix="") -> str:
+    def prefix_str(self, prefix="") -> str:
         res = prefix + "if " + str(self._eP) + " then\n"
         res += self._S1.prefix_str(prefix + INDENT) + "\n"
         res += prefix + "else\n"
@@ -335,11 +359,11 @@ class AstIf(Ast):
 
     @property
     def extract(self) -> Ast:
-        if self.SRefined is not None:
-            return self.SRefined.extract
-        else:
-            return AstIf(self._eP, self.S1.extract, self.S0.extract)
+        return AstIf(self._eP, self.S1.extract, self.S0.extract)
 
+    def get_prescription(self) -> list[AstPres]:
+        return self.S1.get_prescription() + self.S0.get_prescription()
+    
     def wlp(self, post: IQOpt) -> IQOpt:
         return self.P.Sasaki_imply(self.S1.wlp(post)) &\
               (~ self.P).Sasaki_imply(self.S0.wlp(post))
@@ -347,7 +371,6 @@ class AstIf(Ast):
 
 class AstWhile(Ast):
     def __init__(self, eP : Expr, S : Ast):
-        super().__init__()
         expr_type_check(eP, IQOpt)
 
         # check whether P is a projector
@@ -369,7 +392,7 @@ class AstWhile(Ast):
     def definite(self) -> bool:
         return self._S.definite
     
-    def prefix_str_current_only(self, prefix="") -> str:
+    def prefix_str(self, prefix="") -> str:
         res = prefix + "while " + str(self._eP) + " do\n"
         res += self._S.prefix_str(prefix + INDENT) + "\n"
         res += prefix + "end"
@@ -377,12 +400,15 @@ class AstWhile(Ast):
 
     @property
     def extract(self) -> Ast:
-        if self.SRefined is not None:
-            return self.SRefined.extract
-        else:
-            return AstWhile(self._eP, self.S.extract)
+        return AstWhile(self._eP, self.S.extract)
 
+    def get_prescription(self) -> list[AstPres]:
+        return self.S.get_prescription()
+    
     def wlp(self, post: IQOpt) -> IQOpt:
+        '''
+        This will terminate because the lattice has finite height.
+        '''
         flag = True
         Rn = IQOpt.identity(False)
         Rn_1 = IQOpt.identity(False)
@@ -396,3 +422,19 @@ class AstWhile(Ast):
 
         return Rn
 
+
+######################################################################
+# the Expr object for programs
+
+class EAst(Expr):
+    def __init__(self, ast : Ast):
+        self.__ast = ast
+
+    def T(self) -> Type:
+        return Ast
+    
+    def eval(self) -> object:
+        return self.__ast
+    
+    def __str__(self) -> str:
+        return str(self.__ast)

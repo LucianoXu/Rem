@@ -2,18 +2,14 @@
 from __future__ import annotations
 from typing import Tuple
 
-import ply.yacc as yacc
-
-from .lexer import tokens
-
 from .ast import *
 
-from qplcomp import parser_def
+from qplcomp import parser_def as QPLCompParser
 
 precedence = (
     ('left', '>'),
     ('right', ';'), # sequential composition is right-associated
-) + parser_def.precedence
+) + QPLCompParser.precedence
 
 
 def type_match(p, types: Tuple[str, ...]) -> bool:
@@ -28,7 +24,7 @@ def type_match(p, types: Tuple[str, ...]) -> bool:
             return False
     return True
 
-def p_prog(p):
+def p_statement(p):
     '''
     statement   : '{' statement '}'
                 | ABORT
@@ -41,54 +37,54 @@ def p_prog(p):
                 | '(' statement '_' FLOATNUM OTIMES statement ')'
                 | IF eiqopt THEN statement ELSE statement END
                 | WHILE eiqopt DO statement END
-                | statement '=' '=' '>' statement
+                | prescription '=' '=' '>' statement
     '''
     #parentheses
-    if len(p) == 4 and p[1] == '{':
+    if type_match(p, ('{', 'statement', '}')):
         p[0] = p[2]
 
     # abort
-    elif p[1] == 'abort':
+    elif type_match(p, ("ABORT",)):
         p[0] = AstAbort()
 
     # skip
-    elif p[1] == 'skip':
+    elif type_match(p, ("SKIP",)):
         p[0] = AstSkip()
 
     # initialization
-    elif len(p) == 3 and p.slice[2].type == 'ASSIGN0':
+    elif type_match(p, ("eqvar", "ASSIGN0")):
         p[0] = AstInit(p[1])
 
     # unitary
-    elif len(p) == 2 and p.slice[1].type == 'eiqopt':
+    elif type_match(p, ("eiqopt",)):
         p[0] = AstUnitary(p[1])
     
     # assertion
-    elif p.slice[1].type == 'ASSERT':
+    elif type_match(p, ("ASSERT", "eiqopt")):
         p[0] = AstAssert(p[2])
 
     # prescription
-    elif p.slice[1].type == 'prescription':
+    elif type_match(p, ("prescription",)):
         p[0] = p[1]
 
     # sequential composition
-    elif len(p) == 4 and p.slice[2].type == ';':
+    elif type_match(p, ("statement", ';', "statement")):
         p[0] = AstSeq(p[1], p[3])
 
     # probabilistic composition
-    elif len(p) == 8 and p[3] == '_' and p.slice[4].type == 'FLOATNUM':
+    elif type_match(p, ('(', 'statement', '_', 'FLOATNUM', 'OTIMES', 'statement', ')')):
         p[0] = AstProb(p[2], p[6], float(p[4]))
 
     # if
-    elif p.slice[1].type == 'IF':
+    elif type_match(p, ("IF", "eiqopt", "THEN", "statement", "ELSE", "statement", "END")):
         p[0] = AstIf(p[2], p[4], p[6])
 
     # while
-    elif p.slice[1].type == 'WHILE':
+    elif type_match(p, ("WHILE", "eiqopt", "DO", "statement", "END")):
         p[0] = AstWhile(p[2], p[4])
 
     # refinement
-    elif type_match(p, ("statement", '=', '=', '>', "statement")):
+    elif type_match(p, ("prescription", '=', '=', '>', "statement")):
         p[1].refine(p[5])
         p[0] = p[1]
     else:
@@ -101,14 +97,9 @@ def p_prescription(p):
     p[0] = AstPres(p[4], p[8])
     
     
-from qplcomp.qexpr.parser_def import p_eiqopt, p_eqopt, p_eqvar, p_num, p_qvar, p_qvar_pre, p_output, p_variable
+from qplcomp.qexpr.parser_def import p_eiqopt, p_eqopt, p_eqvar, p_num, p_qvar, p_qvar_pre, p_variable
 
 def p_error(p):
     if p is None:
         raise RuntimeError("unexpected end of file")
     raise RuntimeError("Syntax error in input: '" + str(p.value) + "'.")
-
-
-
-# Build the parser
-parser = yacc.yacc()

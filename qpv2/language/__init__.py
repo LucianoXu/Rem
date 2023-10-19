@@ -1,4 +1,5 @@
 
 
 from .ast import *
-from .parser import parser
+from . import lexer_def, parser_def
+from .parsing_build import parser

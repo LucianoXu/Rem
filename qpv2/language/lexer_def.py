@@ -1,7 +1,6 @@
 
-import ply.lex as lex
 
-from qplcomp import lexer_def
+from qplcomp import lexer_def as QPLCompLexer
 
 from qplcomp.qexpr.lexer_def import *
 
@@ -20,16 +19,13 @@ reserved = {
 
 # refinement rule names
 
-    'RSKIP'     : 'RSKIP',
-    'RIMPLY'    : 'RIMPLY',
-    'RSEQ'      : 'RSEQ',
 }
 
-tokens = ['ASSIGN0'] + list(reserved.values()) + lexer_def.tokens
-reserved.update(lexer_def.reserved)
+tokens = ['ASSIGN0'] + list(reserved.values()) + QPLCompLexer.tokens
+reserved.update(QPLCompLexer.reserved)
 
 
-literals = ['(', ')', '_', '[', ']', ';', ',', ':', '=', '>', '{', '}'] + lexer_def.literals
+literals = ['(', ')', '_', '[', ']', ';', ',', ':', '=', '>', '{', '}'] + QPLCompLexer.literals
 
 t_ASSIGN0 = r":=0"
 
@@ -53,8 +49,3 @@ def t_newline(t):
 
 def t_error(t):
     raise ValueError("Syntax Error. Illegal character '" + t.value[0] + "'.")
-
-
-# Build the lexer
-import re
-lexer = lex.lex(reflags = re.UNICODE)

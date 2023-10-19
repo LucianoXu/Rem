@@ -120,6 +120,10 @@ class Env:
         self._lib : Dict[str, Expr]
         self._numbering : int
 
+    @staticmethod
+    def restart():
+        Env.__instance = None
+
     def get_name(self, prefix : str = DEFAULT_PREFIX) -> str:
         '''
         Return a key which is not used in the environment. The key will be in the form of `prefix` + number.
@@ -167,3 +171,12 @@ class Env:
     
     def __contains__(self, key : str) -> bool:
         return key in self._lib
+    
+    def get_items_str(self, varls : list[str] = []) -> str:
+        if len(varls) == 0:
+            varls = list(self._lib.keys())
+        res = ""
+        for key in varls:
+            res += key + " := \n" + str(self._lib[key]) + "\n\n"
+        return res
+    
