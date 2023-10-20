@@ -1,19 +1,30 @@
-Def Inv := ((I \otimes I - P00)[q0 q1] \otimes Omega[t t']) \vee (P00[q0 q1] \otimes (Rztheta[t] Omega[t t'] Rztheta[t]^\dagger)).
+// Computing operators
+
+Def II := I \otimes I.
+Eval II.
+Test CX[p q] CX[q p] CX[p q] = SWAP[p q].
+Test P0 \otimes P1 <= II.
+Test P0[p] \vee P1[p] = I[p].
+
+
+// Subprograms and proofs.
 
 Def prog := Prog X[x].
 Show prog.
 
-Refine pfsub : [pre : P0[x], post: P1[x] P1[x] P1[x]].
+Refine pfsub : [pre : P0[x], post: P1[x]].
 
     Step Prog prog.
 
 End.
 
-Def pfsube := Extract pfsub.
-
-Pause.
 
 
+// The example in the draft.
+
+Def Inv := ((I \otimes I - P00)[q0 q1] \otimes Omega[t t']) \vee (P00[q0 q1] \otimes (Rztheta[t] Omega[t t'] Rztheta[t]^\dagger)).
+
+Eval Inv.
 
 Refine pf : [pre : Omega[t t'], post: Rztheta[t] Omega[t t'] Rztheta[t]^\dagger].
 
@@ -49,3 +60,6 @@ Refine pf : [pre : Omega[t t'], post: Rztheta[t] Omega[t t'] Rztheta[t]^\dagger]
             skip
         end.
 End.
+
+Def pfextract := Extract pf.
+Show pfextract.

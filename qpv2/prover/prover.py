@@ -153,9 +153,13 @@ class Prover:
 
     #################################
     # printing
+    def eval_id(self, id : str) -> None:
+        res = Env()[id].eval()
+        self.state_bar = f"Eval {id}: \n{res}"
+
 
     def show_id(self, id : str) -> None:
-        self.state_bar = f"Show {id}:" + "\n" + str(Env()[id])
+        self.state_bar = f"Show {id}: \n{Env()[id]}"
     
     def get_defs(self) -> str:
         return Env().get_items_str(self.defined_var)

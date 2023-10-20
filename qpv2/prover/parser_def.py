@@ -24,6 +24,7 @@ def p_cmd(p):
         | META_END '.'
 
         | SHOW ID '.'
+        | EVAL ID '.'
         | TEST eqopt '=' eqopt '.'
         | TEST eqopt LEQ eqopt '.'
         | TEST eiqopt '=' eiqopt '.'
@@ -64,6 +65,9 @@ def p_cmd(p):
 
     elif type_match(p, ('SHOW', 'ID', '.')):
         Prover().show_id(p[2])
+        
+    elif type_match(p, ("EVAL", "ID", ".")):
+        Prover().eval_id(p[2])
 
     elif type_match(p, ('TEST', 'eqopt', '=', 'eqopt', '.')):
         Prover().test_eq(p[2], p[4])
