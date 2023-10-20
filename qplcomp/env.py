@@ -18,6 +18,9 @@ DEFAULT_PREFIX = "VAL"
 
 # TODO : type information needed.
 
+class EnvError(Exception):
+    pass
+
 class Expr:
     '''
     The class for expressions.
@@ -58,9 +61,9 @@ class Variable(Expr):
         '''
 
         if not isinstance(id, str):
-            raise TypeError("The id should be a string.")
+            raise EnvError("The id for the variable should be a string.")
         if not isinstance(T, Type) and T is not None:
-            raise TypeError("The type T should be a Type or the None object.")
+            raise EnvError("The type T should be a Type or the None object.")
         
         self._id = id
         self._T = T
@@ -82,7 +85,7 @@ class Variable(Expr):
 
         if self.T is not None:
             if not isinstance(val, self.T):
-                raise TypeError("The variable '" + self._id + "' should be of type '" + str(self.T) + "', but the value defined in the environment is of type '" + str(type(val)) + "'.")
+                raise EnvError("The variable '" + self._id + "' should be of type '" + str(self.T) + "', but the value defined in the environment is of type '" + str(type(val)) + "'.")
         
         return val
     
@@ -95,7 +98,7 @@ def expr_type_check(expr : Expr, target_type : Type) -> None:
     The method to check the type of this expression. It will raise a TypeError if the type of expr is not target_type.
     '''
     if expr.T is not None and expr.T != target_type:
-        raise TypeError("[ENV] The parameter expression '" + str(expr) + "' should be of type '" + str(target_type) + "', but is of type '"+ str(expr.T) + "'.")
+        raise EnvError("The parameter expression '" + str(expr) + "' should be of type '" + str(target_type) + "', but is of type '"+ str(expr.T) + "'.")
 
 class Env:
     '''
@@ -145,8 +148,6 @@ class Env:
         If yes, return the corresponding key.
         If not, create a new item with an auto key and return the key used.
         '''
-        if not isinstance(expr, Expr):
-            raise ValueError("Invalid value. Only Expr instances are allowed.")
         
         for key in self._lib:
             if self._lib[key] == expr:
@@ -158,15 +159,17 @@ class Env:
     
     def __setitem__(self, key : str, expr : Expr) -> None:
         if not isinstance(expr, Expr):
-            raise ValueError("Invalid value. Only quantum values are allowed.")
+            raise ValueError("Invalid value. Only Expr instances are allowed.")
         
         # it's not allowed to change the value.
         if key in self._lib:
-            raise ValueError("The variable '" + str(key) + "' has been defined.")
+            raise EnvError(f"The variable '{str(key)}' has been defined.")
 
         self._lib[key] = expr
 
     def __getitem__(self, key : str) -> Expr:
+        if key not in self._lib:
+            raise EnvError(f"The variable '{key}' is not defined.")
         return self._lib[key]
     
     def __contains__(self, key : str) -> bool:

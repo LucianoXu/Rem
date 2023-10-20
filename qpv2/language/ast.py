@@ -4,6 +4,8 @@ from typing import Type
 from qplcomp import IQOpt
 from qplcomp import Expr, Variable, QVar, IQOpt, expr_type_check
 
+from ..error import type_check, QPVError
+
 INDENT = "  "
 
 class Ast:
@@ -151,7 +153,7 @@ class AstUnitary(Ast):
 
         # check whether this is a unitary
         if not eU.eval().qval.is_unitary:   # type: ignore
-            raise ValueError("The operator '" + str(eU) + "' for unitary statement is not unitary.")
+            raise QPVError("The operator '" + str(eU) + "' for unitary statement is not unitary.")
         
         self._eU = eU
 
@@ -184,7 +186,7 @@ class AstAssert(Ast):
 
         # check whether this is a projector
         if not eP.eval().qval.is_projector: # type: ignore
-            raise ValueError("The operator '" + str(eP) + "' for assertion statement is not projective.")
+            raise QPVError("The operator '" + str(eP) + "' for assertion statement is not projective.")
         
         self._eP = eP
 
@@ -223,9 +225,9 @@ class AstPres(Ast):
 
         # check whether P and Q are projectors
         if not eP.eval().qval.is_projector: # type: ignore
-            raise ValueError("The operator '" + str(eP) + "' for assertion statement is not projective.")
+            raise QPVError("The operator '" + str(eP) + "' for assertion statement is not projective.")
         if not eQ.eval().qval.is_projector: # type: ignore
-            raise ValueError("The operator '" + str(eQ) + "' for assertion statement is not projective.")
+            raise QPVError("The operator '" + str(eQ) + "' for assertion statement is not projective.")
         
         self._eP = eP
         self._eQ = eQ
@@ -244,7 +246,10 @@ class AstPres(Ast):
         For prescriptions, it checks the weakest precondition.
         '''
         if not self.P <= SRefined.wlp(self.Q):
-            raise ValueError("The relation P <= wlp.S.Q is not satisfied.")
+            msg = "Refinement failed. The relation P <= wlp.S.Q is not satisfied for: \n"
+            msg += "P = \n" + str(self.P) + "\n"
+            msg += "Q = \n" + str(self.Q) + "\n"
+            raise QPVError(msg)
         
         self.SRefined = SRefined
 
@@ -318,7 +323,7 @@ class AstProb(Ast):
         self._S1 = S1
         
         if p < 0 or p > 1:
-            raise ValueError("Invalid probability: '" + str(p) + "'.")
+            raise QPVError("Invalid probability: '" + str(p) + "'.")
         
         self._p = p
 
@@ -363,7 +368,7 @@ class AstIf(Ast):
 
         # check whether P is a projector
         if not eP.eval().qval.is_projector: # type: ignore
-            raise ValueError("The operator '" + str(eP) + "' for assertion statement is not projective.")
+            raise QPVError("The operator '" + str(eP) + "' for assertion statement is not projective.")
         
         self._eP = eP
         self._S1 = S1
@@ -412,7 +417,7 @@ class AstWhile(Ast):
 
         # check whether P is a projector
         if not eP.eval().qval.is_projector: # type: ignore
-            raise ValueError("The operator '" + str(eP) + "' for assertion statement is not projective.")
+            raise QPVError("The operator '" + str(eP) + "' for assertion statement is not projective.")
         
         self._eP = eP
         self._S = S

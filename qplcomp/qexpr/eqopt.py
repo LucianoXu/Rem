@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Type
 
-from ..sugar import type_check
+from ..error import type_check
 from ..env import Expr, Env, expr_type_check
 
 from ..qval import QOpt, QSOpt

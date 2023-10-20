@@ -1,7 +1,7 @@
 
 from typing import Type
 
-from ..sugar import type_check
+from ..error import type_check
 
 from ..qval import QVar
 from ..env import Expr, Env

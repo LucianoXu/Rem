@@ -2,7 +2,7 @@
 from __future__ import annotations
 from typing import Sequence
 
-from ..sugar import type_check
+from ..error import type_check, QPLCompError
 
 import numpy as np
 from .. import linalgPP
@@ -62,12 +62,12 @@ class QOpt(QVal):
             d1 = data.shape[1]
 
             if d0 != d1:
-                raise ValueError("Dimension error.")
+                raise QPLCompError(f"Inconsistent dimension for square matrices: {d0} and {d1}.")
 
             # check whether dim = 2**n for some n
             self._qnum = round(np.log2(d1))
             if (2**self._qnum != d0):
-                raise ValueError("Dimension error.")
+                raise QPLCompError(f"Incorrect matrix dimension: {d0} is some power of 2.")
             
             self._matrix_repr = data
             self._tensor_repr = np.reshape(data, (2,)*self._qnum*2)
@@ -75,11 +75,11 @@ class QOpt(QVal):
         # if the parameter data is tensor representation
         else:
             if len(data.shape) % 2 == 1:
-                raise ValueError("Dimension error.")
+                raise QPLCompError(f"Incorrect tensor shape: {data.shape} has odd number indices.")
             
             for d in data.shape:
                 if d != 2:
-                    raise ValueError("Dimension error.")
+                    raise QPLCompError(f"Incorrect tensor shape: {data.shape} has indices of dimension other than 2.")
                 
             self._qnum = len(data.shape) // 2
             self._matrix_repr = data.reshape((2**self._qnum,) * 2)
@@ -242,7 +242,7 @@ class QOpt(QVal):
 
         type_check(other, QOpt)
         if self.qnum != other.qnum:
-            raise ValueError("The two QOpt should have the same number of qubit numbers.")
+            raise QPLCompError(f"Inconsistent qubit number: {self.qnum} and {other.qnum}. The two QOpt should have the same number of qubit numbers.")
         
         return QOpt(self.t_repr + other.t_repr)
         
@@ -302,7 +302,7 @@ class QOpt(QVal):
         type_check(other, QOpt)
 
         if self.qnum != other.qnum:
-            raise ValueError("The two QOpt should have the same number of qubit numbers.")
+            raise QPLCompError(f"Inconsistent qubit number: {self.qnum} and {other.qnum}. The two QOpt should have the same number of qubit numbers.")
         
         res = QOpt(self.m_repr @ other.m_repr)
         
@@ -380,15 +380,15 @@ class QOpt(QVal):
 
         # check the validity of the permutation
         if len(perm) != self.qnum:
-            raise ValueError("The permutation provided is not valid.")
+            raise QPLCompError(f"The permutation {perm} provided is not valid.")
         appearance = [False] * len(perm)
         for item in perm:
             if item < 0 or item >= len(perm):
-                raise ValueError("The permutation provided is not valid.")
+                raise QPLCompError(f"The permutation {perm} provided is not valid.")
             appearance[item] = True
         for pos in appearance:
             if not pos:
-                raise ValueError("The permutation provided is not valid.")
+                raise QPLCompError(f"The permutation {perm} provided is not valid.")
         
 
         t_repr_perm = list(perm) + [i + self.qnum for i in perm]
@@ -413,8 +413,8 @@ class QOpt(QVal):
         type_check(other, QOpt)
 
         if self.qnum != other.qnum:
-            raise ValueError("The two QOpt should have the same number of qubit numbers.")
-
+            raise QPLCompError(f"Inconsistent qubit number: {self.qnum} and {other.qnum}. The two QOpt should have the same number of qubit numbers.")
+        
         return linalgPP.Loewner_le(self.m_repr, other.m_repr, self.prec)
     
     def __le__(self, other : QOpt) -> bool:
@@ -433,10 +433,10 @@ class QOpt(QVal):
         type_check(other, QOpt)
 
         if self.qnum != other.qnum:
-            raise ValueError("The two QOpt should have the same number of qubit numbers.")
+            raise QPLCompError(f"Inconsistent qubit number: {self.qnum} and {other.qnum}. The two QOpt should have the same number of qubit numbers.")
         
         if not self.is_projector or not other.is_projector:
-            raise ValueError("The two QOpt are not both projectors.")
+            raise QPLCompError("The two QOpt are not both projectors.")
         
         # only preserve the 1-eigenvalue vectors
         stacked = np.hstack(
@@ -489,10 +489,10 @@ class QOpt(QVal):
         type_check(other, QOpt)
 
         if self.qnum != other.qnum:
-            raise ValueError("The two QOpt should have the same number of qubit numbers.")
+            raise QPLCompError(f"Inconsistent qubit number: {self.qnum} and {other.qnum}. The two QOpt should have the same number of qubit numbers.")
         
         if not self.is_projector or not other.is_projector:
-            raise ValueError("The two QOpt are not both projectors.")
+            raise QPLCompError("The two QOpt are not both projectors.")
         
         spaceP = linalgPP.column_space(self.m_repr, QVal.prec)
         spaceQ = linalgPP.column_space(other.m_repr, QVal.prec)
@@ -534,7 +534,7 @@ class QOpt(QVal):
         '''
         
         if not self.is_projector:
-            raise ValueError("The QOpt instance is not a projector.")
+            raise QPLCompError("The QOpt instance is not a projector.")
         
         return QOpt.eye_opt(self.qnum) - self
     

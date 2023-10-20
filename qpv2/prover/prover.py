@@ -2,7 +2,7 @@
 from __future__ import annotations
 from typing import Any
 
-from qplcomp import Env, prepare_env, EQOpt, QOpt
+from qplcomp import Env, prepare_env, EQOpt, QOpt, PLYError, EnvError, QPLCompError
 from ..language import *
 
 from ply.yacc import ParserReflect
@@ -19,6 +19,7 @@ class Prover:
     '''
     __instance : Prover | None = None
     parser : Any
+    lexer : Any
 
     def __new__(cls):
         if cls.__instance is None:
@@ -28,6 +29,7 @@ class Prover:
             cls.__instance.defined_var = []
             cls.__instance.__refine_proof = None
             cls.__instance.current_goals = []
+
             cls.__instance.state_bar = "Emtpy Prover."
 
         return cls.__instance
@@ -46,6 +48,7 @@ class Prover:
         It restarts `Env` with these additional opts.
         '''
         Prover.__instance = None
+        Prover.lexer.lineno = 1
         Env.restart()
         for id in opts:
             Env()[id] = EQOpt(QOpt(opts[id]))
@@ -56,17 +59,17 @@ class Prover:
         Call the parser and operate the prover state.
         '''
         try:
-            self.parser.parse(code)
+            self.parser.parse(code, lexer = self.lexer)
         except PauseError:
             pass
-        except Exception as e:
+        except (EnvError, PLYError, QPLCompError, QPVError) as e:
             self.state_bar = f"{e.__class__.__name__}: {e}"
 
 
     @property
     def refine_proof(self) -> AstPres:
         if self.__refine_proof is None:
-            raise Exception("It is not currently inside a refinement.")
+            raise QPVError("It is not currently inside a refinement.")
         return self.__refine_proof
 
     
@@ -81,10 +84,10 @@ class Prover:
         It will start a refinement proof.
         '''
         if self.__refine_proof is not None:
-            raise Exception("It is currently inside a refinement.")
+            raise QPVError("It is currently inside a refinement.")
         
         if not isinstance(ast, AstPres):
-            raise Exception("The program to be refined must be a prescription.")
+            raise QPVError("The program to be refined must be a prescription.")
         
         self.define(id, EAst(ast))
 
@@ -98,8 +101,12 @@ class Prover:
         '''
         It will check whether a refinement proof is finished and end it when it is.
         '''        
+        if self.__refine_proof is None:
+            raise QPVError("The prover is not in refinement model.")
+
         if len(self.current_goals) != 0:
-            raise Exception("Unfinished goals.")
+            raise QPVError("Goals not clear.")
+        
         
         self.__refine_proof = None
 
@@ -110,20 +117,20 @@ class Prover:
         Refine the first goal in `self.current_goals` with SRefined.
         '''
         if len(self.current_goals) == 0:
-            raise Exception("There is no prescriptions to refine.")
+            raise QPVError("There is no prescriptions to refine.")
         
         self.current_goals[0].refine(SRefined)
 
         self.current_goals = SRefined.get_prescription() + self.current_goals[1:]
         
-        self.state_bar = "Refine step succeeded."
+        self.state_bar = "Refinement step succeeded."
     
     def refine_choose_goal(self, i : int) -> None:
         '''
         Choose the i-th goal
         '''
         if not 1 <= i <= len(self.current_goals):
-            raise Exception(f"Invalid goal number {i}. Choose a number from {1} to {len(self.current_goals)}. ")
+            raise QPVError(f"Invalid goal number {i}. Choose a number from {1} to {len(self.current_goals)}. ")
         
         self.current_goals = [self.current_goals[i-1]] + self.current_goals[:i-1] + self.current_goals[i:]
 
@@ -141,22 +148,23 @@ class Prover:
 
     def get_goals_str(self) -> str:
         if self.__refine_proof is None:
-            return "\nNot in Refinement Model.\n"
+            return ""
         
+        res = "-"*40 + "\n"
+        res += "= Refinement Model =\n"
         if len(self.current_goals) == 0:
-            return "\nGoal Clear.\n"
-        res = ""
-        for i in range(len(self.current_goals)):
-            res += "\nGoal ({}/{})\n".format(i+1, len(self.current_goals))
-            res += str(self.current_goals[i])
-            res += "\n"
+            res += "\nGoal Clear.\n"
+        else:
+            for i in range(len(self.current_goals)):
+                res += "\nGoal ({}/{})\n".format(i+1, len(self.current_goals))
+                res += str(self.current_goals[i])
+                res += "\n"
         return res
     
     def __str__(self) -> str:
-        res = "-"*40 + "\n"
-        res += self.get_goals_str()
+        res = self.get_goals_str()
         res += "\n" + "-"*40 + "\n"
-        res += "= Info =\n" + self.state_bar + "\n"
+        res += f"= Info (line {self.lexer.lineno}) =\n\n" + self.state_bar + "\n"
         return res
 
 

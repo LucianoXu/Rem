@@ -60,3 +60,4 @@ def p_cmd(p):
 
     elif type_match(p, ('SHOW', 'ID', '.')):
         Prover().show_id(p[2])
+

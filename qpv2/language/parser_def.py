@@ -5,6 +5,7 @@ from typing import Tuple
 from .ast import *
 
 from qplcomp import parser_def as QPLCompParser
+from qplcomp import ParsingError
 
 precedence = (
     ('left', '>'),
@@ -106,5 +107,5 @@ from qplcomp.qexpr.parser_def import p_eiqopt, p_eqopt, p_eqvar, p_num, p_qvar, 
 
 def p_error(p):
     if p is None:
-        raise RuntimeError("unexpected end of file")
-    raise RuntimeError("Syntax error in input: '" + str(p.value) + "'.")
+        raise ParsingError("unexpected end of file")
+    raise ParsingError("Syntax error in input: '" + str(p.value) + "'.")

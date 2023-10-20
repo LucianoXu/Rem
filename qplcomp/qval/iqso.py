@@ -4,7 +4,7 @@ from __future__ import annotations
 import numpy as np
 from .. import linalgPP
 
-from ..sugar import type_check
+from ..error import type_check, QPLCompError
 
 from .val import IQVal, QVal
 from .qopt import QOpt
@@ -32,7 +32,7 @@ class IQSOpt(IQVal):
     
     def extend(self, qvarT: QVar) -> IQSOpt:
         if not qvarT.contains(self.qvar):
-            raise ValueError("The extension target qvar '" + str(qvarT) + "' does not contain the original qvar '" + str(self.qvar) + "'.")
+            raise QPLCompError("The extension target qvar '" + str(qvarT) + "' does not contain the original qvar '" + str(self.qvar) + "'.")
         
         # extend every Kraus operator
 

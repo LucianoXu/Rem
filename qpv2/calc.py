@@ -8,6 +8,8 @@ from .language import *
 import numpy as np
 from qplcomp import QOpt, IQOpt, QSOpt, IQSOpt
 
+from .error import QPVError
+
 P0 = QOpt(np.array([[1., 0.], [0., 0.]]))
 E10 = QOpt(np.array([[0., 1.], [0., 0.]]))
 ESet0 = QSOpt([P0, E10])
@@ -24,11 +26,11 @@ def calc(prog : Ast, rho : IQOpt) -> IQOpt:
 
     # check whether the program can be calculated
     if not extracted_prog.definite:
-        raise ValueError("This program is not definite therefore cannot calculate.")
+        raise QPVError("This program is not definite therefore cannot calculate.")
     
     # check whether rho is a partial density
     if not rho.qval.is_pdo:
-        raise ValueError("The input rho is not a partial density operator.")
+        raise QPVError("The input rho is not a partial density operator.")
     
     return calc_iter(extracted_prog, rho)
     

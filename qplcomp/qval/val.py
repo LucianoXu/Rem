@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ..sugar import type_check
+from ..error import type_check, QPLCompError
 
 from .qvar import QVar
 
@@ -37,7 +37,7 @@ class IQVal:
         self._qvar = qvar
 
         if qval.qnum != qvar.qnum:
-            raise ValueError("The qubit number of value '" + str(qval) + "' does not match that of the variable '" + str(qvar) + "'.")
+            raise QPLCompError("The qubit number of value '" + str(qval) + "' does not match that of the variable '" + str(qvar) + "'.")
     
     @property
     def qval(self) -> QVal:

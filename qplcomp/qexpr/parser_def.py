@@ -6,9 +6,10 @@
 from __future__ import annotations
 from typing import Tuple
 
-from ..sugar import type_check
+from ..error import type_check
 
 from ..env import Env
+from .lexer_def import PLYError
 
 def type_match(p, types: Tuple[str, ...]) -> bool:
     '''
@@ -22,6 +23,9 @@ def type_match(p, types: Tuple[str, ...]) -> bool:
             return False
     return True
 
+
+class ParsingError(PLYError):
+    pass
 
 ############################################################
 # parsing rules
@@ -208,8 +212,8 @@ def p_num(p):
 
 def p_error(p):
     if p is None:
-        raise RuntimeError("unexpected end of file")
-    raise RuntimeError("Syntax error in input: '" + str(p.value) + "'.")
+        raise ParsingError("Unexpected end of file.")
+    raise ParsingError("Syntax error in input: '" + str(p.value) + f"'. (line {p[1].lineno})")
 
 
 

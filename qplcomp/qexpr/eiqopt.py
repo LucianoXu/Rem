@@ -3,7 +3,7 @@ from typing import Type
 
 from ..qval import QOpt, QVar, IQOpt
 
-from ..sugar import type_check
+from ..error import type_check
 from ..env import Expr, Env, expr_type_check
 
 import numpy as np

@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import List, Tuple, Type, List
 
-from ..sugar import type_check
+from ..error import type_check, QPLCompError
 
 class QVar:
     '''
@@ -13,7 +13,7 @@ class QVar:
         temp = []
         for v in qvls:
             if v in temp:
-                raise ValueError("The variable '" + v + "' appears in the qvar '" + QVar._qvls_str(qvls) + "' more than once.")
+                raise QPLCompError("The variable '" + v + "' appears in the qvar '" + QVar._qvls_str(qvls) + "' more than once.")
             temp.append(v)
             
         self._qvls = temp
@@ -121,7 +121,7 @@ class QVar:
         return the positions of variables of `other` in `self`
         '''
         if not self.contains(other):
-            raise ValueError("QVar `self` should contain QVar `other`.")
+            raise QPLCompError(f"QVar '{self}' should contain QVar {other}.")
         
         r = []
         for i in range(other.qnum):

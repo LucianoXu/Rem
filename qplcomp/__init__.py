@@ -12,7 +12,9 @@ This package aims at providing the necessary components for the implementation o
 from . import qval
 from . import qexpr
 
-from .env import Expr, Env, Variable, expr_type_check
+from .error import QPLCompError
+
+from .env import Expr, Env, Variable, expr_type_check, EnvError
 
 from .qexpr import Parser
 from .qexpr import prepare_env
@@ -30,3 +32,4 @@ from .qexpr.eiqopt import EIQOpt
 from .qexpr.eqvar import QVar
 from .qexpr import lexer_def
 from .qexpr import parser_def
+from .qexpr import PLYError, LexingError, ParsingError

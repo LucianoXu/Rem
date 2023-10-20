@@ -48,4 +48,4 @@ def t_newline(t):
     t.lexer.lineno += len(t.value)
 
 def t_error(t):
-    raise ValueError("Syntax Error. Illegal character '" + t.value[0] + "'.")
+    raise LexingError("Illegal character '" + t.value[0] + f"'. (line {t.lineno})")

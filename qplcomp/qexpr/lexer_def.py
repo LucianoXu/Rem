@@ -5,6 +5,13 @@
 # It defines the details of this tokenizer. It can be imported by high-level lexers.
 # ------------------------------------------------------------
 
+class PLYError(Exception):
+    pass
+
+class LexingError(PLYError):
+    pass
+
+
 reserved = {
     'IQOPT' : 'IQOPT',
 }
@@ -53,5 +60,9 @@ def t_ID(t):
 # A string containing ignored characters (spaces and tabs)
 t_ignore = ' \t'
 
+def t_newline(t):
+    r'\n+'
+    t.lexer.lineno += len(t.value)
+
 def t_error(t):
-    raise ValueError("Syntax Error. Illegal character '" + t.value[0] + "'.")
+    raise LexingError("Illegal character '" + t.value[0] + f"'. (line {t.lineno})")

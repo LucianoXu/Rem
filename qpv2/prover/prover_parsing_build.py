@@ -1,4 +1,5 @@
 
+from .prover import Prover
 #############################################################
 # the lexer
 
@@ -8,7 +9,7 @@ from .lexer_def import *
 
 # Build the lexer
 import re
-lexer = lex.lex(reflags = re.UNICODE)
+Prover.lexer = lex.lex(reflags = re.UNICODE)
 
 
 
@@ -18,7 +19,6 @@ lexer = lex.lex(reflags = re.UNICODE)
 import ply.yacc as yacc
 
 from .parser_def import *
-from .prover import Prover
 
 start = "cmd"
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 import numpy as np
 from .. import linalgPP
 
-from ..sugar import type_check
+from ..error import type_check, QPLCompError
 
 from .val import IQVal, QVal
 from .qopt import QOpt
@@ -61,7 +61,7 @@ class IQOpt(IQVal):
 
     def extend(self, qvarT: QVar) -> IQOpt:
         if not qvarT.contains(self.qvar):
-            raise ValueError("The extension target qvar '" + str(qvarT) + "' does not contain the original qvar '" + str(self.qvar) + "'.")
+            raise QPLCompError("The extension target qvar '" + str(qvarT) + "' does not contain the original qvar '" + str(self.qvar) + "'.")
         
         dim_I = qvarT.qnum - self.qnum
 
@@ -187,7 +187,7 @@ class IQOpt(IQVal):
         type_check(other, IQOpt)
 
         if not self.qvar.disjoint(other.qvar):
-            raise ValueError("The quantum variable '" + str(self.qvar) + "' is not disjoint with '" + str(other.qvar) + "'.")
+            raise QPLCompError("The quantum variable '" + str(self.qvar) + "' is not disjoint with '" + str(other.qvar) + "'.")
         
         qvar_all = self.qvar + other.qvar
 
