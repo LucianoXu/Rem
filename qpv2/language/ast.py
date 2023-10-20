@@ -63,7 +63,7 @@ class AstSubprog(Ast):
 
     
     def prefix_str(self, prefix = "") -> str:
-        return prefix + str(self.__esubprog)
+        return prefix + "Prog " + str(self.__esubprog)
 
     
     @property

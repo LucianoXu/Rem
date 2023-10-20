@@ -415,6 +415,12 @@ class QOpt(QVal):
         if self.qnum != other.qnum:
             raise QPLCompError(f"Inconsistent qubit number: {self.qnum} and {other.qnum}. The two QOpt should have the same number of qubit numbers.")
         
+        # TODO #3
+        if not linalgPP.is_Hermitian(self.m_repr, QVal.prec):
+            raise QPLCompError("The operator is not Hermitian and cannot compare Loewner order.")
+        if not linalgPP.is_Hermitian(other.m_repr, QVal.prec):
+            raise QPLCompError("The operator is not Hermitian and cannot compare Loewner order.")
+        
         return linalgPP.Loewner_le(self.m_repr, other.m_repr, self.prec)
     
     def __le__(self, other : QOpt) -> bool:

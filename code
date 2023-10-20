@@ -5,11 +5,13 @@ Show prog.
 
 Refine pfsub : [pre : P0[x], post: P1[x] P1[x] P1[x]].
 
-    Step prog.
+    Step Prog prog.
 
 End.
 
 Def pfsube := Extract pfsub.
+
+Pause.
 
 
 

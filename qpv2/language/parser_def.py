@@ -38,7 +38,7 @@ def p_statement(p):
                 | '(' statement '_' FLOATNUM OTIMES statement ')'
                 | IF eiqopt THEN statement ELSE statement END
                 | WHILE eiqopt DO statement END
-                | ID
+                | PROG ID
                 | prescription '=' '=' '>' statement
     '''
     #parentheses
@@ -86,8 +86,8 @@ def p_statement(p):
         p[0] = AstWhile(p[2], p[4])
 
     # subprog
-    elif type_match(p, ("ID",)):
-        p[0] = AstSubprog(Variable(p[1]))
+    elif type_match(p, ("PROG", "ID",)):
+        p[0] = AstSubprog(Variable(p[2]))
 
     # refinement
     elif type_match(p, ("prescription", '=', '=', '>', "statement")):

@@ -136,6 +136,21 @@ class Prover:
 
         self.state_bar = "Goal switched."
 
+    def test_eq(self, a : Expr, b : Expr) -> None:
+        if a.eval() == b.eval():
+            self.state_bar = f"Test Result: {a} = {b}"
+        else:
+            self.state_bar = f"Test Result: {a} ≠ {b}"
+
+    def test_leq(self, a : Expr, b : Expr) -> None:
+        try:
+            if a.eval() <= b.eval():    # type: ignore
+                self.state_bar = f"Test Result: {a} <= {b}"
+            else:
+                self.state_bar = f"Test Result: {a} </= {b}"
+        except NotImplementedError:
+            raise QPVError(f"The 'less than' relation is not supported for '{a}' and '{b}'.")
+
     #################################
     # printing
 

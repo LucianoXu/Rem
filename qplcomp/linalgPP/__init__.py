@@ -13,6 +13,7 @@ from .mmethods import column_space
 from .mmethods import right_null_space
 from .mmethods import support
 
+from .mmethods import is_Hermitian
 from .mmethods import is_unitary
 from .mmethods import is_effect
 from .mmethods import is_pdo

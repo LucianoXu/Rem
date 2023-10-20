@@ -24,6 +24,10 @@ def p_cmd(p):
         | META_END '.'
 
         | SHOW ID '.'
+        | TEST eqopt '=' eqopt '.'
+        | TEST eqopt LEQ eqopt '.'
+        | TEST eiqopt '=' eiqopt '.'
+        | TEST eiqopt LEQ eiqopt '.'
 
     '''
     if type_match(p, ()):
@@ -60,4 +64,19 @@ def p_cmd(p):
 
     elif type_match(p, ('SHOW', 'ID', '.')):
         Prover().show_id(p[2])
+
+    elif type_match(p, ('TEST', 'eqopt', '=', 'eqopt', '.')):
+        Prover().test_eq(p[2], p[4])
+    
+    elif type_match(p, ('TEST', 'eiqopt', '=', 'eiqopt', '.')):
+        Prover().test_eq(p[2], p[4])
+
+    elif type_match(p, ('TEST', 'eqopt', 'LEQ', 'eqopt', '.')):
+        Prover().test_leq(p[2], p[4])
+
+    elif type_match(p, ('TEST', 'eiqopt', 'LEQ', 'eiqopt', '.')):
+        Prover().test_leq(p[2], p[4])
+
+    else:
+        raise Exception()
 
