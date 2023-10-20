@@ -11,6 +11,12 @@ reserved = {
 
     # pause the prover to see the state.
     'Pause'     : 'PAUSE',
+
+    'Show'      : 'SHOW',
+
+    'Extract'   : 'EXTRACT',
+
+    'Prog'      : 'PROG',
 }
 
 tokens = ['ASSIGN'] + list(reserved.values()) + AstLexer.tokens

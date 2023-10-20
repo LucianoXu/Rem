@@ -85,7 +85,7 @@ def qpv(input : str, output : str = "output.txt", opts: dict[str, np.ndarray] = 
 
     try:
         while True:
-            time.sleep(1)
+            time.sleep(0.2)
 
     except KeyboardInterrupt:
         observer.stop()

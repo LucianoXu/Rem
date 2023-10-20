@@ -9,6 +9,10 @@ from ply.yacc import ParserReflect
 
 import numpy as np
 
+
+class PauseError(Exception):
+    pass
+
 class Prover:
     '''
     The class that hosts the formal verification.
@@ -26,19 +30,15 @@ class Prover:
             cls.__instance.current_goals = []
             cls.__instance.state_bar = "Emtpy Prover."
 
-            cls.__instance.paused = False
-
         return cls.__instance
     
     def __init__(self):
         # all the variables defined in this Prover
         self.defined_var : list[str]
         self.__refine_proof : AstPres | None
-        self.__proof_id : str
         self.current_goals : list[AstPres]
 
         self.state_bar : str
-        self.paused : bool
 
     @staticmethod
     def restart(opts: dict[str, np.ndarray]):
@@ -57,10 +57,11 @@ class Prover:
         '''
         try:
             self.parser.parse(code)
+        except PauseError:
+            pass
         except Exception as e:
-            self.state_bar = str(e)
+            self.state_bar = f"{e.__class__.__name__}: {e}"
 
-        
 
     @property
     def refine_proof(self) -> AstPres:
@@ -69,7 +70,7 @@ class Prover:
         return self.__refine_proof
 
     
-    def define(self, var : str, obj):
+    def define(self, var : str, obj : Expr):
         Env()[var] = obj
         self.defined_var.append(var)
         self.state_bar = f"Variable defined: {var}."
@@ -85,7 +86,8 @@ class Prover:
         if not isinstance(ast, AstPres):
             raise Exception("The program to be refined must be a prescription.")
         
-        self.__proof_id = id
+        self.define(id, EAst(ast))
+
         self.__refine_proof = ast
         self.current_goals = [ast]
 
@@ -99,10 +101,9 @@ class Prover:
         if len(self.current_goals) != 0:
             raise Exception("Unfinished goals.")
         
-        self.define(self.__proof_id, EAst(self.refine_proof))
         self.__refine_proof = None
 
-        self.state_bar = f"Refinement of {self.__proof_id} completed."
+        self.state_bar = f"Refinement completed."
 
     def step_refine(self, SRefined : Ast) -> None:
         '''
@@ -130,6 +131,9 @@ class Prover:
 
     #################################
     # printing
+
+    def show_id(self, id : str) -> None:
+        self.state_bar = f"Show {id}:" + "\n" + str(Env()[id])
     
     def get_defs(self) -> str:
         return Env().get_items_str(self.defined_var)
@@ -151,8 +155,8 @@ class Prover:
     def __str__(self) -> str:
         res = "-"*40 + "\n"
         res += self.get_goals_str()
-        res += "\n" + "-"*40 + "\n\n"
-        res += "Info: " + self.state_bar + "\n"
+        res += "\n" + "-"*40 + "\n"
+        res += "= Info =\n" + self.state_bar + "\n"
         return res
 
 

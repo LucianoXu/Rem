@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Type
 
 from qplcomp import IQOpt
-from qplcomp import Expr, QVar, IQOpt, expr_type_check
+from qplcomp import Expr, Variable, QVar, IQOpt, expr_type_check
 
 INDENT = "  "
 
@@ -41,6 +41,42 @@ class Ast:
         '''
         raise NotImplementedError()
 
+
+class AstSubprog(Ast):
+    def __init__(self, esubprog : Variable):
+        self.__esubprog = esubprog
+
+    @property
+    def subgprog(self) -> Ast:
+        east = self.__esubprog.eval()
+        if not isinstance(east, Ast):
+            raise Exception()
+        
+        return east
+
+
+    @property
+    def definite(self) -> bool:
+        return self.subgprog.definite
+
+    
+    def prefix_str(self, prefix = "") -> str:
+        return prefix + str(self.__esubprog)
+
+    
+    @property
+    def extract(self) -> Ast:
+        return self
+    
+    def get_prescription(self) -> list[AstPres]:
+        return []
+    
+    def wlp(self, post : IQOpt) -> IQOpt:
+        '''
+        Calculate the weakest liberal precondition.
+        '''
+        return self.subgprog.wlp(post)
+    
 
 class AstAbort(Ast):
     def __init__(self):
@@ -222,7 +258,8 @@ class AstPres(Ast):
             return res
         else:
             res += "\n" + prefix + INDENT + "==> {\n"
-            res += self.SRefined.prefix_str(prefix) + " }"
+            res += self.SRefined.prefix_str(prefix + INDENT) + "\n"
+            res += prefix + "}"
             return res
 
 
@@ -430,6 +467,11 @@ class EAst(Expr):
     def __init__(self, ast : Ast):
         self.__ast = ast
 
+    @property
+    def ast(self) -> Ast:
+        return self.__ast
+
+    @property
     def T(self) -> Type:
         return Ast
     
