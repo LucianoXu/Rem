@@ -7,7 +7,13 @@ reserved = {
     'Refine'    : 'REFINE',
     'End'       : 'META_END',
     'Choose'    : 'CHOOSE',
+
+    # for refinement control
     'Step'      : 'STEP',
+    'Seq'       : 'REFINE_SEQ',
+    'If'        : 'REFINE_IF',
+    'While'     : 'REFINE_WHILE',
+    'Inv'       : 'REFINE_INV',
 
     # pause the prover to see the state.
     'Pause'     : 'PAUSE',

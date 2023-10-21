@@ -112,19 +112,59 @@ class Prover:
 
         self.state_bar = f"Refinement completed."
 
-    def step_refine(self, SRefined : Ast) -> None:
+
+    def step_refine_wlp(self, SRefined : Ast) -> None:
         '''
         Refine the first goal in `self.current_goals` with SRefined.
         '''
         if len(self.current_goals) == 0:
             raise QPVError("There is no prescriptions to refine.")
         
-        self.current_goals[0].refine(SRefined)
+        self.current_goals[0].refine_wlp(SRefined)
 
-        self.current_goals = SRefined.get_prescription() + self.current_goals[1:]
+        self.current_goals = self.current_goals[0].get_prescription() + self.current_goals[1:]
         
         self.state_bar = "Refinement step succeeded."
-    
+
+
+    def step_refine_seq(self, middle : Expr) -> None:
+        '''
+        Refine the first goal in `self.current_goals` with SRefined.
+        '''
+        if len(self.current_goals) == 0:
+            raise QPVError("There is no prescriptions to refine.")
+        
+        self.current_goals[0].refine_seq_break(middle)
+
+        self.current_goals = self.current_goals[0].get_prescription() + self.current_goals[1:]        
+        self.state_bar = "Refinement step succeeded."
+
+    def step_refine_if(self, R : Expr) -> None:
+        '''
+        Refine the first goal in `self.current_goals` with SRefined.
+        '''
+        if len(self.current_goals) == 0:
+            raise QPVError("There is no prescriptions to refine.")
+        
+        self.current_goals[0].refine_if(R)
+
+        self.current_goals = self.current_goals[0].get_prescription() + self.current_goals[1:]        
+        self.state_bar = "Refinement step succeeded."
+
+    def step_refine_while(self, R : Expr, Inv : Expr) -> None:
+        '''
+        Refine the first goal in `self.current_goals` with SRefined.
+        '''
+        if len(self.current_goals) == 0:
+            raise QPVError("There is no prescriptions to refine.")
+        
+        self.current_goals[0].refine_while(R, Inv)
+
+        self.current_goals = self.current_goals[0].get_prescription() + self.current_goals[1:]        
+        self.state_bar = "Refinement step succeeded."
+
+
+
     def refine_choose_goal(self, i : int) -> None:
         '''
         Choose the i-th goal

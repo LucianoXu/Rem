@@ -19,7 +19,12 @@ def p_cmd(p):
         | DEF ID ASSIGN PROG statement '.'
         | DEF ID ASSIGN EXTRACT ID '.'
         | REFINE ID ':' prescription '.'
+
         | STEP statement '.'
+        | STEP REFINE_SEQ eiqopt '.'
+        | STEP REFINE_IF eiqopt '.'
+        | STEP REFINE_WHILE eiqopt REFINE_INV eiqopt '.'
+
         | CHOOSE FLOATNUM '.'
         | META_END '.'
 
@@ -55,7 +60,16 @@ def p_cmd(p):
         Prover().start_refinement(p[2], p[4])
 
     elif type_match(p, ("STEP", "statement", '.')):
-        Prover().step_refine(p[2])
+        Prover().step_refine_wlp(p[2])
+
+    elif type_match(p, ("STEP", 'REFINE_SEQ', 'eiqopt', '.')):
+        Prover().step_refine_seq(p[3])
+
+    elif type_match(p, ("STEP", 'REFINE_IF', 'eiqopt', '.')):
+        Prover().step_refine_if(p[3])
+
+    elif type_match(p, ("STEP", 'REFINE_WHILE', 'eiqopt', 'REFINE_INV', 'eiqopt', '.')):
+        Prover().step_refine_while(p[3], p[5])
 
     elif type_match(p, ("CHOOSE", "FLOATNUM", '.')):
         Prover().refine_choose_goal(int(p[2]))

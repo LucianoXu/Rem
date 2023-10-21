@@ -91,7 +91,7 @@ def p_statement(p):
 
     # refinement
     elif type_match(p, ("prescription", '=', '=', '>', "statement")):
-        p[1].refine(p[5])
+        p[1].refine_wlp(p[5])
         p[0] = p[1]
     else:
         raise Exception()
