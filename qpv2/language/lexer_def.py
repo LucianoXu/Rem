@@ -23,12 +23,13 @@ reserved = {
 
 }
 
-tokens = ['ASSIGN0'] + list(reserved.values()) + QPLCompLexer.tokens
+tokens = ['ASSIGN0', 'OPLUS'] + list(reserved.values()) + QPLCompLexer.tokens
 reserved.update(QPLCompLexer.reserved)
 
 
 literals = ['(', ')', '_', '[', ']', ';', ',', ':', '=', '>', '{', '}'] + QPLCompLexer.literals
 
+t_OPLUS = r"⊕|\\oplus"
 t_ASSIGN0 = r":=0"
 
 

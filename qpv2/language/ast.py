@@ -260,6 +260,7 @@ class AstPres(Ast):
             msg = "Refinement failed. The relation P <= wlp.S.Q is not satisfied for: \n"
             msg += "P = \n\t" + str(self._eP) + "\n"
             msg += "Q = \n\t" + str(self._eQ) + "\n"
+            msg += "S = \n" + SRefined.prefix_str("\t") + "\n"
             raise QPVError(msg)
         
         self.SRefined = SRefined

@@ -579,6 +579,15 @@ class QOpt(QVal):
                    is_pdo=None,
                    is_projector=True)
 
+    def eigen1space(self) -> QOpt:
+        '''
+        Return the eigenspace of `self` with eigenvalue 1. 
+        '''
+        return QOpt(linalgPP.eigen1space(self.m_repr, QVal.prec),
+                    is_unitary=None,
+                   is_effect=True,
+                   is_pdo=None,
+                   is_projector=True)
 
 
 

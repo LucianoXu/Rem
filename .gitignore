@@ -2,3 +2,12 @@
 __pycache__
 parser.out
 parsetab.py
+
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.pdf
+*.synctex.gz
+
+output.txt

@@ -12,6 +12,7 @@ from .mmethods import row_space
 from .mmethods import column_space
 from .mmethods import right_null_space
 from .mmethods import support
+from .mmethods import eigen1space
 
 from .mmethods import is_Hermitian
 from .mmethods import is_unitary

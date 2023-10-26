@@ -54,7 +54,7 @@ def p_cmd(p):
         Prover().define(p[2], EAst(p[5]))
 
     elif type_match(p, ('DEF', 'ID', 'ASSIGN', 'EXTRACT', 'ID', '.')):
-        Prover().define(p[2], EAst(Env()[p[5]].eval().extract))
+        Prover().define(p[2], EAst(Env()[p[5]].eval().extract)) # type: ignore
 
     elif type_match(p, ("REFINE", "ID", ':', 'prescription', '.')):
         Prover().start_refinement(p[2], p[4])

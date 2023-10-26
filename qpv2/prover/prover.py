@@ -210,7 +210,7 @@ class Prover:
             return ""
         
         res = "-"*40 + "\n"
-        res += "= Refinement Model =\n"
+        res += "= Refinement Mode =\n"
         if len(self.current_goals) == 0:
             res += "\nGoal Clear.\n"
         else:

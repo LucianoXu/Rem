@@ -295,6 +295,12 @@ class IQOpt(IQVal):
         Returns: `IQOpt`, a projector.
         '''
         return IQOpt(self.qval.support(), self.qvar)
+    
+    def eigen1space(self) -> IQOpt:
+        '''
+        Return the eigenspace of `self` with eigenvalue 1. 
+        '''
+        return IQOpt(self.qval.eigen1space(), self.qvar)
 
     
     def trace(self, qvar : QVar) -> IQOpt:
@@ -334,13 +340,30 @@ class IQOpt(IQVal):
     # special methods
     ############################################################################
 
-    def initwlp(self, qvar : QVar) -> IQOpt:
+    def initwlp2(self, qvar : QVar) -> IQOpt:
+        '''
+        wlp.q:=0.P = \\lceil tr_q (P \\wedge P0[q]) \\rceil
+        '''
         P0 = QOpt(np.array([[1., 0.], [0., 0.]]), None, True, True, True)
 
         temp = self
         for q in qvar:
             IP0 = IQOpt(P0, QVar([q]))
             temp = temp.conjunct(IP0).trace(QVar([q])).support()
+
+        return temp
+    
+    def initwlp(self, qvar : QVar) -> IQOpt:
+        '''
+        wlp.q:=0.P = E1(tr_q (P P0[q]))
+        E1 represents the eigenspace of eigenvalue 1.
+        '''
+        P0 = QOpt(np.array([[1., 0.], [0., 0.]]), None, True, True, True)
+
+        temp = self
+        for q in qvar:
+            IP0 = IQOpt(P0, QVar([q]))
+            temp = (temp @ IP0).trace(QVar([q])).eigen1space()
 
         return temp
 

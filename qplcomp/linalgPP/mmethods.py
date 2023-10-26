@@ -146,6 +146,24 @@ def support(A : np.ndarray, precision: float) -> np.ndarray:
 
     return res    
 
+def eigen1space(A : np.ndarray, precision: float) -> np.ndarray:
+    '''
+    Calculate the eigenspace of `A` with eigenvalue `1`.
+    Parameters: 
+        - `self` : `np.ndarray`, matrix, should be Hermitian.
+        - `precision` : `float`.
+    Returns: `np.ndarray`, a projector matrix.
+    '''
+
+    eigval, eigvec = np.linalg.eigh(A)
+
+    res = np.zeros_like(A)
+    for i in range(len(eigval)):
+        if np.abs(eigval[i] - 1.) < precision:
+            res += eigvec[:, [i]] @ eigvec[:, [i]].conj().transpose()
+
+    return res    
+
 
 #######################################################################
 #

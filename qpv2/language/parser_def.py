@@ -35,7 +35,7 @@ def p_statement(p):
                 | ASSERT eiqopt
                 | prescription
                 | statement ';' statement
-                | '(' statement '_' FLOATNUM OTIMES statement ')'
+                | '(' statement '_' FLOATNUM OPLUS statement ')'
                 | IF eiqopt THEN statement ELSE statement END
                 | WHILE eiqopt DO statement END
                 | PROG ID
