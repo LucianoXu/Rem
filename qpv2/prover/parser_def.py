@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from .prover import *
 
+from qplcomp import EQVar
+from ..calc import calc
 from ..language import parser_def as AstParser
 from ..language.parser_def import *
 
@@ -16,6 +18,7 @@ def p_cmd(p):
         | PAUSE '.'
         | DEF ID ASSIGN eqopt '.'
         | DEF ID ASSIGN eiqopt '.'
+        | DEF ID ASSIGN '[' '[' statement ']' ']' '(' eiqopt ')' '.'
         | DEF ID ASSIGN PROG statement '.'
         | DEF ID ASSIGN EXTRACT ID '.'
         | REFINE ID ':' prescription '.'
@@ -29,6 +32,7 @@ def p_cmd(p):
         | META_END '.'
 
         | SHOW ID '.'
+        | SHOW DEF '.'
         | EVAL ID '.'
         | TEST eqopt '=' eqopt '.'
         | TEST eqopt LEQ eqopt '.'
@@ -49,6 +53,11 @@ def p_cmd(p):
 
     elif type_match(p, ('DEF', 'ID', 'ASSIGN', 'eiqopt', '.')):
         Prover().define(p[2], p[4])
+
+    elif type_match(p, ('DEF', 'ID', 'ASSIGN', '[', '[', 'statement', ']', ']', '(', 'eiqopt', ')', '.')):
+        rho0 = p[10].eval()
+        rho = calc(p[6], rho0)
+        Prover().define(p[2], EIQOpt(EQOpt(rho.qval), EQVar(rho.qvar)))
 
     elif type_match(p, ('DEF', 'ID', 'ASSIGN', 'PROG', 'statement', '.')):
         Prover().define(p[2], EAst(p[5]))
@@ -79,6 +88,9 @@ def p_cmd(p):
 
     elif type_match(p, ('SHOW', 'ID', '.')):
         Prover().show_id(p[2])
+
+    elif type_match(p, ('SHOW', 'DEF', '.')):
+        Prover().show_def()
         
     elif type_match(p, ("EVAL", "ID", ".")):
         Prover().eval_id(p[2])

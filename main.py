@@ -9,8 +9,10 @@ from qplcomp import QOpt, Env
 
 from qplcomp.qexpr.eqopt import EQOpt
 
-opts = {
-    "Rztheta" : predefined.Rz(np.arccos(3/5))
-}
+if __name__ == "__main__":
+    
+    opts = {
+        "Rztheta" : predefined.Rz(np.arccos(3/5))
+    }
 
-qpv("./code", "output.txt", opts)
+    qpv2_server("./code", "output.txt", opts)

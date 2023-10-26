@@ -1,3 +1,6 @@
+Show Def.
+
+
 // Computing operators
 
 Def II := I \otimes I.
@@ -16,11 +19,15 @@ Show prog.
 
 Refine pfsub : [pre : P0[x], post: P1[x]].
 
-    Step Prog prog.
+    Step proc prog.
 
 End.
-
 Show pfsub.
+
+Def rho1 := [[proc pfsub]](P0[x]).
+Show rho1.
+
+
 
 
 
@@ -79,7 +86,6 @@ Refine pf : [pre : Omega[t t'], post: Rztheta[t] Omega[t t'] Rztheta[t]^\dagger]
     Step 
         While (I \otimes I - P00)[q0 q1] 
         Inv IQOPT Inv0.
-    Pause.
 
     Step 
         [q0 q1] :=0; [pre: P00[q0 q1] \otimes Omega[t t'], post: IQOPT Inv0].
@@ -101,3 +107,6 @@ End.
 
 Def pfextract := Extract pf.
 Show pfextract.
+
+Def rho2 := [[proc pf]](Pp[t]).
+Show rho2.

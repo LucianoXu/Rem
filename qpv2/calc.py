@@ -48,7 +48,10 @@ def calc_iter(prog : Ast, rho : IQOpt) -> IQOpt:
     if rho == IQOpt.zero(is_rho=True):
         return IQOpt.zero(is_rho=True)
 
-    if isinstance(prog, AstAbort):
+    if isinstance(prog, AstSubprog):
+        return calc_iter(prog.subgprog, rho)
+    
+    elif isinstance(prog, AstAbort):
         return IQOpt.zero(is_rho=True)
     
     elif isinstance(prog, AstSkip):
@@ -59,6 +62,7 @@ def calc_iter(prog : Ast, rho : IQOpt) -> IQOpt:
         for q in prog.qvar:
             IESet0 = IQSOpt(ESet0, QVar([q]))
             res = IESet0.apply(res)
+            res.rho_extend = True
         return res
     
     elif isinstance(prog, AstUnitary):
@@ -68,6 +72,11 @@ def calc_iter(prog : Ast, rho : IQOpt) -> IQOpt:
     elif isinstance(prog, AstAssert):
         P = prog.P
         return P @ rho @ P
+    
+    elif isinstance(prog, AstPres):
+        if prog.SRefined is None:
+            raise Exception()
+        return calc_iter(prog.SRefined, rho)
     
     elif isinstance(prog, AstSeq):
         rho1 = calc_iter(prog.S0, rho)

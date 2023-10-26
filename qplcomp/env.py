@@ -183,3 +183,9 @@ class Env:
             res += key + " := \n" + str(self._lib[key]) + "\n\n"
         return res
     
+    def get_items(self) -> str:
+        res = ""
+        for key in self._lib:
+            res += key + "\n"
+        return res
+    

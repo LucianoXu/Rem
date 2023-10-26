@@ -65,6 +65,18 @@ class Prover:
         except (EnvError, PLYError, QPLCompError, QPVError) as e:
             self.state_bar = f"{e.__class__.__name__}: {e}"
 
+    def process(self, code : str) -> None:
+        '''
+        Call the parser and operate the prover state.
+        Errors are raised.
+        '''
+        try:
+            self.parser.parse(code, lexer = self.lexer)
+        except PauseError:
+            print(f"Paused at line {self.lexer.lineno}.")
+        except (EnvError, PLYError, QPLCompError, QPVError) as e:
+            raise e.__class__(str(e) + f" (line {self.lexer.lineno})")
+
 
     @property
     def refine_proof(self) -> AstPres:
@@ -200,6 +212,9 @@ class Prover:
 
     def show_id(self, id : str) -> None:
         self.state_bar = f"Show {id}: \n{Env()[id]}"
+
+    def show_def(self) -> None:
+        self.state_bar = f"Definitions: \n{Env().get_items()}"
     
     def get_defs(self) -> str:
         return Env().get_items_str(self.defined_var)
@@ -230,4 +245,35 @@ class Prover:
 def prover(code : str) -> None:
     Prover()(code)
 
+
+######################################################################
+# Process the file
+
+def qpv2_code(input_code, opts: dict[str, np.ndarray] = {}) -> None:
+    '''
+    Start the qpv prover to process the code.
+
+    - `input_code` : `str`, the code to be checked.
+    - `opts`: `dic[str, np.ndarray]`, the extra quantum operators.
+    - Returns: `None` if the check succeeds. Otherwise there will be an error.
+    '''
+    # restart and calculate
+    Prover.restart(opts)
+    Prover().process(input_code)
+
+def qpv2_file(input_path : str, opts: dict[str, np.ndarray] = {}) -> None:
+    '''
+    Start the qpv prover to process the input file.
+
+    - `input_path` : `str`, the path of the file to be checked.
+    - `opts`: `dic[str, np.ndarray]`, the extra quantum operators.
+    - Returns: `None` if the check succeeds. Otherwise there will be an error.
+    '''
+
+    with open(input_path, "r", encoding="utf-8") as p_in:
+        code = p_in.read()
+
+    # restart and calculate
+    Prover.restart(opts)
+    Prover().process(code)
 

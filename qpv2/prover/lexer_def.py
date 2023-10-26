@@ -25,6 +25,7 @@ reserved = {
     'Test'      : 'TEST',
 
     'Eval'      : 'EVAL',
+    'Prog'      : 'PROG',
 }
 
 tokens = ['ASSIGN', 'LEQ'] + list(reserved.values()) + AstLexer.tokens

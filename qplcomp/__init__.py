@@ -29,7 +29,7 @@ from .qval import QSOpt, IQSOpt
 
 from .qexpr.eqopt import EQOpt
 from .qexpr.eiqopt import EIQOpt
-from .qexpr.eqvar import QVar
+from .qexpr.eqvar import EQVar
 from .qexpr import lexer_def
 from .qexpr import parser_def
 from .qexpr import PLYError, LexingError, ParsingError

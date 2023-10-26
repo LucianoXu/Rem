@@ -93,6 +93,10 @@ class AstAbort(Ast):
     def prefix_str(self, prefix="") -> str:
         return prefix + "abort"
     
+    @property
+    def extract(self) -> Ast:
+        return self
+    
     def get_prescription(self) -> list[AstPres]:
         return []
 
@@ -342,7 +346,10 @@ class AstPres(Ast):
 
     @property
     def definite(self) -> bool:
-        return False
+        if self.SRefined is None:
+            return False
+        else:
+            return self.SRefined.definite
     
     def prefix_str(self, prefix="") -> str:
         res = prefix + "[ pre: " + str(self._eP) + ", post: " + str(self._eQ) + " ]"

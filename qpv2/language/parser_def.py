@@ -38,7 +38,7 @@ def p_statement(p):
                 | '(' statement '_' FLOATNUM OPLUS statement ')'
                 | IF eiqopt THEN statement ELSE statement END
                 | WHILE eiqopt DO statement END
-                | PROG ID
+                | PROC ID
                 | prescription '=' '=' '>' statement
     '''
     #parentheses
@@ -74,7 +74,7 @@ def p_statement(p):
         p[0] = AstSeq(p[1], p[3])
 
     # probabilistic composition
-    elif type_match(p, ('(', 'statement', '_', 'FLOATNUM', 'OTIMES', 'statement', ')')):
+    elif type_match(p, ('(', 'statement', '_', 'FLOATNUM', 'OPLUS', 'statement', ')')):
         p[0] = AstProb(p[2], p[6], float(p[4]))
 
     # if
@@ -86,7 +86,7 @@ def p_statement(p):
         p[0] = AstWhile(p[2], p[4])
 
     # subprog
-    elif type_match(p, ("PROG", "ID",)):
+    elif type_match(p, ("PROC", "ID",)):
         p[0] = AstSubprog(Variable(p[2]))
 
     # refinement

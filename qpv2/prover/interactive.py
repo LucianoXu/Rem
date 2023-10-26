@@ -64,7 +64,7 @@ class InteractiveFileSystem(FileSystemEventHandler):
 
 
 from qplcomp import QOpt, EQOpt
-def qpv(input : str, output : str = "output.txt", opts: dict[str, np.ndarray] = {}) -> None:
+def qpv2_server(input : str, output : str = "output.txt", opts: dict[str, np.ndarray] = {}) -> None:
     '''
     Start the qpv prover in input and output files.
 

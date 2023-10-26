@@ -17,7 +17,7 @@ reserved = {
     'pre'       : 'PRE',
     'post'      : 'POST',
 
-    'Prog'      : 'PROG',
+    'proc'      : 'PROC',
 
 # refinement rule names
 
