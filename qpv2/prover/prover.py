@@ -213,6 +213,14 @@ class Prover:
     def show_id(self, id : str) -> None:
         self.state_bar = f"Show {id}: \n{Env()[id]}"
 
+    def draw_id(self, id : str) -> None:
+        eprog = Env()[id]
+        expr_type_check(eprog, Ast)
+
+        ast_prog = eprog.eval()
+        assert isinstance(ast_prog, Ast)
+        ast_prog.draw(id)
+
     def show_def(self) -> None:
         self.state_bar = f"Definitions: \n{Env().get_items()}"
     

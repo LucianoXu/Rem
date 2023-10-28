@@ -22,6 +22,7 @@ reserved = {
     'Extract'   : 'EXTRACT',
 
     'Show'      : 'SHOW',
+    'Draw'      : 'DRAW',
     'Test'      : 'TEST',
 
     'Eval'      : 'EVAL',
