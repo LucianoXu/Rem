@@ -35,11 +35,11 @@ def p_statement(p):
                 | ASSERT eiqopt
                 | prescription
                 | statement ';' statement
-                | '(' statement '_' FLOATNUM OPLUS statement ')'
+                | '(' statement '[' FLOATNUM OPLUS ']' statement ')'
                 | IF eiqopt THEN statement ELSE statement END
                 | WHILE eiqopt DO statement END
                 | PROC ID
-                | prescription '=' '=' '>' statement
+                | prescription LEQ statement
     '''
     #parentheses
     if type_match(p, ('{', 'statement', '}')):
@@ -74,8 +74,8 @@ def p_statement(p):
         p[0] = AstSeq(p[1], p[3])
 
     # probabilistic composition
-    elif type_match(p, ('(', 'statement', '_', 'FLOATNUM', 'OPLUS', 'statement', ')')):
-        p[0] = AstProb(p[2], p[6], float(p[4]))
+    elif type_match(p, ('(', 'statement', '[', 'FLOATNUM', 'OPLUS', ']', 'statement', ')')):
+        p[0] = AstProb(p[2], p[7], float(p[4]))
 
     # if
     elif type_match(p, ("IF", "eiqopt", "THEN", "statement", "ELSE", "statement", "END")):
@@ -90,17 +90,17 @@ def p_statement(p):
         p[0] = AstSubprog(Variable(p[2]))
 
     # refinement
-    elif type_match(p, ("prescription", '=', '=', '>', "statement")):
-        p[1].refine_wlp(p[5])
+    elif type_match(p, ("prescription", 'LEQ', "statement")):
+        p[1].refine_wlp(p[3])
         p[0] = p[1]
     else:
         raise Exception()
     
 def p_prescription(p):
     '''
-    prescription    : '[' PRE ':' eiqopt ',' POST ':' eiqopt ']'
+    prescription    : '<' eiqopt ',' eiqopt '>'
     '''
-    p[0] = AstPres(p[4], p[8])
+    p[0] = AstPres(p[2], p[4])
     
     
 from qplcomp.qexpr.parser_def import p_eiqopt, p_eqopt, p_eqvar, p_num, p_qvar, p_qvar_pre, p_variable

@@ -48,6 +48,10 @@ class Ast:
 
 class AstSubprog(Ast):
     def __init__(self, esubprog : Variable):
+
+        if esubprog.T != Ast:
+            raise QPVError(f"The variable '{esubprog}' does not evaluate to a program.")
+
         self.__esubprog = esubprog
 
     @property
@@ -65,7 +69,7 @@ class AstSubprog(Ast):
 
     
     def prefix_str(self, prefix = "") -> str:
-        return prefix + "Prog " + str(self.__esubprog)
+        return prefix + "proc " + str(self.__esubprog)
 
     
     @property
@@ -352,11 +356,11 @@ class AstPres(Ast):
             return self.SRefined.definite
     
     def prefix_str(self, prefix="") -> str:
-        res = prefix + "[ pre: " + str(self._eP) + ", post: " + str(self._eQ) + " ]"
+        res = prefix + "< " + str(self._eP) + ", " + str(self._eQ) + " >"
         if self.SRefined is None:
             return res
         else:
-            res += "\n" + prefix + INDENT + "==> {\n"
+            res += "\n" + prefix + INDENT + "<= {\n"
             res += self.SRefined.prefix_str(prefix + INDENT) + "\n"
             res += prefix + "}"
             return res
@@ -443,7 +447,7 @@ class AstProb(Ast):
     
     def prefix_str(self, prefix="") -> str:
         res = prefix + "(\n" + self._S0.prefix_str(prefix + INDENT) + "\n"
-        res += prefix + "_" + str(self._p) + "⊗\n"
+        res += prefix + "[" + str(self._p) + " ⊕]\n"
         res += self._S1.prefix_str(prefix + INDENT) + "\n"
         res += prefix + ")"
         return res

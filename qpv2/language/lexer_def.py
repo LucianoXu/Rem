@@ -14,8 +14,6 @@ reserved = {
     'end'       : 'END',
     'while'     : 'WHILE',
     'do'        : 'DO',
-    'pre'       : 'PRE',
-    'post'      : 'POST',
 
     'proc'      : 'PROC',
 
@@ -23,15 +21,15 @@ reserved = {
 
 }
 
-tokens = ['ASSIGN0', 'OPLUS'] + list(reserved.values()) + QPLCompLexer.tokens
+tokens = ['ASSIGN0', 'OPLUS', 'LEQ'] + list(reserved.values()) + QPLCompLexer.tokens
 reserved.update(QPLCompLexer.reserved)
 
 
-literals = ['(', ')', '_', '[', ']', ';', ',', ':', '=', '>', '{', '}'] + QPLCompLexer.literals
+literals = ['(', ')', '_', '[', ']', ';', ',', ':', '=', '>', '{', '}', '<', '>'] + QPLCompLexer.literals
 
 t_OPLUS = r"⊕|\\oplus"
 t_ASSIGN0 = r":=0"
-
+t_LEQ = r"<="
 
 # we have to redefine t_ID to update the reserved keywords. This is not elegant and we may need a framework for multi-layered parsing based on PLY.
 def t_ID(t):

@@ -241,13 +241,30 @@ class Prover:
         res += f"= Info (line {self.lexer.lineno}) =\n\n" + self.state_bar + "\n"
         return res
 
-
-def prover(code : str) -> None:
-    Prover()(code)
-
-
 ######################################################################
-# Process the file
+# Interfaces
+
+def prover_restart(opts : dict[str, np.ndarray] = {}) -> None:
+    '''
+    Restart the QPV2 prover.
+
+    - `opts`: `dict[str, np.ndarray]`, the extra quantum operators.
+    '''
+    Prover.restart(opts)
+
+def prover(input_code : str) -> None:
+    '''
+    Let the prover execute the code.
+
+    - `input_code` : `str`.
+    '''
+    Prover().process(input_code)
+
+def prover_info() -> str:
+    '''
+    Return the current state of the prover.
+    '''
+    return str(Prover())
 
 def qpv2_code(input_code, opts: dict[str, np.ndarray] = {}) -> None:
     '''

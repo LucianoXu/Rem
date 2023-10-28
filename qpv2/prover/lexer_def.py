@@ -28,13 +28,12 @@ reserved = {
     'Prog'      : 'PROG',
 }
 
-tokens = ['ASSIGN', 'LEQ'] + list(reserved.values()) + AstLexer.tokens
+tokens = ['ASSIGN'] + list(reserved.values()) + AstLexer.tokens
 reserved.update(AstLexer.reserved)
 
 literals = ['.'] + AstLexer.literals
 
 t_ASSIGN = r":="
-t_LEQ = r"<="
 
 def t_ID(t):
     r'[a-zA-Z\'][a-zA-Z\'0-9]*'

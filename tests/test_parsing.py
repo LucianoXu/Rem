@@ -23,15 +23,16 @@ def test_01():
         [q p] :=0;
         (H \otimes X)[p q];
         assert Pp[p];
-        [ pre: Pp[p], post: P1[p]];
-        ( skip _ 0.52 \oplus H[p] );
+        < Pp[p], P1[p] >;
+        ( skip [0.52 \oplus] H[p] );
         if (P1[q] \wedge P0[p]) then
             CX[q p]
         else
             while Pm[p] do
                 H[p]
             end
-        end.
+        end;
+        < P0[p], P1[p] > <= X[p].
     '''
     qpv2.qpv2_code(code)
 
@@ -69,7 +70,7 @@ def test_Refine():
     Def prog := Prog X[x].
     Show prog.
 
-    Refine pfsub : [pre : P0[x], post: P1[x]].
+    Refine pfsub : < P0[x], P1[x] >.
 
         Step proc prog.
 
@@ -93,11 +94,13 @@ def test_RExample():
 
     // The example in the draft.
 
+    Def P00 := P0 \otimes P0.
+
     Def Inv0 := ((I \otimes I - P00)[q0 q1] \otimes Omega[t t']) \vee (P00[q0 q1] \otimes (Rztheta[t] Omega[t t'] Rztheta[t]^\dagger)).
 
     // simplified style.
 
-    Refine pf : [pre : Omega[t t'], post: Rztheta[t] Omega[t t'] Rztheta[t]^\dagger].
+    Refine pf : < Omega[t t'], Rztheta[t] Omega[t t'] Rztheta[t]^\dagger>.
 
 
         Step Seq (I \otimes I - P00)[q0 q1] Omega[t t'].
@@ -111,11 +114,11 @@ def test_RExample():
             Inv IQOPT Inv0.
 
         Step 
-            [q0 q1] :=0; [pre: P00[q0 q1] \otimes Omega[t t'], post: IQOPT Inv0].
+            [q0 q1] :=0; < P00[q0 q1] \otimes Omega[t t'], IQOPT Inv0>.
 
         Step 
             H[q0]; H[q1];
-            [pre: Pp[q0] \otimes Pp[q1] \otimes Omega[t t'], post: IQOPT Inv0].
+            < Pp[q0] \otimes Pp[q1] \otimes Omega[t t'], IQOPT Inv0>.
 
         Step
             CCX[q0 q1 t]; S[t]; CCX[q0 q1 t];

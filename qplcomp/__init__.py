@@ -23,6 +23,7 @@ from .qexpr import prepare_env
 from .qval import QVar
 from .qval import QOpt, IQOpt
 from .qval import QSOpt, IQSOpt
+from .qval import predefined
 
 # qexpr outputs the parsing details for downstream applications
 # the lexer and parser is constructed by ply
