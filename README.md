@@ -237,7 +237,7 @@ $$
 \begin{aligned}
     o ::=\ &C\ |\ - o\ |\ o + o\ |\ o - o\\
         & |\ c * o\ |\ c\ o\ \\
-        & |\ o * o\ |\ o\ o\ |\ o\dagger \\
+        & |\ o * o\ |\ o\dagger \\
         & |\ o \otimes o\ \\
         & |\ o \vee o\ |\ o \wedge o\ |\ o\ \^{} \bot \\
         & |\ o \rightsquigarrow o\ |\ o \Cap o.
@@ -249,7 +249,7 @@ $$
     oi ::= \ & \text{\texttt{IQOPT}}\ C\ |\ o\ qvar \\
         & |\ -oi\ |\ oi + oi\ |\ oi - oi\\
         & |\ c*oi\ |\ c\ oi\\
-        & |\ oi * oi\ |\ oi\ oi\ |\ oi\dagger\\
+        & |\ oi * oi\ |\ oi\dagger\\
         & |\ oi \otimes oi\\
         & |\ oi \vee oi\ |\ oi \wedge oi\ |\ oi\ \^{}\bot\\
         & |\ oi \rightsquigarrow oi\ |\ oi \Cap oi.

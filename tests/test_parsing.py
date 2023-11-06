@@ -7,7 +7,7 @@ def test_opt():
 
     Def II := I \otimes I.
 
-    Test CX[p q] CX[q p] CX[p q] = SWAP[p q].
+    Test CX[p q] * CX[q p] * CX[p q] = SWAP[p q].
 
     Test P0 \otimes P1 <= II.
 
@@ -87,56 +87,73 @@ from qplcomp.qval import predefined
 
 def test_RExample():
     opts = {
-        "Rztheta" : predefined.Rz(np.arccos(3/5))
+        "Rz" : predefined.Rz(np.arccos(3/5))
     }
 
     code = r'''
 
-    // The example in the draft.
+        Show Def.
 
-    Def P00 := P0 \otimes P0.
+        // Computing operators
 
-    Def Inv0 := ((I \otimes I - P00)[q0 q1] \otimes Omega[t t']) \vee (P00[q0 q1] \otimes (Rztheta[t] Omega[t t'] Rztheta[t]^\dagger)).
+        Def II := I \otimes I.
 
-    // simplified style.
+        Test CX[p q] * CX[q p] * CX[p q] = SWAP[p q].
 
-    Refine pf : < Omega[t t'], Rztheta[t] Omega[t t'] Rztheta[t]^\dagger>.
+        Test P0 \otimes P1 <= II.
 
-
-        Step Seq (I \otimes I - P00)[q0 q1] Omega[t t'].
-
-        Step 
-            [q0 q1] :=0; X[q0].
+        Test P0[p] \vee Pp[q] = I[p].
 
 
-        Step 
-            While (I \otimes I - P00)[q0 q1] 
-            Inv IQOPT Inv0.
+        // Subprograms and proofs.
 
-        Step 
-            [q0 q1] :=0; < P00[q0 q1] \otimes Omega[t t'], IQOPT Inv0>.
+        Def prog := Prog X[x].
+        Show prog.
 
-        Step 
+        Refine pfsub : < P0[x], P1[x] >.
+
+            Step proc prog.
+
+        End.
+        Show pfsub.
+
+        Def rho1 := [[proc pfsub]](P0[x]).
+        Show rho1.
+
+
+
+
+        // The example in the draft.
+        Def P00 := P0 \otimes P0.
+        Def Pnot00 := (I \otimes I - P00).
+
+        Def pCircuit := Prog
             H[q0]; H[q1];
-            < Pp[q0] \otimes Pp[q1] \otimes Omega[t t'], IQOPT Inv0>.
-
-        Step
             CCX[q0 q1 t]; S[t]; CCX[q0 q1 t];
-            // problem?
             H[q0]; H[q1];
-            if (I \otimes I - P00)[q0 q1] then
-                Z[t]
-            else
-                skip
-            end.
-    End.
+            if Pnot00[q0 q1] then Z[t] else skip end.
 
-    Def pfextract := Extract pf.
-    Show pfextract.
-    //Pause.
+        Refine pf : < Omega[t t'], Rz[t] * Omega[t t'] * Rz[t]^\dagger >.
 
-    Def rho2 := [[proc pf]](Pp[t]).
-    Show rho2.
+
+            Step Seq Pnot00[q0 q1] * Omega[t t'].
+            
+            Step [q0 q1] :=0; X[q0].
+
+            Def Inv0 := (Pnot00[q0 q1] \otimes Omega[t t']) \vee (P00[q0 q1] \otimes (Rz[t] * Omega[t t'] * Rz[t]^\dagger)).
+
+            Step While Pnot00[q0 q1] Inv IQOPT Inv0.
+
+            Step Seq P00[q0 q1] \otimes Omega[t t'].
+            
+            Step [q0 q1] :=0.
+
+            Step proc pCircuit.
+        End.
+        Show pf.
+        Def S0:= Extract pf. Show S0.
+        Def rho := [[proc S0]](Pp[t]). Show rho.
+
     '''
 
     qpv2.qpv2_code(code, opts)

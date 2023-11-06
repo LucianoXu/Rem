@@ -69,7 +69,6 @@ def p_eiqopt(p):
             | num '*' eiqopt
             | num eiqopt %prec '*'
             | eiqopt '*' eiqopt
-            | eiqopt eiqopt %prec '*'
             | eiqopt DAGGER
             | eiqopt OTIMES eiqopt
             | eiqopt DISJUNCT eiqopt
@@ -96,8 +95,6 @@ def p_eiqopt(p):
         p[0] = EIQOptScale(p[1], p[2])
     elif type_match(p, ('eiqopt', '*', 'eiqopt')):
         p[0] = EIQOptMul(p[1], p[3])
-    elif type_match(p, ('eiqopt', 'eiqopt')):
-        p[0] = EIQOptMul(p[1], p[2])
     elif type_match(p, ('eiqopt', 'DAGGER')):
         p[0] = EIQOptDagger(p[1])
     elif type_match(p, ('eiqopt', 'OTIMES', 'eiqopt')):
@@ -127,7 +124,6 @@ def p_eqopt(p):
             | num '*' eqopt
             | num eqopt  %prec '*'
             | eqopt '*' eqopt
-            | eqopt eqopt %prec '*'
             | eqopt DAGGER
             | eqopt OTIMES eqopt
             | eqopt DISJUNCT eqopt
@@ -152,8 +148,6 @@ def p_eqopt(p):
         p[0] = EQOptScale(p[1], p[2])
     elif type_match(p, ('eqopt', '*', 'eqopt')):
         p[0] = EQOptMul(p[1], p[3])
-    elif type_match(p, ('eqopt', 'eqopt')):
-        p[0] = EQOptMul(p[1], p[2])
     elif type_match(p, ('eqopt', 'DAGGER')):
         p[0] = EQOptDagger(p[1])
     elif type_match(p, ('eqopt', 'OTIMES', 'eqopt')):
