@@ -27,6 +27,8 @@ def p_cmd(p):
         | STEP REFINE_SEQ eiqopt '.'
         | STEP REFINE_IF eiqopt '.'
         | STEP REFINE_WHILE eiqopt REFINE_INV eiqopt '.'
+        | REFINE_WEAKEN_PRE eiqopt '.'
+        | REFINE_STRENGTHEN_POST eiqopt '.'
 
         | CHOOSE FLOATNUM '.'
         | META_END '.'
@@ -80,6 +82,12 @@ def p_cmd(p):
 
     elif type_match(p, ("STEP", 'REFINE_WHILE', 'eiqopt', 'REFINE_INV', 'eiqopt', '.')):
         Prover().step_refine_while(p[3], p[5])
+
+    elif type_match(p, ("REFINE_WEAKEN_PRE", 'eiqopt', '.')):
+        Prover().step_refine_weaken_pre(p[2])
+
+    elif type_match(p, ("REFINE_STRENGTHEN_POST", 'eiqopt', '.')):
+        Prover().step_refine_strengthen_post(p[2])
 
     elif type_match(p, ("CHOOSE", "FLOATNUM", '.')):
         Prover().refine_choose_goal(int(p[2]))

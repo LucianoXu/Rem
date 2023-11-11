@@ -117,6 +117,7 @@ from .eqopt import *
 def p_eqopt(p):
     '''
     eqopt   : variable
+            | '[' eqvec ']'
             | '(' eqopt ')'
             | '(' '-' eqopt ')'
             | eqopt '+' eqopt
@@ -134,6 +135,8 @@ def p_eqopt(p):
     '''
     if type_match(p, ('variable',)):
         p[0] = p[1]
+    elif type_match(p, ('[', 'eqvec', ']')):
+        p[0] = EQOptKetProj(p[2])
     elif type_match(p, ('(', 'eqopt', ')')):
         p[0] = p[2]
     elif type_match(p, ('(', '-', 'eqopt', ')')):
@@ -191,6 +194,26 @@ def p_qvar_pre(p):
         p[0] = []
     else:
         p[0] = p[1] + [p[2]]
+
+from .eqvec import *
+def p_eqvec(p):
+    '''
+    eqvec   : KET_BITSTR
+            | eqvec '+' eqvec
+            | num eqvec %prec '*'
+            | num '*' eqvec
+    '''
+    if type_match(p, ('KET_BITSTR',)):
+        p[0] = EQVecBitString(p[1])
+    elif type_match(p, ('eqvec', '+', 'eqvec')):
+        p[0] = EQVecAdd(p[1], p[3])
+    elif type_match(p, ('num', 'eqvec')):
+        p[0] = EQVecScale(p[1], p[2])
+    elif type_match(p, ('num', '*', 'eqvec')):
+        p[0] = EQVecScale(p[1], p[3])
+    else:
+        raise Exception()
+        
 
 def p_num(p):
     '''

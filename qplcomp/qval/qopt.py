@@ -67,7 +67,7 @@ class QOpt(QVal):
             # check whether dim = 2**n for some n
             self._qnum = round(np.log2(d1))
             if (2**self._qnum != d0):
-                raise QPLCompError(f"Incorrect matrix dimension: {d0} is some power of 2.")
+                raise QPLCompError(f"Incorrect matrix dimension: {d0} should be some power of 2.")
             
             self._matrix_repr = data
             self._tensor_repr = np.reshape(data, (2,)*self._qnum*2)
@@ -632,3 +632,15 @@ class QOpt(QVal):
         Note: Sasaki conjunction P -> R := P \\wedge (P^\\bot \\vee R)
         '''
         return self & ((~ self) | other)
+
+
+from .qvec import QVec
+
+def qproj_from_qvec(qvec : QVec) -> QOpt:
+    '''
+    ```
+    |v> -> |v><v|
+    ```
+    '''
+    v = qvec.v_repr.reshape((2**qvec.qnum, 1))
+    return QOpt(v @ v.conjugate().transpose())

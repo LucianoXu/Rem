@@ -138,6 +138,27 @@ class Prover:
         
         self.state_bar = "Refinement step succeeded."
 
+    def step_refine_weaken_pre(self, R : Expr) -> None:
+        if len(self.current_goals) == 0:
+            raise QPVError("There is no prescriptions to refine.")
+        
+        self.current_goals[0].refine_weaken_pre(R)
+
+        self.current_goals = self.current_goals[0].get_prescription() + self.current_goals[1:]
+        
+        self.state_bar = "Refinement step succeeded."
+
+
+    def step_refine_strengthen_post(self, R : Expr) -> None:
+        if len(self.current_goals) == 0:
+            raise QPVError("There is no prescriptions to refine.")
+        
+        self.current_goals[0].refine_strengthen_post(R)
+
+        self.current_goals = self.current_goals[0].get_prescription() + self.current_goals[1:]
+        
+        self.state_bar = "Refinement step succeeded."
+
 
     def step_refine_seq(self, middle : Expr) -> None:
         '''

@@ -147,7 +147,7 @@ class EIQOptScale(Expr):
     The expression for scaling of quantum operators.
 
     EIQOptScale ::= (c : complex) (b : IQOpt)
-                | (c : complex) '*' (b : IQOpt)
+                    | (c : complex) '*' (b : IQOpt)
     
     Nonterminal.
     '''
@@ -181,8 +181,7 @@ class EIQOptMul(Expr):
     '''
     The Expression for multiplications of Indexed Quantum Operators.
     
-    EIQOptMul ::= (a : IQOpt) (b : IQOpt)
-                | (a : IQOpt) '*' (b : IQOpt)
+    EIQOptMul ::= (a : IQOpt) '*' (b : IQOpt)
 
     Nonterminal.
     '''

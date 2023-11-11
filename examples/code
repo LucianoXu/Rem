@@ -1,3 +1,39 @@
+// A sorting of qubits a, b and c
+
+// predicate "less or equal"
+Def le := P0 ⊗ P0 ∨ P0 ⊗ P1 ∨ P1 ⊗ P1.
+Def le' := P0 ⊗ P0 + P0 ⊗ P1 + P1 ⊗ P1.
+
+Test le = le'.  // le = le' holds indeed
+
+Def CSWAP := P0 ⊗ I ⊗ I + P1 ⊗ SWAP.
+
+Refine sort3 : < c1[], le[a b] ∧ le[b c] ∧ le[a c] >.
+
+    Step < c1[], le[a b] ∧ le[b c] >.
+
+    Step Seq le[a b] ∧ le [a c].
+
+    Step Seq le[b c].
+
+    Step [t]:=0; CX[b t]; CSWAP[t b c].
+    Step [t]:=0; CX[a t]; CSWAP[t a b].
+    Step [t]:=0; CX[b t]; CSWAP[t b c].
+
+End.
+
+// quantum teleportation from a to y
+Def Peq := P0 ⊗ P0 ∨ P1 ⊗ P1.
+
+Refine teleportation : < Omega[a t] ⊗ Bell00[x y] , Omega[y t] >.
+    Step
+        CX[a x];
+        H[a];
+        if P1[x] then X[y] else skip end;
+        if P1[a] then Z[y] else skip end.
+End.
+
+
 Show Def.
 
 // Computing operators
