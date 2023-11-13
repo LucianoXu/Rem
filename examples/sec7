@@ -3,15 +3,15 @@ Def Peq := [|00>] + [|11>].
 
 // the program of noise
 Def Noise := Prog 
-	(X[q1] [0.5 \oplus] (X[q2] [0.5 \oplus] (X[q3] [0.5 \oplus] skip))).
+	(X[q1] [\oplus 0.5] (X[q2] [\oplus 0.5] (X[q3] [\oplus 0.5] skip))).
 
 Def Pe := 0.5 [|1000> + |0111>] \vee 0.5 [|0100> + |1011>] \vee 0.5 [|0010> + |1101>] \vee 0.5 [|0000> + |1111>].
 
-Def Rep3 := Prog < Pe[q1 q2 q3 a], 0.5 [|0000> + |1111>][q1 q2 q3 a]>.
+Def Rep3 := Prog < Pe[q1 q2 q3 a], 0.5 [|0000> + |1111>][q1 q2 q3 a] >.
 
-Refine ErrCorr : < 0.5 [|0000> + |1111>][q1 q2 q3 a], 0.5 [|0000> + |1111>][q1 q2 q3 a]>.
-
+Refine ErrCorr : < 0.5 [|0000> + |1111>][q1 q2 q3 a], 0.5 [|0000> + |1111>][q1 q2 q3 a] >.
 	Step Seq Pe[q1 q2 q3 a].
+
 	Step proc Noise.
 	Step proc Rep3.
 
@@ -31,3 +31,7 @@ End.
 
 Def Rep3Extr := Extract Rep3.
 Show Rep3Extr.
+
+Def noisy := [[proc Noise]]([0.6|000> + 0.8|111>][q1 q2 q3]).
+Def recovered := [[proc Rep3]](IQOPT noisy).
+Eval recovered.

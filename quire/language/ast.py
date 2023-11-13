@@ -624,7 +624,7 @@ class AstProb(Ast):
     
     def prefix_str(self, prefix="") -> str:
         res = prefix + "(\n" + self._S0.prefix_str(prefix + INDENT) + "\n"
-        res += prefix + "[" + str(self._p) + " ⊕]\n"
+        res += prefix + "[⊕ " + str(self._p) +"]\n"
         res += self._S1.prefix_str(prefix + INDENT) + "\n"
         res += prefix + ")"
         return res

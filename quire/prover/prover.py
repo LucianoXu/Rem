@@ -275,7 +275,7 @@ class Prover:
 
 def prover_restart(opts : dict[str, np.ndarray] = {}) -> None:
     '''
-    Restart the QPV2 prover.
+    Restart the Quire prover.
 
     - `opts`: `dict[str, np.ndarray]`, the extra quantum operators.
     '''
@@ -295,7 +295,7 @@ def prover_info() -> str:
     '''
     return str(Prover())
 
-def qpv2_code(input_code, opts: dict[str, np.ndarray] = {}) -> None:
+def quire_code(input_code, opts: dict[str, np.ndarray] = {}) -> None:
     '''
     Start the qpv prover to process the code.
 
@@ -307,7 +307,7 @@ def qpv2_code(input_code, opts: dict[str, np.ndarray] = {}) -> None:
     Prover.restart(opts)
     Prover().process(input_code)
 
-def qpv2_file(input_path : str, opts: dict[str, np.ndarray] = {}) -> None:
+def quire_file(input_path : str, opts: dict[str, np.ndarray] = {}) -> None:
     '''
     Start the qpv prover to process the input file.
 

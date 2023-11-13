@@ -35,7 +35,7 @@ def p_statement(p):
                 | ASSERT eiqopt
                 | prescription
                 | statement ';' statement
-                | '(' statement '[' FLOATNUM OPLUS ']' statement ')'
+                | '(' statement '[' OPLUS FLOATNUM ']' statement ')'
                 | IF eiqopt THEN statement ELSE statement END
                 | WHILE eiqopt DO statement END
                 | PROC ID
@@ -74,8 +74,8 @@ def p_statement(p):
         p[0] = AstSeq(p[1], p[3])
 
     # probabilistic composition
-    elif type_match(p, ('(', 'statement', '[', 'FLOATNUM', 'OPLUS', ']', 'statement', ')')):
-        p[0] = AstProb(p[2], p[7], float(p[4]))
+    elif type_match(p, ('(', 'statement', '[', 'OPLUS', 'FLOATNUM', ']', 'statement', ')')):
+        p[0] = AstProb(p[2], p[7], float(p[5]))
 
     # if
     elif type_match(p, ("IF", "eiqopt", "THEN", "statement", "ELSE", "statement", "END")):

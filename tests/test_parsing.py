@@ -1,4 +1,4 @@
-import qpv2
+import quire
 import numpy as np
 
 def test_opt():
@@ -13,7 +13,7 @@ def test_opt():
 
     Test P0[p] \vee Pp[q] = I[p].
     '''
-    qpv2.qpv2_code(code)
+    quire.quire_code(code)
 
 def test_01():
     code = r'''
@@ -24,7 +24,7 @@ def test_01():
         (H \otimes X)[p q];
         assert Pp[p];
         < Pp[p], P1[p] >;
-        ( skip [0.52 \oplus] H[p] );
+        ( skip [\oplus 0.52] H[p] );
         if (P1[q] \wedge P0[p]) then
             CX[q p]
         else
@@ -34,7 +34,7 @@ def test_01():
         end;
         < P0[p], P1[p] > <= X[p].
     '''
-    qpv2.qpv2_code(code)
+    quire.quire_code(code)
 
 def test_forward_calc():
     code = r'''
@@ -48,7 +48,7 @@ def test_forward_calc():
 
     Def rho := [[ proc prog ]](c1[]).
     '''
-    qpv2.qpv2_code(code)
+    quire.quire_code(code)
 
 def test_forward_calc2():
     code = r'''
@@ -61,7 +61,7 @@ def test_forward_calc2():
 
     Def rho := [[ proc prog ]](c1[]).
     '''
-    qpv2.qpv2_code(code)
+    quire.quire_code(code)
 
 def test_Refine():
     code = r'''
@@ -81,7 +81,7 @@ def test_Refine():
     Show rho1.    
     '''
 
-    qpv2.qpv2_code(code)
+    quire.quire_code(code)
 
 from qplcomp.qval import predefined
 
@@ -156,4 +156,4 @@ def test_RExample():
 
     '''
 
-    qpv2.qpv2_code(code, opts)
+    quire.quire_code(code, opts)
