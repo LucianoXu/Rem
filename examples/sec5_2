@@ -1,6 +1,7 @@
 
-
 Show Def.
+
+Pause. // Move this command around to pause at different stages.
 
 // Computing operators
 
@@ -33,7 +34,7 @@ Show rho1.
 
 // The example in the draft.
 Def P00 := [|00>].
-Def Pnot00 := (I \otimes I - P00).
+Def Pnot00 := P00^\bot.
 
 Def pCircuit := Prog
     H[q0]; H[q1];

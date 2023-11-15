@@ -1,5 +1,7 @@
 
-Def Peq := [|00>] + [|11>].
+Def Peq := [|00>] \vee [|11>].
+
+Pause. // Move this command around to pause at different stages.
 
 // the program of noise
 Def Noise := Prog 

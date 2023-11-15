@@ -1,16 +1,14 @@
 # Quire
+
+**(See README.ipynb for the interactive introduction.)**
+
 `Quire` is a Python-based interactive tool for quantum program development.
 It checks whether operator terms and quantum programs are well-formed, calculates the classical simulation of program execution, checks whether the specified prescription is satisfied, and assists in the step-wise refinement of programs in the sense of partial correctness. 
-
-Efforts are made to balance and ensure that `Quire` is user-friendly, expressive and automated.
-`Quire` works in an environment of definitions, and a simple imperative language is designed to manipulate the environment and prover in a convenient way. 
-The basic operator algebra is implemented in `Quire`. Although only ground terms (variable-free expressions) are allowed, it enables us to express many verification scenes without too much compromise.
-Thanks to Python's numerical calculation and the structure of projective predicates, all properties of operators and programs are decidable here, which makes the tool highly automated.
 
 
 ## Installation
 
-After cloning the repository, navigate to its root folder and run
+After cloning the repository or get the source code, navigate to its root folder and run
 ```
 pip install -r requirements.txt
 ```
@@ -20,7 +18,18 @@ pytest
 ```
 If the all test are passed then the tool is well installed.
 
-## Hello World Example
+## Hello World Example (by server)
+
+Quire can be utilized in two modes: **by server** or **by Python interface**.
+
+The examples in our articles are demonstrated by server. We have prepared the boot script, which is initiated by running
+```cmd
+python main.py
+```
+The server will monitor the savings of input file (`./examples/sec7` in this case) and update responses in the output file (`./output` in this case). Move the `Pause` command around to pause and see the response at different stages.
+
+## Hello World Example (by Python interface)
+
 This is a simple example demonstrating the function and usage of Quire. In the example, We refine the prescription $$[\mathrm{pre}: \ket{00}_{p, q} \bra{00}, \mathrm{post}: \ket{++}_{p, q}\bra{++}]$$ with program $prog$ and simulate the computing result.
 
 ```python
