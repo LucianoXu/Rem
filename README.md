@@ -24,7 +24,7 @@ Quire can be utilized in two modes: **by server** or **by Python interface**.
 
 The examples in our articles are demonstrated by server. We have prepared the boot script, which is initiated by running
 ```cmd
-python main.py
+python boot.py
 ```
 The server will monitor the savings of input file (`./examples/sec7` in this case) and update responses in the output file (`./output` in this case). Move the `Pause` command around to pause and see the response at different stages.
 
