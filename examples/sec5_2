@@ -1,64 +1,35 @@
 
-Show Def.
+Def Peq := [|00>] \vee [|11>].
+
+Def Pe0 := 0.5 [|0000> + |1111>]. Def Pe1 := 0.5 [|1000> + |0111>].
+Def Pe2 := 0.5 [|0100> + |1011>]. Def Pe3 := 0.5 [|0010> + |1101>].
+
+Def Pe := Pe0 \vee Pe1 \vee Pe2 \vee Pe3.
 
 Pause. // Move this command around to pause at different stages.
 
-// Computing operators
+Refine Rep : < Pe[q1 q2 q3 a], Pe0[q1 q2 q3 a] >.
+	
+	// detect and recover
+	Step If Peq[q1 q2].
+	
+	Step If Peq[q2 q3].
 
-Def II := I \otimes I.
+	WeakenPre Pe0[q1 q2 q3 a]. Pause. Step skip.
+	WeakenPre Pe3[q1 q2 q3 a]. Step X[q3].
 
-Test CX[p q] * CX[q p] * CX[p q] = SWAP[p q].
+	Step If Peq[q2 q3].
 
-Test P0 \otimes P1 <= II.
-
-Test P0[p] \vee Pp[q] = I[p].
-
-
-// Subprograms and proofs.
-
-Def prog := Prog X[x].
-Show prog.
-
-Refine pfsub : < P0[x], P1[x] >.
-
-    Step proc prog.
-
+	WeakenPre Pe1[q1 q2 q3 a]. Step X[q1].
+	WeakenPre Pe2[q1 q2 q3 a]. Step X[q2].
 End.
-Show pfsub.
 
-Def rho1 := [[proc pfsub]](P0[x]).
-Show rho1.
+Def RepExtr := Extract Rep.
+Show RepExtr.
 
+Def Noise := Prog 
+	(X[q1] [\oplus 0.5] (X[q2] [\oplus 0.5] (X[q3] [\oplus 0.5] skip))).
 
-
-
-// The example in the draft.
-Def P00 := [|00>].
-Def Pnot00 := P00^\bot.
-
-Def pCircuit := Prog
-    H[q0]; H[q1];
-    CCX[q0 q1 t]; S[t]; CCX[q0 q1 t];
-    H[q0]; H[q1];
-    if Pnot00[q0 q1] then Z[t] else skip end.
-
-Def Inv0 := (Pnot00[q0 q1] \otimes Omega[t t']) \vee (P00[q0 q1] \otimes (Rz[t] * Omega[t t'] * Rz[t]^\dagger)).
-
-Refine pf : < Omega[t t'], Rz[t] * Omega[t t'] * Rz[t]^\dagger >.
-
-    Step Seq Pnot00[q0 q1] * Omega[t t'].
-    
-    Step [q0 q1] :=0; X[q0].
-
-
-    Step While Pnot00[q0 q1] Inv IQOPT Inv0.
-
-    Step Seq P00[q0 q1] \otimes Omega[t t'].
-    
-    Step [q0 q1] :=0.
-
-    Step proc pCircuit.
-End.
-Show pf.
-Def S0:= Extract pf. Show S0.
-Def rho := [[proc S0]](Pp[t]). Show rho.
+Def noisy := [[proc Noise]]([0.6|000> + 0.8|111>][q1 q2 q3]).
+Def recovered := [[proc RepExtr]](IQOPT noisy).
+Eval recovered.

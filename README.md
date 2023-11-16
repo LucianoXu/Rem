@@ -26,7 +26,7 @@ The examples in our articles are demonstrated by server. We have prepared the bo
 ```cmd
 python boot.py
 ```
-The server will monitor the savings of input file (`./examples/sec7` in this case) and update responses in the output file (`./output` in this case). Move the `Pause` command around to pause and see the response at different stages.
+The server will monitor the savings of input file (`./examples/sec5_2` in this case) and update responses in the output file (`./output` in this case). Move the `Pause` command around to pause and see the response at different stages.
 
 ## Hello World Example (by Python interface)
 
