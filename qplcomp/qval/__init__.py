@@ -16,7 +16,8 @@ Finally, it provides a library `qvallib` with common quantum operators preserved
 from .qvar import QVar
 from .val import QVal, IQVal
 
-from .qopt import QOpt
+from .qvec import QVec
+from .qopt import QOpt, qproj_from_qvec
 from .qso import QSOpt
 
 from .iqopt import IQOpt

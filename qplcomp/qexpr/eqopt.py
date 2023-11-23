@@ -4,7 +4,7 @@ from typing import Type
 from ..error import type_check
 from ..env import Expr, Env, expr_type_check
 
-from ..qval import QOpt, QSOpt
+from ..qval import QVec, QOpt, QSOpt, qproj_from_qvec
 
 
 import numpy as np
@@ -36,6 +36,32 @@ class EQOpt(Expr):
         return str(self._qopt)
     
     ##################################
+
+class EQOptKetProj(Expr):
+    '''
+    The experssion for quantum projective operators from kets.
+
+    EQOptKetProj ::= '[' (v : QVec) ']'
+
+    '''
+
+    def __init__(self, vec : Expr):
+
+        type_check(vec, Expr)
+        expr_type_check(vec, QVec)
+        self._vec = vec
+
+
+    @property
+    def T(self) -> Type:
+        return QOpt
+    
+    def eval(self) -> QOpt:
+        return qproj_from_qvec(self._vec.eval())    # type: ignore
+
+    def __str__(self) -> str:
+        return f"[{self._vec}]"
+
 
 
 class EQOptAdd(Expr):
@@ -142,8 +168,7 @@ class EQOptMul(Expr):
     '''
     The expression for subtractions of quantum operators.
 
-    EQOptMul ::= (a : QOpt) (b : QOpt)
-                | (a : QOpt) '*' (b : QOpt)
+    EQOptMul ::= (a : QOpt) '*' (b : QOpt)
     
     Nonterminal.
     '''
@@ -178,8 +203,8 @@ class EQOptScale(Expr):
     '''
     The expression for scaling of quantum operators.
 
-    EQOptScale ::= (c : complex) (b : QOpt)
-                | (c : complex) '*' (b : QOpt)
+    EQOptScale ::=  (c : complex) (b : QOpt)
+                    | (c : complex) '*' (b : QOpt)
     
     Nonterminal.
     '''

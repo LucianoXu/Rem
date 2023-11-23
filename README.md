@@ -1,16 +1,14 @@
-# QPV2
-`QPV2` is a Python-based interactive tool for quantum program development.
-It checks whether operator terms and quantum programs are well-formed, calculates the classical simulation of program execution, checks whether the specified prescription is satisfied, and assists in the step-wise refinement of programs in the sense of partial correctness. 
+# Quire
 
-Efforts are made to balance and ensure that `QPV2` is user-friendly, expressive and automated.
-`QPV2` works in an environment of definitions, and a simple imperative language is designed to manipulate the environment and prover in a convenient way. 
-The basic operator algebra is implemented in `QPV2`. Although only ground terms (variable-free expressions) are allowed, it enables us to express many verification scenes without too much compromise.
-Thanks to Python's numerical calculation and the structure of projective predicates, all properties of operators and programs are decidable here, which makes the tool highly automated.
+**(See README.ipynb for the interactive introduction.)**
+
+`Quire` is a Python-based interactive tool for quantum program development.
+It checks whether operator terms and quantum programs are well-formed, calculates the classical simulation of program execution, checks whether the specified prescription is satisfied, and assists in the step-wise refinement of programs in the sense of partial correctness. 
 
 
 ## Installation
 
-After cloning the repository, navigate to its root folder and run
+After cloning the repository or get the source code, navigate to its root folder and run
 ```
 pip install -r requirements.txt
 ```
@@ -20,11 +18,22 @@ pytest
 ```
 If the all test are passed then the tool is well installed.
 
-## Hello World Example
-This is a simple example demonstrating the function and usage of QPV2. In the example, We refine the prescription $$[\mathrm{pre}: \ket{00}_{p, q} \bra{00}, \mathrm{post}: \ket{++}_{p, q}\bra{++}]$$ with program $prog$ and simulate the computing result.
+## Hello World Example (by server)
+
+Quire can be utilized in two modes: **by server** or **by Python interface**.
+
+The examples in our articles are demonstrated by server. We have prepared the boot script, which is initiated by running
+```cmd
+python boot.py
+```
+The server will monitor the savings of input file (`./examples/sec5_2` in this case) and update responses in the output file (`./output` in this case). Move the `Pause` command around to pause and see the response at different stages.
+
+## Hello World Example (by Python interface)
+
+This is a simple example demonstrating the function and usage of Quire. In the example, We refine the prescription $$[\mathrm{pre}: \ket{00}_{p, q} \bra{00}, \mathrm{post}: \ket{++}_{p, q}\bra{++}]$$ with program $prog$ and simulate the computing result.
 
 ```python
-from qpv2 import *
+from quire import *
 prover_restart()
 prover(
     r'''
@@ -42,7 +51,7 @@ Here is the step-wise explanation.
 
 First we import the package and reset the prover.
 ```python
-from qpv2 import *
+from quire import *
 prover_restart()
 print(prover_info())
 ```
@@ -104,25 +113,25 @@ print(prover_info())
 ```
 
 ## Documentation
-This section explains the Python interface, commands and syntax of `QPV2`.
+This section explains the Python interface, commands and syntax of `Quire`.
 
 ### Python Interface
 
-- `qpv2_code(input_code, opts)`
+- `quire_code(input_code, opts)`
   
-    Reset the prover with extra operators in `opt`, and process the `QPV2` commands in the string `input_code`.
+    Reset the prover with extra operators in `opt`, and process the `Quire` commands in the string `input_code`.
 
-- `qpv2_file(input_path, opts)`
+- `quire_file(input_path, opts)`
   
-    Reset the prover with extra operators in `opt`, and process the `QPV2` commands in the file at `input_path`.
+    Reset the prover with extra operators in `opt`, and process the `Quire` commands in the file at `input_path`.
 
-- `qpv2_server(input, output, opts)`
+- `quire_server(input, output, opts)`
   
-    Reset the prover with extra operators in `opt`, and start an interactive server which processes `QPV2` commands in the file `input` and output information in the file `output`.\\
+    Reset the prover with extra operators in `opt`, and start an interactive server which processes `Quire` commands in the file `input` and output information in the file `output`.\\
     Note: Modify and save the `input` file to update the input, and use `Ctrl+C` to close the server.
 
 In the following introduction of syntax, $C$ denotes an identifier for a constant, $stm$ denotes a quantum program, $qvar$ denotes a quantum register, $o$ denotes an unlabelled operator and $oi$ denotes a labelled quantum operator.
-### `QPV2` commands
+### `Quire` commands
 
 - $\texttt{Def}\ C\ \texttt{:=}\ o \texttt{.}$
     
@@ -170,6 +179,14 @@ In the following introduction of syntax, $C$ denotes an identifier for a constan
     [Inv, P^\bot \doublecap Inv]_{\bar{q}}\le while\ P[\bar{q}]\ do\ [P\doublecap Inv, Inv]_{\bar{q}}\ end
     $$
     to the current goal, where $P$, $Inv$ are specified by $oi_1$, $oi_2$ respectively.
+
+- $\texttt{WeakenPre}\ oi \texttt{.}$
+
+    Weaken the precondition of the goal.
+
+- $\texttt{StrengthenPost}\ oi \texttt{.}$
+
+    Strengthen the postcondition of the goal.
     
 - $\texttt{Choose}\ N \texttt{.}$
   
@@ -218,38 +235,47 @@ Quantum program statements, denoted as $stm$, are generated by the following gra
 - $oi$
 - $\texttt{assert}\ oi$
 - $\texttt{< } oi_1\texttt{, } oi_2 \texttt{ >}$
-- $ stm_1 \texttt{; }stm_2 $
-- $ \texttt{(} stm_1\ \texttt{[} p\ \oplus\texttt{]}\ stm_2 \texttt{)}$
-- $ \texttt{if}\ oi\ \texttt{then}\ stm_1\ \texttt{else}\ stm_0\ \texttt{end}$
-- $ \texttt{while}\ oi\ \texttt{do}\ stm\ \texttt{end}$
-- $ \texttt{proc}\ C$
-- $ pres\ \texttt{<=}\ stm$
+- $stm_1 \texttt{; }stm_2$
+- $\texttt{(} stm_1\ \texttt{[}\oplus\ p \texttt{]}\ stm_2 \texttt{)}$
+- $\texttt{if}\ oi\ \texttt{then}\ stm_1\ \texttt{else}\ stm_0\ \texttt{end}$
+- $\texttt{while}\ oi\ \texttt{do}\ stm\ \texttt{end}$
+- $\texttt{proc}\ C$
+- $pres\ \texttt{<=}\ stm$
+
+
 ### Quantum Variables
-In QPV2, the whole quantum system consists of qubits, and every qubit is denoted by an identifier (a string following the regular expression `[a-zA-Z\'][a-zA-Z\'0-9]*`). A quantum variable is an ordered list of unique qubit identifiers. For example, valid quantum variables include:
+In Quire, the whole quantum system consists of qubits, and every qubit is denoted by an identifier (a string following the regular expression `[a-zA-Z\'][a-zA-Z\'0-9]*`). A quantum variable is an ordered list of unique qubit identifiers. For example, valid quantum variables include:
 - `[]`, `[p]`, `[p q r']`, ...
   
 And invalid quantum variables include:
 - `[p p]`, `[1p 2q]`, ...
+- 
 ### Constructing Operators
 The grammar for unlabelled quantum variable is:
 
 $$
 \begin{aligned}
-    o ::=\ &C\ |\ - o\ |\ o + o\ |\ o - o\\
+    o ::=\ &C\ |\ \texttt{[} v \texttt{]}\ |\ - o\ |\ o + o\ |\ o - o\\
         & |\ c * o\ |\ c\ o\ \\
-        & |\ o * o\ |\ o\ o\ |\ o\dagger \\
+        & |\ o * o\ |\ o\dagger \\
         & |\ o \otimes o\ \\
         & |\ o \vee o\ |\ o \wedge o\ |\ o\ \^{} \bot \\
         & |\ o \rightsquigarrow o\ |\ o \Cap o.
 \end{aligned}
 $$
+
+The operator $\texttt{[} v \texttt{]}$ correspond to the projector $\ket{v}\bra{v}$. The syntax for $v$ is:
+$$
+v ::=\ \ket{\texttt{<bit string>}}\ |\ v + v\ |\ c * v\ |\ c\ v.
+$$
+
 The grammar for labelled quantum variable is:
 $$
 \begin{aligned}
     oi ::= \ & \text{\texttt{IQOPT}}\ C\ |\ o\ qvar \\
         & |\ -oi\ |\ oi + oi\ |\ oi - oi\\
         & |\ c*oi\ |\ c\ oi\\
-        & |\ oi * oi\ |\ oi\ oi\ |\ oi\dagger\\
+        & |\ oi * oi\ |\ oi\dagger\\
         & |\ oi \otimes oi\\
         & |\ oi \vee oi\ |\ oi \wedge oi\ |\ oi\ \^{}\bot\\
         & |\ oi \rightsquigarrow oi\ |\ oi \Cap oi.

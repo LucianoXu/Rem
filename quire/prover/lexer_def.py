@@ -17,6 +17,8 @@ reserved = {
 
     # pause the prover to see the state.
     'Pause'     : 'PAUSE',
+    'WeakenPre' : 'REFINE_WEAKEN_PRE',
+    'StrengthenPost' :  'REFINE_STRENGTHEN_POST',
 
 
     'Extract'   : 'EXTRACT',

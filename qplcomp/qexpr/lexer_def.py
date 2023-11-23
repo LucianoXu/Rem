@@ -20,6 +20,7 @@ tokens = [
     'ID',
     'FLOATNUM',
     'COMPLEXNUM',
+    'KET_BITSTR',
 
     'OTIMES',
     'DAGGER',
@@ -30,7 +31,7 @@ tokens = [
     'SASAKI_CONJUNCT',
  ] + list(reserved.values())
  
-literals = ['(', ')', '[', ']', '+', '-', '*']
+literals = ['(', ')', '[', ']', '+', '-', '*', '|', '>']
 
 t_OTIMES = r"⊗|\\otimes"
 t_DAGGER = r"†|\^\\dagger"
@@ -49,6 +50,11 @@ def t_COMPLEXNUM(t):
 
 def t_FLOATNUM(t):
     r'[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?'
+    return t
+
+def t_KET_BITSTR(t):
+    r'\|[01]+>'
+    t.value = t.value[1:-1]
     return t
 
 def t_ID(t):

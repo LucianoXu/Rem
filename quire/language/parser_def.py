@@ -35,7 +35,7 @@ def p_statement(p):
                 | ASSERT eiqopt
                 | prescription
                 | statement ';' statement
-                | '(' statement '[' FLOATNUM OPLUS ']' statement ')'
+                | '(' statement '[' OPLUS FLOATNUM ']' statement ')'
                 | IF eiqopt THEN statement ELSE statement END
                 | WHILE eiqopt DO statement END
                 | PROC ID
@@ -74,8 +74,8 @@ def p_statement(p):
         p[0] = AstSeq(p[1], p[3])
 
     # probabilistic composition
-    elif type_match(p, ('(', 'statement', '[', 'FLOATNUM', 'OPLUS', ']', 'statement', ')')):
-        p[0] = AstProb(p[2], p[7], float(p[4]))
+    elif type_match(p, ('(', 'statement', '[', 'OPLUS', 'FLOATNUM', ']', 'statement', ')')):
+        p[0] = AstProb(p[2], p[7], float(p[5]))
 
     # if
     elif type_match(p, ("IF", "eiqopt", "THEN", "statement", "ELSE", "statement", "END")):
@@ -103,9 +103,9 @@ def p_prescription(p):
     p[0] = AstPres(p[2], p[4])
     
     
-from qplcomp.qexpr.parser_def import p_eiqopt, p_eqopt, p_eqvar, p_num, p_qvar, p_qvar_pre, p_variable
+from qplcomp.qexpr.parser_def import p_eiqopt, p_eqopt, p_eqvar, p_num, p_qvar, p_qvar_pre, p_variable, p_eqvec
 
 def p_error(p):
     if p is None:
-        raise ParsingError("unexpected end of file")
+        raise ParsingError("Empty file or incomplete string.")
     raise ParsingError("Syntax error in input: '" + str(p.value) + "'.")

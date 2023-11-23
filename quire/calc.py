@@ -85,7 +85,7 @@ def calc_iter(prog : Ast, rho : IQOpt) -> IQOpt:
     elif isinstance(prog, AstProb):
         rho_0 = calc_iter(prog.S0, rho)
         rho_1 = calc_iter(prog.S1, rho)
-        return prog.p * rho_0 + (1 - prog.p) * rho_1
+        return (1-prog.p) * rho_0 + prog.p * rho_1
     
     elif isinstance(prog, AstIf):
         # branch of res == 1

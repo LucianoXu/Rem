@@ -1,0 +1,23 @@
+// A sorting of qubits a, b and c
+
+// predicate "less or equal"
+Def le := P0 ⊗ P0 ∨ P0 ⊗ P1 ∨ P1 ⊗ P1.
+Def le' := P0 ⊗ P0 + P0 ⊗ P1 + P1 ⊗ P1.
+
+Test le = le'.  // le = le' holds indeed
+
+Def CSWAP := P0 ⊗ I ⊗ I + P1 ⊗ SWAP.
+
+Refine sort3 : < c1[], le[a b] ∧ le[b c] ∧ le[a c] >.
+
+    Step < c1[], le[a b] ∧ le[b c] >.
+
+    Step Seq le[a b] ∧ le [a c].
+
+    Step Seq le[b c].
+
+    Step [t]:=0; CX[b t]; CSWAP[t b c].
+    Step [t]:=0; CX[a t]; CSWAP[t a b].
+    Step [t]:=0; CX[b t]; CSWAP[t b c].
+
+End.

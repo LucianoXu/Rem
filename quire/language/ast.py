@@ -7,6 +7,7 @@ from qplcomp import IQOpt
 from qplcomp import Expr, Variable, QVar, IQOpt, expr_type_check
 
 from qplcomp.qexpr.eiqopt import *
+from qplcomp.qexpr.eiqopt import EIQOpt
 
 from ..error import type_check, QPVError
 
@@ -56,6 +57,13 @@ class Ast:
         Calculate the weakest liberal precondition.
         '''
         raise NotImplementedError()
+    
+    def sp_ex(self, pre : EIQOpt) -> EIQOpt:
+        '''
+        Calculate the strongest postcondition (expression).
+        '''
+        raise NotImplementedError()
+
     
     def draw(self, path: str) -> None:
         '''
@@ -163,13 +171,13 @@ class AstSubprog(Ast):
         return self
     
     def get_prescription(self) -> list[AstPres]:
-        return []
+        return self.subgprog.get_prescription()
     
     def wlp(self, post : IQOpt) -> IQOpt:
-        '''
-        Calculate the weakest liberal precondition.
-        '''
         return self.subgprog.wlp(post)
+    
+    def sp_ex(self, pre: EIQOpt) -> EIQOpt:
+        return self.subgprog.sp_ex(pre)
     
     def layout(self, dot: Digraph) -> None:
         subproc_box(dot, str(self.astid), str(self))
@@ -359,6 +367,7 @@ class AstPres(Ast):
     ############################################################
     # Refinement Steps
 
+
     def refine_wlp(self, SRefined: Ast) -> None:
         '''
         == Refinement Rule ==
@@ -378,6 +387,44 @@ class AstPres(Ast):
             raise QPVError(msg)
         
         self.SRefined = SRefined
+
+    def refine_weaken_pre(self, R : Expr) -> None:
+        '''
+        == Refinement Rule ==
+        ```
+            P ⊑ R
+            ----------------
+            [P, Q] ⊑ [R, Q]
+        ```
+        '''
+        expr_type_check(R, IQOpt)
+        if not self.P <= R.eval(): # type: ignore
+            msg = "Refinement failed. The relation P ⊑ R is not satisfied for: \n"
+            msg += "P = \n\t" + str(self._eP) + "\n"
+            msg += "R = \n\t" + str(R) + "\n"
+            raise QPVError(msg)
+        
+        self.SRefined = AstPres(R, self._eQ)
+
+
+    def refine_strengthen_post(self, R : Expr) -> None:
+        '''
+        == Refinement Rule ==
+        ```
+            R ⊑ Q
+            ----------------
+            [P, Q] ⊑ [P, R]
+        ```
+        '''
+        expr_type_check(R, IQOpt)
+        if not R.eval() <= self.Q: # type: ignore
+            msg = "Refinement failed. The relation R ⊑ Q is not satisfied for: \n"
+            msg += "R = \n\t" + str(R) + "\n"
+            msg += "Q = \n\t" + str(self._eQ) + "\n"
+            raise QPVError(msg)
+        
+        self.SRefined = AstPres(self._eP, R)
+
 
     
     def refine_seq_break(self, middle: Expr) -> None:
@@ -577,7 +624,7 @@ class AstProb(Ast):
     
     def prefix_str(self, prefix="") -> str:
         res = prefix + "(\n" + self._S0.prefix_str(prefix + INDENT) + "\n"
-        res += prefix + "[" + str(self._p) + " ⊕]\n"
+        res += prefix + "[⊕ " + str(self._p) +"]\n"
         res += self._S1.prefix_str(prefix + INDENT) + "\n"
         res += prefix + ")"
         return res

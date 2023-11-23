@@ -69,7 +69,6 @@ def p_eiqopt(p):
             | num '*' eiqopt
             | num eiqopt %prec '*'
             | eiqopt '*' eiqopt
-            | eiqopt eiqopt %prec '*'
             | eiqopt DAGGER
             | eiqopt OTIMES eiqopt
             | eiqopt DISJUNCT eiqopt
@@ -96,8 +95,6 @@ def p_eiqopt(p):
         p[0] = EIQOptScale(p[1], p[2])
     elif type_match(p, ('eiqopt', '*', 'eiqopt')):
         p[0] = EIQOptMul(p[1], p[3])
-    elif type_match(p, ('eiqopt', 'eiqopt')):
-        p[0] = EIQOptMul(p[1], p[2])
     elif type_match(p, ('eiqopt', 'DAGGER')):
         p[0] = EIQOptDagger(p[1])
     elif type_match(p, ('eiqopt', 'OTIMES', 'eiqopt')):
@@ -120,6 +117,7 @@ from .eqopt import *
 def p_eqopt(p):
     '''
     eqopt   : variable
+            | '[' eqvec ']'
             | '(' eqopt ')'
             | '(' '-' eqopt ')'
             | eqopt '+' eqopt
@@ -127,7 +125,6 @@ def p_eqopt(p):
             | num '*' eqopt
             | num eqopt  %prec '*'
             | eqopt '*' eqopt
-            | eqopt eqopt %prec '*'
             | eqopt DAGGER
             | eqopt OTIMES eqopt
             | eqopt DISJUNCT eqopt
@@ -138,6 +135,8 @@ def p_eqopt(p):
     '''
     if type_match(p, ('variable',)):
         p[0] = p[1]
+    elif type_match(p, ('[', 'eqvec', ']')):
+        p[0] = EQOptKetProj(p[2])
     elif type_match(p, ('(', 'eqopt', ')')):
         p[0] = p[2]
     elif type_match(p, ('(', '-', 'eqopt', ')')):
@@ -152,8 +151,6 @@ def p_eqopt(p):
         p[0] = EQOptScale(p[1], p[2])
     elif type_match(p, ('eqopt', '*', 'eqopt')):
         p[0] = EQOptMul(p[1], p[3])
-    elif type_match(p, ('eqopt', 'eqopt')):
-        p[0] = EQOptMul(p[1], p[2])
     elif type_match(p, ('eqopt', 'DAGGER')):
         p[0] = EQOptDagger(p[1])
     elif type_match(p, ('eqopt', 'OTIMES', 'eqopt')):
@@ -197,6 +194,26 @@ def p_qvar_pre(p):
         p[0] = []
     else:
         p[0] = p[1] + [p[2]]
+
+from .eqvec import *
+def p_eqvec(p):
+    '''
+    eqvec   : KET_BITSTR
+            | eqvec '+' eqvec
+            | num eqvec %prec '*'
+            | num '*' eqvec
+    '''
+    if type_match(p, ('KET_BITSTR',)):
+        p[0] = EQVecBitString(p[1])
+    elif type_match(p, ('eqvec', '+', 'eqvec')):
+        p[0] = EQVecAdd(p[1], p[3])
+    elif type_match(p, ('num', 'eqvec')):
+        p[0] = EQVecScale(p[1], p[2])
+    elif type_match(p, ('num', '*', 'eqvec')):
+        p[0] = EQVecScale(p[1], p[3])
+    else:
+        raise Exception()
+        
 
 def p_num(p):
     '''

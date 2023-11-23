@@ -1,0 +1,12 @@
+
+
+// quantum teleportation from a to y
+Def Peq := P0 ⊗ P0 ∨ P1 ⊗ P1.
+
+Refine teleportation : < Omega[a t] ⊗ Bell00[x y] , Omega[y t] >.
+    Step
+        CX[a x];
+        H[a];
+        if P1[x] then X[y] else skip end;
+        if P1[a] then Z[y] else skip end.
+End.

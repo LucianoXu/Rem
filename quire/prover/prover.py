@@ -138,6 +138,27 @@ class Prover:
         
         self.state_bar = "Refinement step succeeded."
 
+    def step_refine_weaken_pre(self, R : Expr) -> None:
+        if len(self.current_goals) == 0:
+            raise QPVError("There is no prescriptions to refine.")
+        
+        self.current_goals[0].refine_weaken_pre(R)
+
+        self.current_goals = self.current_goals[0].get_prescription() + self.current_goals[1:]
+        
+        self.state_bar = "Refinement step succeeded."
+
+
+    def step_refine_strengthen_post(self, R : Expr) -> None:
+        if len(self.current_goals) == 0:
+            raise QPVError("There is no prescriptions to refine.")
+        
+        self.current_goals[0].refine_strengthen_post(R)
+
+        self.current_goals = self.current_goals[0].get_prescription() + self.current_goals[1:]
+        
+        self.state_bar = "Refinement step succeeded."
+
 
     def step_refine_seq(self, middle : Expr) -> None:
         '''
@@ -254,7 +275,7 @@ class Prover:
 
 def prover_restart(opts : dict[str, np.ndarray] = {}) -> None:
     '''
-    Restart the QPV2 prover.
+    Restart the Quire prover.
 
     - `opts`: `dict[str, np.ndarray]`, the extra quantum operators.
     '''
@@ -274,7 +295,7 @@ def prover_info() -> str:
     '''
     return str(Prover())
 
-def qpv2_code(input_code, opts: dict[str, np.ndarray] = {}) -> None:
+def quire_code(input_code, opts: dict[str, np.ndarray] = {}) -> None:
     '''
     Start the qpv prover to process the code.
 
@@ -286,7 +307,7 @@ def qpv2_code(input_code, opts: dict[str, np.ndarray] = {}) -> None:
     Prover.restart(opts)
     Prover().process(input_code)
 
-def qpv2_file(input_path : str, opts: dict[str, np.ndarray] = {}) -> None:
+def quire_file(input_path : str, opts: dict[str, np.ndarray] = {}) -> None:
     '''
     Start the qpv prover to process the input file.
 
