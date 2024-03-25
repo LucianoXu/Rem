@@ -1,29 +1,17 @@
 from __future__ import annotations
 from typing import Type
 
-from graphviz import Digraph
-
 from qplcomp import IQOpt
 from qplcomp import Expr, Variable, QVar, IQOpt, expr_type_check
 
 from qplcomp.qexpr.eiqopt import *
 from qplcomp.qexpr.eiqopt import EIQOpt
 
-from ..error import type_check, QPVError
+from ..error import QPVError
 
 INDENT = "  "
 
 class Ast:
-
-    ASTID = 0
-
-    def __init__(self):
-        self.__astid = Ast.ASTID
-        Ast.ASTID += 1
-
-    @property
-    def astid(self) -> int:
-        return self.__astid
 
     @property
     def definite(self) -> bool:
@@ -64,78 +52,6 @@ class Ast:
         '''
         raise NotImplementedError()
 
-    
-    def draw(self, path: str) -> None:
-        '''
-        Output a graph showing the structure of this program.
-        '''
-        dot = Digraph(encoding="utf-8")
-        
-        self.layout(dot)
-
-        dot.render(path)
-
-    def layout(self, dot : Digraph) -> None:
-        '''
-        Layout function for this program node.
-        '''
-        raise NotImplementedError()
-
-
-#####################################################################
-# different presets of node formats
-def processed_label(label) -> str:
-    '''
-    Process the label for graphviz.
-    '''
-    txt = str(label)
-    txt = txt.replace('⊗', '\\otimes')
-    txt = txt.replace('⊕', '\\oplus')
-    txt = txt.replace('∨', '\\vee')
-    txt = txt.replace('∧', '\\wedge')
-    txt = txt.replace('⊥', '\\bot')
-    txt = txt.replace('⇝', '\\SasakiImply')
-    txt = txt.replace('⋒', '\\SasakiConjunct')
-
-    txt = txt.replace('\\', '\\\\')
-    txt = txt.replace('<', '\\<')
-
-    # if no line breaks
-    if txt.find('\n') == -1:
-        return txt
-    
-    txt = txt.replace('\n', '\\l') + "\\l"
-    
-    return txt
-
-
-def normal_box(dot : Digraph, name : str, label : str):
-    '''
-    node for normal programs
-    '''
-    dot.node(name, processed_label(label),
-        shape = "box", style="filled",
-        fontname = "Consolas",
-        labeljust="l")    
-    
-
-def subproc_box(dot : Digraph, name : str, label : str):
-    '''
-    node for normal programs
-    '''
-    dot.node(name, processed_label(label),
-        shape = "box", style="filled", fillcolor = "white",
-        fontname = "Consolas",
-        labeljust="l")    
-
-def prec_box(dot : Digraph, name : str, label : str):
-    '''
-    node for normal programs
-    '''
-    dot.node(name, processed_label(label),
-        shape = "box", style="filled", fillcolor = "khaki",
-        fontname = "Consolas",
-        labeljust="l")    
 
 #####################################################################
 # different program structures
@@ -178,9 +94,6 @@ class AstSubprog(Ast):
     
     def sp_ex(self, pre: EIQOpt) -> EIQOpt:
         return self.subgprog.sp_ex(pre)
-    
-    def layout(self, dot: Digraph) -> None:
-        subproc_box(dot, str(self.astid), str(self))
 
 
 class AstAbort(Ast):
@@ -204,9 +117,6 @@ class AstAbort(Ast):
     def wlp(self, post: IQOpt) -> IQOpt:
         return IQOpt.identity(False)
 
-    def layout(self, dot: Digraph) -> None:
-        normal_box(dot, str(self.astid), str(self))
-
 
 class AstSkip(Ast):
     def __init__(self):
@@ -228,9 +138,6 @@ class AstSkip(Ast):
     
     def wlp(self, post: IQOpt) -> IQOpt:
         return post
-
-    def layout(self, dot: Digraph) -> None:
-        normal_box(dot, str(self.astid), str(self))
 
 class AstInit(Ast):
     def __init__(self, eqvar : Expr):
@@ -258,9 +165,6 @@ class AstInit(Ast):
     
     def wlp(self, post: IQOpt) -> IQOpt:
         return post.initwlp(self.qvar)
-
-    def layout(self, dot: Digraph) -> None:
-        normal_box(dot, str(self.astid), str(self))
 
     
 class AstUnitary(Ast):
@@ -296,9 +200,6 @@ class AstUnitary(Ast):
         U = self.U
         return U.dagger() @ post @ U
     
-    def layout(self, dot: Digraph) -> None:
-        normal_box(dot, str(self.astid), str(self))
-
 class AstAssert(Ast):
     def __init__(self, eP : Expr):
         super().__init__()
@@ -330,9 +231,6 @@ class AstAssert(Ast):
 
     def wlp(self, post: IQOpt) -> IQOpt:
         return self.P.Sasaki_imply(post)
-    
-    def layout(self, dot: Digraph) -> None:
-        normal_box(dot, str(self.astid), str(self))
 
     
 
@@ -542,16 +440,6 @@ class AstPres(Ast):
             return self.P
         else:
             return IQOpt.zero(False)
-        
-    def layout(self, dot: Digraph) -> None:
-        if self.SRefined is None:
-            prec_box(dot, str(self.astid), self.pres_str())
-        else:
-            self.SRefined.layout(dot)
-            normal_box(dot, str(self.astid), self.pres_str())
-            # the edge of refinement
-            dot.edge(str(self.astid), str(self.SRefined.astid), 
-                label = "", style = "dotted")
 
 
 class AstSeq(Ast):
@@ -585,15 +473,6 @@ class AstSeq(Ast):
     def wlp(self, post: IQOpt) -> IQOpt:
         return self.S0.wlp(self.S1.wlp(post))
     
-    def layout(self, dot: Digraph) -> None:
-        self.S0.layout(dot)
-        self.S1.layout(dot)
-        normal_box(dot, str(self.astid), "S0; S1")
-        dot.edge(str(self.astid), str(self.S0.astid), 
-            label = "S0", fontname = "Consolas bold")
-        dot.edge(str(self.astid), str(self.S1.astid), 
-            label = "S1", fontname = "Consolas bold")
-
 class AstProb(Ast):
     def __init__(self, S0 : Ast, S1 : Ast, p : float):
         super().__init__()
@@ -639,15 +518,6 @@ class AstProb(Ast):
     def wlp(self, post: IQOpt) -> IQOpt:
         return self.S0.wlp(post) & self.S1.wlp(post)
     
-    def layout(self, dot: Digraph) -> None:
-        self.S0.layout(dot)
-        self.S1.layout(dot)
-        normal_box(dot, str(self.astid), f"S0 [{self.p} ⊕] S1")
-        dot.edge(str(self.astid), str(self.S0.astid), 
-            label = "S0", fontname = "Consolas bold")
-        dot.edge(str(self.astid), str(self.S1.astid), 
-            label = "S1", fontname = "Consolas bold")
-
 class AstIf(Ast):
     def __init__(self, eP : Expr, S1 : Ast, S0 : Ast):
         super().__init__()
@@ -697,15 +567,6 @@ class AstIf(Ast):
         return self.P.Sasaki_imply(self.S1.wlp(post)) &\
               (~ self.P).Sasaki_imply(self.S0.wlp(post))
 
-    def layout(self, dot: Digraph) -> None:
-        self.S0.layout(dot)
-        self.S1.layout(dot)
-        normal_box(dot, str(self.astid), f"if {self._eP} then S1 else S0 end")
-        dot.edge(str(self.astid), str(self.S0.astid), 
-            label = "S0", fontname = "Consolas bold")
-        dot.edge(str(self.astid), str(self.S1.astid), 
-            label = "S1", fontname = "Consolas bold")
-        
 class AstWhile(Ast):
     def __init__(self, eP : Expr, S : Ast):
         super().__init__()
@@ -759,12 +620,6 @@ class AstWhile(Ast):
             flag = not Rn == Rn_1
 
         return Rn
-
-    def layout(self, dot: Digraph) -> None:
-        self.S.layout(dot)
-        normal_box(dot, str(self.astid), f"while {self._eP} do S end")
-        dot.edge(str(self.astid), str(self.S.astid), 
-            label = "S", fontname = "Consolas bold")
 
 
 ######################################################################

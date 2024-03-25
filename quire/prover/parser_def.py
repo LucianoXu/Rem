@@ -34,7 +34,6 @@ def p_cmd(p):
         | META_END '.'
 
         | SHOW ID '.'
-        | DRAW ID '.'
         | SHOW DEF '.'
         | EVAL ID '.'
         | TEST eqopt '=' eqopt '.'
@@ -97,9 +96,6 @@ def p_cmd(p):
 
     elif type_match(p, ('SHOW', 'ID', '.')):
         Prover().show_id(p[2])
-
-    elif type_match(p, ('DRAW', 'ID', '.')):
-        Prover().draw_id(p[2])
 
     elif type_match(p, ('SHOW', 'DEF', '.')):
         Prover().show_def()
