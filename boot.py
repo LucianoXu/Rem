@@ -1,7 +1,11 @@
 import numpy as np
-from quire import quire_server, predefined
+
+from quire import app_run
+
+from quire import predefined
 
 # this is for example 'sec5_1'
 opts = { "Rz" : predefined.Rz(np.arccos(3/5)) }
 
-quire_server("./examples/sec5_2", "./output", opts)
+if __name__ == "__main__":
+    app_run(opts)
