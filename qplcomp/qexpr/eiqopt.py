@@ -3,46 +3,76 @@ from typing import Type
 
 from ..qval import QOpt, QVar, IQOpt
 
-from ..error import type_check
-from ..env import Expr, Env, expr_type_check
+from ..env import TypedTerm, Env, Types
+
+from abc import ABC, abstractmethod
 
 import numpy as np
 
+from .eqopt import QOptType, EQOptAbstract
+from .eqvar import QVarType, EQVar
 
-class EIQOpt(Expr):
+
+class IQOptType(Types):
+    def __str__(self) -> str:
+        return "IQOpt"
+    
+class EIQOptAbstract(TypedTerm):
+    '''
+    The Expression for Indexed Quantum Operators.
+    '''
+    def __init__(self):
+        super().__init__(IQOptType())
+    
+    @abstractmethod
+    def eval(self, env: Env) -> EIQOpt:
+        pass
+
+class EIQOpt(EIQOptAbstract):
     '''
     The Expression of Indexed Quantum Operators.
     
     EIQOpt ::= EQOpt EQVar
-
-    Nonterminal.
     '''
 
-    def __init__(self, qopt : Expr, qvar : Expr):
+    def __init__(self, iqopt: IQOpt):
+        super().__init__()
 
-        expr_type_check(qopt, QOpt)
-        self._qopt = qopt
+        assert isinstance(iqopt, IQOpt)
+        self.iqopt = iqopt
 
-        expr_type_check(qvar, QVar)
-        self._qvar = qvar
-
-
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return IQOpt
     
-    def eval(self) -> object:
-        return IQOpt(self._qopt.eval(), self._qvar.eval())    # type: ignore
+    def eval(self, env: Env) -> EIQOpt:
+        return self
     
     def __str__(self) -> str:
-        return str(self._qopt) + str(self._qvar)
-    ##################################
+        return str(self.iqopt)
+    
+class EIQOptPair(EIQOptAbstract):
+    '''
+    The Expression of Indexed Quantum Operators.
+    
+    EIQOpt ::= EQOpt EQVar
+    '''
+
+    def __init__(self, qopt : EQOptAbstract, qvar : EQVar):
+        super().__init__()
+
+        qopt.type_checking(QOptType())
+        self.qopt = qopt
+
+        qvar.type_checking(QVarType())
+        self.qvar = qvar
+    
+    def eval(self, env: Env) -> EIQOpt:
+        return EIQOpt(IQOpt(self.qopt.eval(env).qopt, self.qvar.eval(env).qvar))
+    
+    def __str__(self) -> str:
+        return str(self.qopt) + str(self.qvar)
+
 
     
-class EIQOptAdd(Expr):
+class EIQOptAdd(EIQOptAbstract):
     '''
     The Expression for additions of Indexed Quantum Operators.
     
@@ -51,33 +81,24 @@ class EIQOptAdd(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, ioptA : Expr, ioptB : Expr):
+    def __init__(self, ioptA : EIQOptAbstract, ioptB : EIQOptAbstract):
+        super().__init__()
 
-        type_check(ioptA, Expr)
-        expr_type_check(ioptA, IQOpt)
-        self._ioptA = ioptA
+        ioptA.type_checking(IQOptType())
+        self.ioptA = ioptA
 
-        type_check(ioptB, Expr)
-        expr_type_check(ioptB, IQOpt)
-        self._ioptB = ioptB
+        ioptB.type_checking(IQOptType())
+        self.ioptB = ioptB
 
-
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return IQOpt
-    
-    def eval(self) -> object:
-        return self._ioptA.eval() + self._ioptB.eval()  # type: ignore
+    def eval(self, env: Env) -> EIQOpt:
+        return EIQOpt(self.ioptA.eval(env).iqopt + self.ioptB.eval(env).iqopt)
     
     def __str__(self) -> str:
-        return "(" + str(self._ioptA) + "+" + str(self._ioptB) + ")"
-    ##################################
+        return "(" + str(self.ioptA) + "+" + str(self.ioptB) + ")"
 
 
-class EIQOptNeg(Expr):
+
+class EIQOptNeg(EIQOptAbstract):
     '''
     The expression for negation of an indexed quantum operator.
 
@@ -86,28 +107,22 @@ class EIQOptNeg(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, iopt : Expr):
+    def __init__(self, iopt : EIQOptAbstract):
+        super().__init__()
 
-        type_check(iopt, Expr)
-        expr_type_check(iopt, IQOpt)
-        self._iopt = iopt
+        iopt.type_checking(IQOptType())
+        self.iopt = iopt
+        
 
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return IQOpt
-    
-    def eval(self) -> object:
-        return -self._iopt.eval()    # type: ignore
+    def eval(self, env: Env) -> EIQOpt:
+        return EIQOpt(- self.iopt.eval(env).iqopt)
     
     def __str__(self) -> str:
-        return "(-" + str(self._iopt) + ")"
+        return "(-" + str(self.iopt) + ")"
     
-    ##################################
 
-class EIQOptSub(Expr):
+
+class EIQOptSub(EIQOptAbstract):
     '''
     The Expression for subtraction of Indexed Quantum Operators.
     
@@ -116,33 +131,24 @@ class EIQOptSub(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, ioptA : Expr, ioptB : Expr):
+    def __init__(self, ioptA : EIQOptAbstract, ioptB : EIQOptAbstract):
+        super().__init__()
 
-        type_check(ioptA, Expr)
-        expr_type_check(ioptA, IQOpt)
-        self._ioptA = ioptA
+        ioptA.type_checking(IQOptType())
+        self.ioptA = ioptA
 
-        type_check(ioptB, Expr)
-        expr_type_check(ioptB, IQOpt)
-        self._ioptB = ioptB
+        ioptB.type_checking(IQOptType())
+        self.ioptB = ioptB
 
-
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return IQOpt
     
-    def eval(self) -> object:
-        return self._ioptA.eval() - self._ioptB.eval()  # type: ignore
+    def eval(self, env: Env) -> EIQOpt:
+        return EIQOpt(self.ioptA.eval(env).iqopt - self.ioptB.eval(env).iqopt)
     
     def __str__(self) -> str:
-        return "(" + str(self._ioptA) + "-" + str(self._ioptB) + ")"
-    ##################################
+        return "(" + str(self.ioptA) + "-" + str(self.ioptB) + ")"
 
 
-class EIQOptScale(Expr):
+class EIQOptScale(EIQOptAbstract):
     '''
     The expression for scaling of quantum operators.
 
@@ -152,32 +158,24 @@ class EIQOptScale(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, c : complex, iopt : Expr):
+    def __init__(self, c : complex, iopt : EIQOptAbstract):
+        super().__init__()
 
-        type_check(c, (complex, float))
-        self._c = c
+        assert isinstance(c, (complex, float))
+        self.c = c
 
-        type_check(iopt, Expr)
-        expr_type_check(iopt, QOpt)
-        self._iopt = iopt
-
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return IQOpt
+        iopt.type_checking(IQOptType())
+        self.iopt = iopt
     
-    def eval(self) -> object:
-        return self._c * self._iopt.eval() # type: ignore
+    def eval(self, env: Env) -> EIQOpt:
+        return EIQOpt(self.c * self.iopt.eval(env).iqopt)
     
     def __str__(self) -> str:
-        return "(" + str(self._c) + " " + str(self._iopt) + ")"
+        return "(" + str(self.c) + " " + str(self.iopt) + ")"
     
-    ##################################
 
 
-class EIQOptMul(Expr):
+class EIQOptMul(EIQOptAbstract):
     '''
     The Expression for multiplications of Indexed Quantum Operators.
     
@@ -186,33 +184,23 @@ class EIQOptMul(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, ioptA : Expr, ioptB : Expr):
+    def __init__(self, ioptA : EIQOptAbstract, ioptB : EIQOptAbstract):
+        super().__init__()
 
-        type_check(ioptA, Expr)
-        expr_type_check(ioptA, IQOpt)
-        self._ioptA = ioptA
+        ioptA.type_checking(IQOptType())
+        self.ioptA = ioptA
 
-        type_check(ioptB, Expr)
-        expr_type_check(ioptB, IQOpt)
-        self._ioptB = ioptB
+        ioptB.type_checking(IQOptType())
+        self.ioptB = ioptB
 
-
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return IQOpt
-    
-    def eval(self) -> object:
-        return self._ioptA.eval() @ self._ioptB.eval()  # type: ignore
+    def eval(self, env: Env) -> EIQOpt:
+        return EIQOpt(self.ioptA.eval(env).iqopt @ self.ioptB.eval(env).iqopt)
     
     def __str__(self) -> str:
-        return "(" + str(self._ioptA) + " " + str(self._ioptB) + ")"
-    ##################################
+        return "(" + str(self.ioptA) + " " + str(self.ioptB) + ")"
 
 
-class EIQOptDagger(Expr):
+class EIQOptDagger(EIQOptAbstract):
     '''
     The expression for the conjugate transpose of an indexed quantum operator.
 
@@ -222,29 +210,21 @@ class EIQOptDagger(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, iopt : Expr):
+    def __init__(self, iopt : EIQOptAbstract):
+        super().__init__()
 
-        type_check(iopt, Expr)
-        expr_type_check(iopt, IQOpt)
-        self._iopt = iopt
-
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return IQOpt
+        iopt.type_checking(IQOptType())
+        self.iopt = iopt
     
-    def eval(self) -> object:
-        return self._iopt.eval().dagger()    # type: ignore
-    
+    def eval(self, env: Env) -> EIQOpt:
+        return EIQOpt(self.iopt.eval(env).iqopt.dagger())
+        
     def __str__(self) -> str:
-        return "(" + str(self._iopt) + "†" + ")"
+        return "(" + str(self.iopt) + "†" + ")"
     
-    ##################################
 
 
-class EIQOptTensor(Expr):
+class EIQOptTensor(EIQOptAbstract):
     '''
     The expression for tensor product of indexed quantum operators.
 
@@ -254,34 +234,26 @@ class EIQOptTensor(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, ioptA : Expr, ioptB : Expr):
+    def __init__(self, ioptA : EIQOptAbstract, ioptB : EIQOptAbstract):
+        super().__init__()
 
-        type_check(ioptA, Expr)
-        expr_type_check(ioptA, IQOpt)
-        self._ioptA = ioptA
+        ioptA.type_checking(IQOptType())
+        self.ioptA = ioptA
 
-        type_check(ioptB, Expr)
-        expr_type_check(ioptB, IQOpt)
-        self._ioptB = ioptB
+        ioptB.type_checking(IQOptType())
+        self.ioptB = ioptB
 
-    ##################################
-    # Expression settings
 
-    @property
-    def T(self) -> Type:
-        return IQOpt
-    
-    def eval(self) -> object:
-        return self._ioptA.eval().tensor(self._ioptB.eval())    # type: ignore
+    def eval(self, env: Env) -> EIQOpt:
+        return EIQOpt(self.ioptA.eval(env).iqopt.tensor(self.ioptB.eval(env).iqopt))
     
     def __str__(self) -> str:
-        return "(" + str(self._ioptA) + " ⊗ " + str(self._ioptB) + ")"
+        return "(" + str(self.ioptA) + " ⊗ " + str(self.ioptB) + ")"
     
-    ##################################
 
 
 
-class EIQOptDisjunct(Expr):
+class EIQOptDisjunct(EIQOptAbstract):
     '''
     The expression for disjunction of projective indexed quantum operators.
 
@@ -291,32 +263,23 @@ class EIQOptDisjunct(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, ioptA : Expr, ioptB : Expr):
+    def __init__(self, ioptA : EIQOptAbstract, ioptB : EIQOptAbstract):
+        super().__init__()
 
-        type_check(ioptA, Expr)
-        expr_type_check(ioptA, IQOpt)
-        self._ioptA = ioptA
+        ioptA.type_checking(IQOptType())
+        self.ioptA = ioptA
 
-        type_check(ioptB, Expr)
-        expr_type_check(ioptB, IQOpt)
-        self._ioptB = ioptB
-
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return IQOpt
-    
-    def eval(self) -> object:
-        return self._ioptA.eval() | self._ioptB.eval()    # type: ignore
+        ioptB.type_checking(IQOptType())
+        self.ioptB = ioptB
+        
+    def eval(self, env: Env) -> EIQOpt:
+        return EIQOpt(self.ioptA.eval(env).iqopt | self.ioptB.eval(env).iqopt)
     
     def __str__(self) -> str:
-        return "(" + str(self._ioptA) + " ∨ " + str(self._ioptB) + ")"
+        return "(" + str(self.ioptA) + " ∨ " + str(self.ioptB) + ")"
     
-    ##################################
 
-class EIQOptConjunct(Expr):
+class EIQOptConjunct(EIQOptAbstract):
     '''
     The expression for conjunction of projective indexed quantum operators.
 
@@ -326,33 +289,25 @@ class EIQOptConjunct(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, ioptA : Expr, ioptB : Expr):
+    def __init__(self, ioptA : EIQOptAbstract, ioptB : EIQOptAbstract):
+        super().__init__()
 
-        type_check(ioptA, Expr)
-        expr_type_check(ioptA, IQOpt)
-        self._ioptA = ioptA
+        ioptA.type_checking(IQOptType())
+        self.ioptA = ioptA
 
-        type_check(ioptB, Expr)
-        expr_type_check(ioptB, IQOpt)
-        self._ioptB = ioptB
+        ioptB.type_checking(IQOptType())
+        self.ioptB = ioptB
 
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return IQOpt
     
-    def eval(self) -> object:
-        return self._ioptA.eval() & self._ioptB.eval()    # type: ignore
+    def eval(self, env: Env) -> EIQOpt:
+        return EIQOpt(self.ioptA.eval(env).iqopt & self.ioptB.eval(env).iqopt)
     
     def __str__(self) -> str:
-        return "(" + str(self._ioptA) + " ∧ " + str(self._ioptB) + ")"
+        return "(" + str(self.ioptA) + " ∧ " + str(self.ioptB) + ")"
     
-    ##################################
 
 
-class EIQOptComplement(Expr):
+class EIQOptComplement(EIQOptAbstract):
     '''
     The expression for complement of projective quantum operators.
 
@@ -362,30 +317,21 @@ class EIQOptComplement(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, iopt : Expr):
+    def __init__(self, iopt : EIQOptAbstract):
+        super().__init__()
 
-        type_check(iopt, Expr)
-        expr_type_check(iopt, IQOpt)
-        self._iopt = iopt
-
-
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return IQOpt
+        iopt.type_checking(IQOptType())
+        self.iopt = iopt
     
-    def eval(self) -> object:
-        return (~ self._iopt.eval())    # type: ignore
+    def eval(self, env: Env) -> EIQOpt:
+        return EIQOpt(~ self.iopt.eval(env).iqopt)
     
     def __str__(self) -> str:
-        return "(" + str(self._iopt) + "^⊥)"
+        return "(" + str(self.iopt) + "^⊥)"
     
-    ##################################
 
 
-class EIQOptSasakiImply(Expr):
+class EIQOptSasakiImply(EIQOptAbstract):
     '''
     The expression for Sasaki implication of projective quantum operators.
 
@@ -395,32 +341,24 @@ class EIQOptSasakiImply(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, ioptA : Expr, ioptB : Expr):
+    def __init__(self, ioptA : EIQOptAbstract, ioptB : EIQOptAbstract):
+        super().__init__()
 
-        type_check(ioptA, Expr)
-        expr_type_check(ioptA, IQOpt)
-        self._ioptA = ioptA
+        ioptA.type_checking(IQOptType())
+        self.ioptA = ioptA
 
-        type_check(ioptB, Expr)
-        expr_type_check(ioptB, IQOpt)
-        self._ioptB = ioptB
+        ioptB.type_checking(IQOptType())
+        self.ioptB = ioptB
 
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return IQOpt
     
-    def eval(self) -> object:
-        return self._ioptA.eval().Sasaki_imply(self._ioptB.eval())    # type: ignore
+    def eval(self, env: Env) -> EIQOpt:
+        return EIQOpt(self.ioptA.eval(env).iqopt.Sasaki_imply(self.ioptB.eval(env).iqopt))
     
     def __str__(self) -> str:
-        return "(" + str(self._ioptA) + " ⇝ " + str(self._ioptB) + ")"
+        return "(" + str(self.ioptA) + " ⇝ " + str(self.ioptB) + ")"
     
-    ##################################
 
-class EIQOptSasakiConjunct(Expr):
+class EIQOptSasakiConjunct(EIQOptAbstract):
     '''
     The expression for Sasaki conjunction of projective quantum operators.
 
@@ -430,27 +368,19 @@ class EIQOptSasakiConjunct(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, ioptA : Expr, ioptB : Expr):
+    def __init__(self, ioptA : EIQOptAbstract, ioptB : EIQOptAbstract):
+        super().__init__()
 
-        type_check(ioptA, Expr)
-        expr_type_check(ioptA, IQOpt)
-        self._ioptA = ioptA
+        ioptA.type_checking(IQOptType())
+        self.ioptA = ioptA
 
-        type_check(ioptB, Expr)
-        expr_type_check(ioptB, IQOpt)
-        self._ioptB = ioptB
+        ioptB.type_checking(IQOptType())
+        self.ioptB = ioptB
 
-    ##################################
-    # Expression settings
 
-    @property
-    def T(self) -> Type:
-        return IQOpt
-    
-    def eval(self) -> object:
-        return self._ioptA.eval().Sasaki_conjunct(self._ioptB.eval())    # type: ignore
+    def eval(self, env: Env) -> EIQOpt:
+        return EIQOpt(self.ioptA.eval(env).iqopt.Sasaki_conjunct(self.ioptB.eval(env).iqopt))
     
     def __str__(self) -> str:
-        return "(" + str(self._ioptA) + " ⋒ " + str(self._ioptB) + ")"
+        return "(" + str(self.ioptA) + " ⋒ " + str(self.ioptB) + ")"
     
-    ##################################

@@ -1,34 +1,31 @@
+from __future__ import annotations
 
 from typing import Type
 
-from ..error import type_check
+from qplcomp.env import Env
 
 from ..qval import QVar
-from ..env import Expr, Env
+from ..env import TypedTerm, Types
 
-class EQVar(Expr):
+class QVarType(Types):
+    def __str__(self) -> str:
+        return "QVar"
+
+
+class EQVar(TypedTerm):
     '''
     The expression for a literal quantum variable.
 
     Terminal.
     '''
     def __init__(self, qvar : QVar):
+        super().__init__(QVarType())
 
-        type_check(qvar, QVar)
-        self._qvar = qvar
+        assert isinstance(qvar, QVar)
+        self.qvar = qvar
 
-    
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return QVar
-    
-    def eval(self) -> object:
-        return self._qvar
+    def eval(self, env: Env) -> EQVar:
+        return self
     
     def __str__(self) -> str:
-        return str(self._qvar)
-    
-    ##################################
+        return str(self.qvar)

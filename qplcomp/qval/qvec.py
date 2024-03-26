@@ -2,7 +2,7 @@
 from __future__ import annotations
 from typing import Sequence
 
-from ..error import type_check, QPLCompError
+from ..error import QPLCompError
 
 from .. import linalgPP
 
@@ -108,7 +108,7 @@ class QVec(QVal):
         - Returns: `QVec`.
         '''
 
-        type_check(other, QVec)
+        assert isinstance(other, QVec)
         if self.qnum != other.qnum:
             raise QPLCompError(f"Inconsistent qubit number: {self.qnum} and {other.qnum}. The two QVec should have the same number of qubit numbers.")
         

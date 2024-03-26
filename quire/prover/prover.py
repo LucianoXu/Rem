@@ -2,10 +2,11 @@
 from __future__ import annotations
 from typing import Any
 
-from qplcomp import Env, prepare_env, EQOpt, QOpt, PLYError, EnvError, QPLCompError
-from ..language import *
+from qplcomp import Env, prepare_env, EQOpt, QOpt, PLYError, QPLCompError
+from ..language import AstPres, TypedTerm, ValueError
 
-from ply.yacc import ParserReflect
+from ply.yacc import LRParser
+from ply.lex import Lexer
 
 import numpy as np
 
@@ -13,37 +14,31 @@ import numpy as np
 class PauseError(Exception):
     pass
 
+class Frame:
+    '''
+    A exclusive proof frame of the prover.
+    '''
+    def __init__(self, env: Env, defined_var: list[str], refine_proof: AstPres|None, current_goals: list[AstPres]):
+        self.env = env
+        self.defined_var = defined_var
+        self.refine_proof = refine_proof
+        self.current_goals = current_goals
+
 class Prover:
     '''
-    The class that hosts the formal verification.
+    The object that interprates language and host the formal verification.
     '''
-    __instance : Prover | None = None
-    parser : Any
-    lexer : Any
 
-    def __new__(cls):
-        if cls.__instance is None:
-            prepare_env()
-            cls.__instance = object.__new__(cls)
-            
-            cls.__instance.defined_var = []
-            cls.__instance.__refine_proof = None
-            cls.__instance.current_goals = []
-
-            cls.__instance.state_bar = "Emtpy Prover."
-
-        return cls.__instance
-    
     def __init__(self):
+
         # all the variables defined in this Prover
-        self.defined_var : list[str]
-        self.__refine_proof : AstPres | None
-        self.current_goals : list[AstPres]
+        self.defined_var : list[str] = []
+        self.__refine_proof : AstPres | None = None
+        self.current_goals : list[AstPres] = []
 
-        self.state_bar : str
+        self.state_bar : str = "Empty Prover."
 
-    @staticmethod
-    def restart(opts: dict[str, np.ndarray]):
+    def restart(self, opts: dict[str, np.ndarray]):
         '''
         It restarts `Env` with these additional opts.
         '''
@@ -62,7 +57,7 @@ class Prover:
             self.parser.parse(code, lexer = self.lexer)
         except PauseError:
             pass
-        except (EnvError, PLYError, QPLCompError, QPVError) as e:
+        except (TermError, PLYError, QPLCompError, ValueError) as e:
             self.state_bar = f"{e.__class__.__name__}: {e}"
 
     def process(self, code : str) -> None:
@@ -74,18 +69,18 @@ class Prover:
             self.parser.parse(code, lexer = self.lexer)
         except PauseError:
             print(f"Paused at line {self.lexer.lineno}.")
-        except (EnvError, PLYError, QPLCompError, QPVError) as e:
+        except (TermError, PLYError, QPLCompError, ValueError) as e:
             raise e.__class__(str(e) + f" (line {self.lexer.lineno})")
 
 
     @property
     def refine_proof(self) -> AstPres:
         if self.__refine_proof is None:
-            raise QPVError("It is not currently inside a refinement.")
+            raise ValueError("It is not currently inside a refinement.")
         return self.__refine_proof
 
     
-    def define(self, var : str, obj : Expr):
+    def define(self, var : str, obj : TypedTerm):
         Env()[var] = obj
         self.defined_var.append(var)
         self.state_bar = f"Variable defined: {var}."
@@ -96,10 +91,10 @@ class Prover:
         It will start a refinement proof.
         '''
         if self.__refine_proof is not None:
-            raise QPVError("It is currently inside a refinement.")
+            raise ValueError("It is currently inside a refinement.")
         
         if not isinstance(ast, AstPres):
-            raise QPVError("The program to be refined must be a prescription.")
+            raise ValueError("The program to be refined must be a prescription.")
         
         self.define(id, EAst(ast))
 
@@ -114,10 +109,10 @@ class Prover:
         It will check whether a refinement proof is finished and end it when it is.
         '''        
         if self.__refine_proof is None:
-            raise QPVError("The prover is not in refinement model.")
+            raise ValueError("The prover is not in refinement model.")
 
         if len(self.current_goals) != 0:
-            raise QPVError("Goals not clear.")
+            raise ValueError("Goals not clear.")
         
         
         self.__refine_proof = None
@@ -125,12 +120,12 @@ class Prover:
         self.state_bar = f"Refinement completed."
 
 
-    def step_refine_wlp(self, SRefined : Ast) -> None:
+    def step_refine_wlp(self, SRefined : QWhileAst) -> None:
         '''
         Refine the first goal in `self.current_goals` with SRefined.
         '''
         if len(self.current_goals) == 0:
-            raise QPVError("There is no prescriptions to refine.")
+            raise ValueError("There is no prescriptions to refine.")
         
         self.current_goals[0].refine_wlp(SRefined)
 
@@ -138,9 +133,9 @@ class Prover:
         
         self.state_bar = "Refinement step succeeded."
 
-    def step_refine_weaken_pre(self, R : Expr) -> None:
+    def step_refine_weaken_pre(self, R : TypedTerm) -> None:
         if len(self.current_goals) == 0:
-            raise QPVError("There is no prescriptions to refine.")
+            raise ValueError("There is no prescriptions to refine.")
         
         self.current_goals[0].refine_weaken_pre(R)
 
@@ -149,9 +144,9 @@ class Prover:
         self.state_bar = "Refinement step succeeded."
 
 
-    def step_refine_strengthen_post(self, R : Expr) -> None:
+    def step_refine_strengthen_post(self, R : TypedTerm) -> None:
         if len(self.current_goals) == 0:
-            raise QPVError("There is no prescriptions to refine.")
+            raise ValueError("There is no prescriptions to refine.")
         
         self.current_goals[0].refine_strengthen_post(R)
 
@@ -160,36 +155,36 @@ class Prover:
         self.state_bar = "Refinement step succeeded."
 
 
-    def step_refine_seq(self, middle : Expr) -> None:
+    def step_refine_seq(self, middle : TypedTerm) -> None:
         '''
         Refine the first goal in `self.current_goals` with SRefined.
         '''
         if len(self.current_goals) == 0:
-            raise QPVError("There is no prescriptions to refine.")
+            raise ValueError("There is no prescriptions to refine.")
         
         self.current_goals[0].refine_seq_break(middle)
 
         self.current_goals = self.current_goals[0].get_prescription() + self.current_goals[1:]        
         self.state_bar = "Refinement step succeeded."
 
-    def step_refine_if(self, R : Expr) -> None:
+    def step_refine_if(self, R : TypedTerm) -> None:
         '''
         Refine the first goal in `self.current_goals` with SRefined.
         '''
         if len(self.current_goals) == 0:
-            raise QPVError("There is no prescriptions to refine.")
+            raise ValueError("There is no prescriptions to refine.")
         
         self.current_goals[0].refine_if(R)
 
         self.current_goals = self.current_goals[0].get_prescription() + self.current_goals[1:]        
         self.state_bar = "Refinement step succeeded."
 
-    def step_refine_while(self, R : Expr, Inv : Expr) -> None:
+    def step_refine_while(self, R : TypedTerm, Inv : TypedTerm) -> None:
         '''
         Refine the first goal in `self.current_goals` with SRefined.
         '''
         if len(self.current_goals) == 0:
-            raise QPVError("There is no prescriptions to refine.")
+            raise ValueError("There is no prescriptions to refine.")
         
         self.current_goals[0].refine_while(R, Inv)
 
@@ -203,26 +198,26 @@ class Prover:
         Choose the i-th goal
         '''
         if not 1 <= i <= len(self.current_goals):
-            raise QPVError(f"Invalid goal number {i}. Choose a number from {1} to {len(self.current_goals)}. ")
+            raise ValueError(f"Invalid goal number {i}. Choose a number from {1} to {len(self.current_goals)}. ")
         
         self.current_goals = [self.current_goals[i-1]] + self.current_goals[:i-1] + self.current_goals[i:]
 
         self.state_bar = "Goal switched."
 
-    def test_eq(self, a : Expr, b : Expr) -> None:
+    def test_eq(self, a : TypedTerm, b : TypedTerm) -> None:
         if a.eval() == b.eval():
             self.state_bar = f"Test Result: {a} = {b}"
         else:
             self.state_bar = f"Test Result: {a} ≠ {b}"
 
-    def test_leq(self, a : Expr, b : Expr) -> None:
+    def test_leq(self, a : TypedTerm, b : TypedTerm) -> None:
         try:
             if a.eval() <= b.eval():    # type: ignore
                 self.state_bar = f"Test Result: {a} <= {b}"
             else:
                 self.state_bar = f"Test Result: {a} </= {b}"
         except NotImplementedError:
-            raise QPVError(f"The 'less than' relation is not supported for '{a}' and '{b}'.")
+            raise ValueError(f"The 'less than' relation is not supported for '{a}' and '{b}'.")
 
     #################################
     # printing

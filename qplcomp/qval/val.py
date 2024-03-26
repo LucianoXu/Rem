@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ..error import type_check, QPLCompError
+from ..error import QPLCompError
 
 from .qvar import QVar
 
@@ -30,10 +30,10 @@ class IQVal:
     Indexed Quantum Values.
     '''
     def __init__(self, qval : QVal, qvar : QVar):
-        type_check(qval, QVal)
+        assert isinstance(qval, QVal)
         self._qval = qval
 
-        type_check(qvar, QVar)
+        assert isinstance(qvar, QVar)
         self._qvar = qvar
 
         if qval.qnum != qvar.qnum:

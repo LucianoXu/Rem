@@ -2,7 +2,7 @@
 from __future__ import annotations
 from typing import Sequence
 
-from ..error import type_check, QPLCompError
+from ..error import QPLCompError
 
 import numpy as np
 from .. import linalgPP
@@ -240,7 +240,7 @@ class QOpt(QVal):
         - Returns: `QOpt`.
         '''
 
-        type_check(other, QOpt)
+        assert isinstance(other, QOpt)
         if self.qnum != other.qnum:
             raise QPLCompError(f"Inconsistent qubit number: {self.qnum} and {other.qnum}. The two QOpt should have the same number of qubit numbers.")
         
@@ -299,7 +299,7 @@ class QOpt(QVal):
         Errors: ValueError when self and other differ in their qubit numbers.
         '''
         
-        type_check(other, QOpt)
+        assert isinstance(other, QOpt)
 
         if self.qnum != other.qnum:
             raise QPLCompError(f"Inconsistent qubit number: {self.qnum} and {other.qnum}. The two QOpt should have the same number of qubit numbers.")
@@ -345,7 +345,7 @@ class QOpt(QVal):
         Calculate and return the tensor product of operators self and other.
         '''
 
-        type_check(other, QOpt)
+        assert isinstance(other, QOpt)
 
         new_t_repr = np.tensordot(self.t_repr, other.t_repr, ([], []))
 
@@ -410,7 +410,7 @@ class QOpt(QVal):
         Returns: bool, whether self <= other.
         Errors: ValueError when self and other differ in their qubit numbers.
         '''
-        type_check(other, QOpt)
+        assert isinstance(other, QOpt)
 
         if self.qnum != other.qnum:
             raise QPLCompError(f"Inconsistent qubit number: {self.qnum} and {other.qnum}. The two QOpt should have the same number of qubit numbers.")
@@ -436,7 +436,7 @@ class QOpt(QVal):
             - ValueError when self and other differ in their qubit numbers.
             - ValueError when self or other is not a projector.
         '''
-        type_check(other, QOpt)
+        assert isinstance(other, QOpt)
 
         if self.qnum != other.qnum:
             raise QPLCompError(f"Inconsistent qubit number: {self.qnum} and {other.qnum}. The two QOpt should have the same number of qubit numbers.")
@@ -492,7 +492,7 @@ class QOpt(QVal):
         Step 3. Take out the corresponding space of a from the null space, and transform it to the conjunction space by applying spaceP.    
         ================================================================
         '''
-        type_check(other, QOpt)
+        assert isinstance(other, QOpt)
 
         if self.qnum != other.qnum:
             raise QPLCompError(f"Inconsistent qubit number: {self.qnum} and {other.qnum}. The two QOpt should have the same number of qubit numbers.")

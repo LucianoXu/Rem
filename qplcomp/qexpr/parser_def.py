@@ -6,8 +6,6 @@
 from __future__ import annotations
 from typing import Tuple
 
-from ..error import type_check
-
 from ..env import Env
 from .lexer_def import PLYError
 
@@ -49,12 +47,12 @@ def p_output(p):
 
     p[0] = p[1]
 
-from ..env import Variable
+from ..env import Var
 def p_variable(p):
     '''
     variable    : ID
     '''
-    p[0] = Variable(p[1])
+    p[0] = Var(p[1])
 
 
 from .eiqopt import *
@@ -80,7 +78,7 @@ def p_eiqopt(p):
     if type_match(p, ('IQOPT', 'variable')):
         p[0] = p[2]
     elif type_match(p, ('eqopt', 'eqvar')):
-        p[0] = EIQOpt(p[1], p[2])
+        p[0] = EIQOptPair(p[1], p[2])
     elif type_match(p, ('(', 'eiqopt', ')')):
         p[0] = p[2]
     elif type_match(p, ('(', '-', 'eiqopt', ')')):

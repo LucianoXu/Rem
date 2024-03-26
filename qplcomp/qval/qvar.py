@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import List, Tuple, Type, List
 
-from ..error import type_check, QPLCompError
+from ..error import QPLCompError
 
 class QVar:
     '''
@@ -59,7 +59,7 @@ class QVar:
         '''
         return the quantum variable that contains [self] and [other]
         '''
-        type_check(other, QVar)
+        assert isinstance(other, QVar)
         
         r = self._qvls.copy()
         for qv in other._qvls:
@@ -79,7 +79,7 @@ class QVar:
         '''
         return the quantum variable that removes variables of `other` in `self`
         '''
-        type_check(other, QVar)
+        assert isinstance(other, QVar)
         
         r = []
         for qv in self._qvls:
@@ -92,7 +92,7 @@ class QVar:
         '''
         Test whether the quantum variable `self` contains `other`.
         '''
-        type_check(other, QVar)
+        assert isinstance(other, QVar)
 
         for qv in other._qvls:
             if qv not in self._qvls:
@@ -108,7 +108,7 @@ class QVar:
         '''
         Test whether the quantum variable `self` and `other` are disjoint.
         '''
-        type_check(other, QVar)
+        assert isinstance(other, QVar)
 
         for qv in self._qvls:
             if qv in other._qvls:

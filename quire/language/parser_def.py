@@ -87,7 +87,7 @@ def p_statement(p):
 
     # subprog
     elif type_match(p, ("PROC", "ID",)):
-        p[0] = AstSubprog(Variable(p[2]))
+        p[0] = AstSubprog(Var(p[2]))
 
     # refinement
     elif type_match(p, ("prescription", 'LEQ', "statement")):

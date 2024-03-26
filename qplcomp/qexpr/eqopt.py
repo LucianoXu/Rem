@@ -1,16 +1,32 @@
 from __future__ import annotations
 from typing import Type
 
-from ..error import type_check
-from ..env import Expr, Env, expr_type_check
+from ..env import TypedTerm, Env, Types
+
+from .eqvec import EQVecAbstract, QVecType
+from .eqso import QSOptType, EQSOptAbstract
 
 from ..qval import QVec, QOpt, QSOpt, qproj_from_qvec
 
-
+from abc import ABC, abstractmethod
 import numpy as np
 
+class QOptType(Types):
+    def __str__(self) -> str:
+        return "QOpt"
 
-class EQOpt(Expr):
+class EQOptAbstract(TypedTerm, ABC):
+    '''
+    The expression for Quantum Operators.
+    '''
+    def __init__(self):
+        super().__init__(QOptType())
+    
+    @abstractmethod
+    def eval(self, env: Env) -> EQOpt:
+        pass
+
+class EQOpt(EQOptAbstract):
     '''
     The expression for Quantum Operators.
 
@@ -18,53 +34,42 @@ class EQOpt(Expr):
     '''
 
     def __init__(self, qopt : QOpt):
+        super().__init__()
+        assert isinstance(qopt, QOpt)
+        self.qopt = qopt
 
-        type_check(qopt, QOpt)
-        self._qopt = qopt
-
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return QOpt
-    
-    def eval(self) -> object:
-        return self._qopt
+    def eval(self, env: Env) -> EQOpt:
+        return self
     
     def __str__(self) -> str:
-        return str(self._qopt)
+        return str(self.qopt)
     
-    ##################################
 
-class EQOptKetProj(Expr):
+
+class EQOptKetProj(EQOptAbstract):
     '''
     The experssion for quantum projective operators from kets.
 
     EQOptKetProj ::= '[' (v : QVec) ']'
-
     '''
 
-    def __init__(self, vec : Expr):
+    def __init__(self, vec : EQVecAbstract):
+        super().__init__()
 
-        type_check(vec, Expr)
-        expr_type_check(vec, QVec)
-        self._vec = vec
+        assert isinstance(vec, EQVecAbstract)
+        vec.type_checking(QVecType())
+        self.vec = vec
 
-
-    @property
-    def T(self) -> Type:
-        return QOpt
     
-    def eval(self) -> QOpt:
-        return qproj_from_qvec(self._vec.eval())    # type: ignore
+    def eval(self, env) -> EQOpt:
+        return EQOpt(qproj_from_qvec(self.vec.eval(env).qvec))
 
     def __str__(self) -> str:
-        return f"[{self._vec}]"
+        return f"[{self.vec}]"
 
 
 
-class EQOptAdd(Expr):
+class EQOptAdd(EQOptAbstract):
     '''
     The expression for additions of quantum operators.
 
@@ -73,32 +78,23 @@ class EQOptAdd(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, optA : Expr, optB : Expr):
+    def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
+        super().__init__()
 
-        type_check(optA, Expr)
-        expr_type_check(optA, QOpt)
-        self._optA = optA
+        optA.type_checking(QOptType())
+        self.optA = optA
 
-        type_check(optB, Expr)
-        expr_type_check(optB, QOpt)
-        self._optB = optB
+        optB.type_checking(QOptType())
+        self.optB = optB
 
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return QOpt
-    
-    def eval(self) -> object:
-        return self._optA.eval() + self._optB.eval()    # type: ignore
+    def eval(self, env: Env) -> EQOpt:
+        return EQOpt(self.optA.eval(env).qopt + self.optB.eval(env).qopt)
     
     def __str__(self) -> str:
-        return "(" + str(self._optA) + "+" + str(self._optB) + ")"
+        return "(" + str(self.optA) + "+" + str(self.optB) + ")"
     
-    ##################################
 
-class EQOptNeg(Expr):
+class EQOptNeg(EQOptAbstract):
     '''
     The expression for negation of a quantum operator.
 
@@ -107,29 +103,23 @@ class EQOptNeg(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, opt : Expr):
+    def __init__(self, opt : EQOptAbstract):
+        super().__init__()
 
-        type_check(opt, Expr)
-        expr_type_check(opt, QOpt)
-        self._opt = opt
+        opt.type_checking(QOptType())
+        self.opt = opt
 
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return QOpt
     
-    def eval(self) -> object:
-        return -self._opt.eval()    # type: ignore
+    def eval(self, env: Env) -> EQOpt:
+        return EQOpt(- self.opt.eval(env).qopt)
     
     def __str__(self) -> str:
-        return "(-" + str(self._opt) + ")"
+        return "(-" + str(self.opt) + ")"
     
-    ##################################
 
 
-class EQOptSub(Expr):
+
+class EQOptSub(EQOptAbstract):
     '''
     The expression for subtractions of quantum operators.
 
@@ -138,33 +128,23 @@ class EQOptSub(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, optA : Expr, optB : Expr):
+    def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
+        super().__init__()
 
-        type_check(optA, Expr)
-        expr_type_check(optA, QOpt)
-        self._optA = optA
+        optA.type_checking(QOptType())
+        self.optA = optA
 
-        type_check(optB, Expr)
-        expr_type_check(optB, QOpt)
-        self._optB = optB
+        optB.type_checking(QOptType())
+        self.optB = optB
 
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return QOpt
-    
-    def eval(self) -> object:
-        return self._optA.eval() - self._optB.eval()    # type: ignore
+    def eval(self, env: Env) -> EQOpt:
+        return EQOpt(self.optA.eval(env).qopt - self.optB.eval(env).qopt)
     
     def __str__(self) -> str:
-        return "(" + str(self._optA) + "-" + str(self._optB) + ")"
+        return "(" + str(self.optA) + "-" + str(self.optB) + ")"
     
-    ##################################
 
-
-class EQOptMul(Expr):
+class EQOptMul(EQOptAbstract):
     '''
     The expression for subtractions of quantum operators.
 
@@ -173,33 +153,23 @@ class EQOptMul(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, optA : Expr, optB : Expr):
+    def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
+        super().__init__()
 
-        type_check(optA, Expr)
-        expr_type_check(optA, QOpt)
-        self._optA = optA
+        optA.type_checking(QOptType())
+        self.optA = optA
 
-        type_check(optB, Expr)
-        expr_type_check(optB, QOpt)
-        self._optB = optB
+        optB.type_checking(QOptType())
+        self.optB = optB
 
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return QOpt
-    
-    def eval(self) -> object:
-        return self._optA.eval() @ self._optB.eval()    # type: ignore
+    def eval(self, env: Env) -> EQOpt:
+        return EQOpt(self.optA.eval(env).qopt @ self.optB.eval(env).qopt)
     
     def __str__(self) -> str:
-        return "(" + str(self._optA) + " " + str(self._optB) + ")"
+        return "(" + str(self.optA) + " " + str(self.optB) + ")"
     
-    ##################################
 
-
-class EQOptScale(Expr):
+class EQOptScale(EQOptAbstract):
     '''
     The expression for scaling of quantum operators.
 
@@ -209,31 +179,24 @@ class EQOptScale(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, c : complex, opt : Expr):
+    def __init__(self, c : complex, opt : EQOptAbstract):
+        super().__init__()
 
-        type_check(c, (complex, float))
-        self._c = c
+        assert isinstance(c, (complex, float))
+        self.c = c
 
-        type_check(opt, Expr)
-        expr_type_check(opt, QOpt)
-        self._opt = opt
-
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return QOpt
+        opt.type_checking(QOptType())
+        self.opt = opt
     
-    def eval(self) -> object:
-        return self._c * self._opt.eval() # type: ignore
+    def eval(self, env: Env) -> EQOpt:
+        return EQOpt(self.c * self.opt.eval(env).qopt)
     
     def __str__(self) -> str:
-        return "(" + str(self._c) + " " + str(self._opt) + ")"
+        return "(" + str(self.c) + " " + str(self.opt) + ")"
     
-    ##################################
 
-class EQOptDagger(Expr):
+
+class EQOptDagger(EQOptAbstract):
     '''
     The expression for the conjugate transpose of a quantum operator.
 
@@ -243,30 +206,23 @@ class EQOptDagger(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, opt : Expr):
+    def __init__(self, opt : EQOptAbstract):
+        super().__init__()
 
-        type_check(opt, Expr)
-        expr_type_check(opt, QOpt)
-        self._opt = opt
+        opt.type_checking(QOptType())
+        self.opt = opt
 
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return QOpt
-    
-    def eval(self) -> object:
-        return self._opt.eval().dagger()    # type: ignore
+    def eval(self, env: Env) -> EQOpt:
+        return EQOpt(self.opt.eval(env).qopt.dagger())
     
     def __str__(self) -> str:
-        return "(" + str(self._opt) + "†" + ")"
+        return "(" + str(self.opt) + "†" + ")"
     
-    ##################################
 
 
 
-class EQOptTensor(Expr):
+
+class EQOptTensor(EQOptAbstract):
     '''
     The expression for tensor product of quantum operators.
 
@@ -276,33 +232,25 @@ class EQOptTensor(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, optA : Expr, optB : Expr):
+    def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
+        super().__init__()
 
-        type_check(optA, Expr)
-        expr_type_check(optA, QOpt)
-        self._optA = optA
+        optA.type_checking(QOptType())
+        self.optA = optA
 
-        type_check(optB, Expr)
-        expr_type_check(optB, QOpt)
-        self._optB = optB
+        optB.type_checking(QOptType())
+        self.optB = optB
 
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return QOpt
-    
-    def eval(self) -> object:
-        return self._optA.eval().tensor(self._optB.eval())    # type: ignore
+    def eval(self, env: Env) -> EQOpt:
+        return EQOpt(self.optA.eval(env).qopt.tensor(self.optB.eval(env).qopt))
     
     def __str__(self) -> str:
-        return "(" + str(self._optA) + " ⊗ " + str(self._optB) + ")"
+        return "(" + str(self.optA) + " ⊗ " + str(self.optB) + ")"
     
-    ##################################
 
 
-class EQOptDisjunct(Expr):
+
+class EQOptDisjunct(EQOptAbstract):
     '''
     The expression for disjunction of projective quantum operators.
 
@@ -312,32 +260,24 @@ class EQOptDisjunct(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, optA : Expr, optB : Expr):
+    def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
+        super().__init__()
 
-        type_check(optA, Expr)
-        expr_type_check(optA, QOpt)
-        self._optA = optA
+        optA.type_checking(QOptType())
+        self.optA = optA
 
-        type_check(optB, Expr)
-        expr_type_check(optB, QOpt)
-        self._optB = optB
-
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return QOpt
-    
-    def eval(self) -> object:
-        return self._optA.eval() | self._optB.eval()    # type: ignore
+        optB.type_checking(QOptType())
+        self.optB = optB
+        
+    def eval(self, env: Env) -> EQOpt:
+        return EQOpt(self.optA.eval(env).qopt | self.optB.eval(env).qopt)
     
     def __str__(self) -> str:
-        return "(" + str(self._optA) + " ∨ " + str(self._optB) + ")"
+        return "(" + str(self.optA) + " ∨ " + str(self.optB) + ")"
     
-    ##################################
 
-class EQOptConjunct(Expr):
+
+class EQOptConjunct(EQOptAbstract):
     '''
     The expression for conjunction of projective quantum operators.
 
@@ -347,32 +287,22 @@ class EQOptConjunct(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, optA : Expr, optB : Expr):
+    def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
+        super().__init__()
 
-        type_check(optA, Expr)
-        expr_type_check(optA, QOpt)
-        self._optA = optA
+        optA.type_checking(QOptType())
+        self.optA = optA
 
-        type_check(optB, Expr)
-        expr_type_check(optB, QOpt)
-        self._optB = optB
-
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return QOpt
-    
-    def eval(self) -> object:
-        return self._optA.eval() & self._optB.eval()    # type: ignore
+        optB.type_checking(QOptType())
+        self.optB = optB
+        
+    def eval(self, env: Env) -> EQOpt:
+        return EQOpt(self.optA.eval(env).qopt & self.optB.eval(env).qopt)
     
     def __str__(self) -> str:
-        return "(" + str(self._optA) + " ∧ " + str(self._optB) + ")"
+        return "(" + str(self.optA) + " ∧ " + str(self.optB) + ")"
     
-    ##################################
-
-class EQOptComplement(Expr):
+class EQOptComplement(EQOptAbstract):
     '''
     The expression for complement of projective quantum operators.
 
@@ -382,30 +312,21 @@ class EQOptComplement(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, opt : Expr):
+    def __init__(self, opt : EQOptAbstract):
+        super().__init__()
 
-        type_check(opt, Expr)
-        expr_type_check(opt, QOpt)
-        self._opt = opt
-
-
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return QOpt
+        opt.type_checking(QOptType())
+        self.opt = opt
     
-    def eval(self) -> object:
-        return (~ self._opt.eval())    # type: ignore
+    def eval(self, env: Env) -> EQOpt:
+        return EQOpt(~ self.opt.eval(env).qopt)
     
     def __str__(self) -> str:
-        return "(" + str(self._opt) + "^⊥)"
+        return "(" + str(self.opt) + "^⊥)"
     
-    ##################################
 
 
-class EQOptSasakiImply(Expr):
+class EQOptSasakiImply(EQOptAbstract):
     '''
     The expression for Sasaki implication of projective quantum operators.
 
@@ -415,32 +336,25 @@ class EQOptSasakiImply(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, optA : Expr, optB : Expr):
+    def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
+        super().__init__()
 
-        type_check(optA, Expr)
-        expr_type_check(optA, QOpt)
-        self._optA = optA
+        optA.type_checking(QOptType())
+        self.optA = optA
 
-        type_check(optB, Expr)
-        expr_type_check(optB, QOpt)
-        self._optB = optB
+        optB.type_checking(QOptType())
+        self.optB = optB
 
-    ##################################
-    # Expression settings
 
-    @property
-    def T(self) -> Type:
-        return QOpt
-    
-    def eval(self) -> object:
-        return self._optA.eval().Sasaki_imply(self._optB.eval())    # type: ignore
+    def eval(self, env: Env) -> EQOpt:
+        return EQOpt(self.optA.eval(env).qopt.Sasaki_imply(self.optB.eval(env).qopt))
     
     def __str__(self) -> str:
-        return "(" + str(self._optA) + " ⇝ " + str(self._optB) + ")"
+        return "(" + str(self.optA) + " ⇝ " + str(self.optB) + ")"
     
-    ##################################
 
-class EQOptSasakiConjunct(Expr):
+
+class EQOptSasakiConjunct(EQOptAbstract):
     '''
     The expression for Sasaki conjunction of projective quantum operators.
 
@@ -450,33 +364,24 @@ class EQOptSasakiConjunct(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, optA : Expr, optB : Expr):
+    def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
+        super().__init__()
 
-        type_check(optA, Expr)
-        expr_type_check(optA, QOpt)
-        self._optA = optA
+        optA.type_checking(QOptType())
+        self.optA = optA
 
-        type_check(optB, Expr)
-        expr_type_check(optB, QOpt)
-        self._optB = optB
-
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return QOpt
-    
-    def eval(self) -> object:
-        return self._optA.eval().Sasaki_conjunct(self._optB.eval())    # type: ignore
+        optB.type_checking(QOptType())
+        self.optB = optB
+            
+    def eval(self, env) -> EQOpt:
+        return EQOpt(self.optA.eval(env).qopt.Sasaki_conjunct(self.optB.eval(env).qopt))
     
     def __str__(self) -> str:
-        return "(" + str(self._optA) + " ⋒ " + str(self._optB) + ")"
+        return "(" + str(self.optA) + " ⋒ " + str(self.optB) + ")"
     
-    ##################################
 
 
-class EQSOptApply(Expr):
+class EQSOptApply(EQOptAbstract):
     '''
     The expression for application of superoperators on operators.
 
@@ -485,27 +390,19 @@ class EQSOptApply(Expr):
     Nonterminal.
     '''
 
-    def __init__(self, so : Expr, opt : Expr):
+    def __init__(self, so : EQSOptAbstract, opt : EQOptAbstract):
+        super().__init__()
 
-        type_check(so, Expr)
-        expr_type_check(so, QSOpt)
-        self._so = so
+        so.type_checking(QSOptType())
+        self.so = so
 
-        type_check(opt, Expr)
-        expr_type_check(opt, QOpt)
-        self._opt = opt
+        opt.type_checking(QOptType())
+        self.opt = opt
 
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return QOpt
     
-    def eval(self) -> object:
-        return self._so.eval().apply(self._opt.eval())    # type: ignore
-    
+    def eval(self, env: Env) -> EQOpt:
+        return EQOpt(self.so.eval(env).qso.apply(self.opt.eval(env).qopt))
+        
     def __str__(self) -> str:
-        return "(" + str(self._so) + "(" + str(self._opt) + "))"
-    
-    ##################################
+        return "(" + str(self.so) + "(" + str(self.opt) + "))"
+

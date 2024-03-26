@@ -4,7 +4,7 @@ from __future__ import annotations
 import numpy as np
 from .. import linalgPP
 
-from ..error import type_check, QPLCompError
+from ..error import QPLCompError
 
 from .val import IQVal, QVal
 from .qopt import QOpt
@@ -21,7 +21,7 @@ class IQSOpt(IQVal):
     def __init__(self, qso: QSOpt, qvar: QVar):
         super().__init__(qso, qvar)
 
-        type_check(qso, QSOpt)
+        assert isinstance(qso, QSOpt)
         self._qval : QSOpt
 
     @property
@@ -57,7 +57,7 @@ class IQSOpt(IQVal):
             - `iopt` : `IQOpt`, the indexed operator.
         - Returns: `IQOpt`, the indexed result.
         '''
-        type_check(iopt, IQOpt)
+        assert isinstance(iopt, IQOpt)
 
         # the common qvar
         qvar_all = self.qvar + iopt.qvar
@@ -76,7 +76,7 @@ class IQSOpt(IQVal):
         - Returns: `IQSOpt`.
         '''
 
-        type_check(other, IQSOpt)
+        assert isinstance(other, IQSOpt)
 
         # the common qvar
         qvar_all = self.qvar + other.qvar

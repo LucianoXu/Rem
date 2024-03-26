@@ -14,7 +14,7 @@ from . import qexpr
 
 from .error import QPLCompError
 
-from .env import Expr, Env, Variable, expr_type_check, EnvError
+from .env import TypedTerm, Env, Var
 
 from .qexpr import Parser
 from .qexpr import prepare_env

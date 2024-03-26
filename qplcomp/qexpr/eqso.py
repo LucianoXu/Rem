@@ -1,75 +1,68 @@
 from __future__ import annotations
 from typing import Type
 
-from ..error import type_check
-from ..env import Expr, Env, expr_type_check
+from ..env import TypedTerm, Env, Types
 
 from ..qval import QSOpt
 
+from abc import ABC, abstractmethod
 
 import numpy as np
 
 
-class EQSOpt(Expr):
+class QSOptType(Types):
+    def __str__(self) -> str:
+        return "QSOpt"
+    
+class EQSOptAbstract(TypedTerm, ABC):
     '''
     The expression for Quantum Super Operators.
-
-    Terminal.
     '''
+    def __init__(self):
+        super().__init__(QSOptType())
+    
+    @abstractmethod
+    def eval(self, env: Env) -> EQSOpt:
+        pass
+
+
+class EQSOpt(EQSOptAbstract):
 
     def __init__(self, qso : QSOpt):
+        super().__init__()
 
-        type_check(qso, QSOpt)
-        self._qso = qso
+        assert isinstance(qso, QSOpt)
+        self.qso = qso
 
 
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return QSOpt
-    
-    def eval(self) -> object:
-        return self._qso
+    def eval(self, env: Env) -> EQSOpt:
+        return self
     
     def __str__(self) -> str:
-        return str(self._qso)
-    
-    ##################################
+        return str(self.qso)
 
 
 
-class EQSOptAdd(Expr):
+class EQSOptAdd(EQSOptAbstract):
     '''
     The expression for additions of quantum superoperators.
 
     EQSOptAdd ::= (a : QSOpt) '+' (b : QSOpt)
-    
-    Nonterminal.
     '''
 
-    def __init__(self, soA : Expr, soB : Expr):
+    def __init__(self, soA : EQSOptAbstract, soB : EQSOptAbstract):
+        super().__init__()
 
-        type_check(soA, Expr)
-        expr_type_check(soA, QSOpt)
-        self._soA = soA
+        assert isinstance(soA, EQSOptAbstract)
+        soA.type_checking(QSOptType())
+        self.soA = soA
 
-        type_check(soB, Expr)
-        expr_type_check(soB, QSOpt)
-        self._soB = soB
+        assert isinstance(soB, EQSOptAbstract)
+        soB.type_checking(QSOptType())
+        self.soB = soB
 
-    ##################################
-    # Expression settings
-
-    @property
-    def T(self) -> Type:
-        return QSOpt
-    
-    def eval(self) -> object:
-        return self._soA.eval() + self._soB.eval()    # type: ignore
+    def eval(self, env: Env) -> EQSOpt:
+        return EQSOpt(self.soA.eval(env).qso + self.soB.eval(env).qso)
     
     def __str__(self) -> str:
-        return "(" + str(self._soA) + "+" + str(self._soB) + ")"
-    
-    ##################################
+        return "(" + str(self.soA) + "+" + str(self.soB) + ")"

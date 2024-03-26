@@ -30,7 +30,7 @@ parser = yacc.yacc()
 #############################################################
 # the encapsulation 
 
-from ..env import Env, Expr
+from ..env import Env, TypedTerm
 
 from ..qval import qvallib, QOpt, QSOpt
 
@@ -57,9 +57,9 @@ def prepare_env() -> None:
 class Parser:
 
     @staticmethod
-    def parse(code : str) -> Expr:
+    def parse(code : str) -> TypedTerm:
         res = parser.parse(code)
-        if not isinstance(res, Expr):
+        if not isinstance(res, TypedTerm):
             raise Exception("Unexpected Exception.")
         
         return res

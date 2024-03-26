@@ -4,145 +4,124 @@ env
 
 This package provides a simple variable system. It includes:
 
-- class `Expr`: the typed expressions of the system. More specific definition of expressions should be defined as its subclasses.
+- class `TypedTerm`: the typed expressions of the system. More specific definition of expressions should be defined as its subclasses.
 - class `Variable`: It is the expression constructed by a variable.
-- class `Env`: environments for the variable system. It is a dictionary from identifiers (`str`) to its definitions (`Expr`).
+- class `Env`: environments for the variable system. It is a dictionary from identifiers (`str`) to its definitions (`TypedTerm`).
 
 '''
 
 from __future__ import annotations
 
-from typing import Dict, Type
+from typing import Dict, Type, Any
 
-DEFAULT_PREFIX = "VAL"
+from abc import ABC, abstractmethod
 
-# TODO : type information needed.
-
-class EnvError(Exception):
+class TermError(Exception):
     pass
 
-class Expr:
+class Types(ABC):
     '''
-    The class for expressions.
-    The type checking is implemented in the construction of Expr.
+    The class for types.
     '''
-
-    def __init__(self):
-        '''
-        parameter env: ever expression lives in some particular environment.
-
-        TODO #2
-        '''
-    
-    @property
-    def T(self) -> None | Type:
-        raise NotImplementedError()
-    
-    def eval(self) -> object:
-        '''
-        Calculate the value of this varible within the environment.
-
-        Note: this is going to be a complete calculation, which is different from partial reductions.
-        '''
-        raise NotImplementedError()
-    
+    @abstractmethod
     def __str__(self) -> str:
-        raise NotImplementedError()
-    
-class Variable(Expr):
-    '''
-    The class for variables. Variables can be of any type, and can be replaced by beta-reduction.
-    '''
-    def __init__(self, id : str, T : None | Type = None):
-        '''
-        Construct a Variable expression.
+        pass
 
-        The type of it can be `None`, meaning that it's type is not determined yet.
+    def __eq__(self, other : Any) -> bool:
+        return isinstance(other, Types) and str(self) == str(other)
+
+
+class TypedTerm(ABC):
+    '''
+    The class for (typed) terms.
+    Type checking is implemented in the construction of TypedTerm.
+    '''
+
+    def __init__(self, type: Types):
+        if not isinstance(type, Types):
+            raise TermError("The type should be a Types object.")
+        self.type: Types = type
+
+    def eval(self, env: Env) -> TypedTerm:
         '''
+        Evaluate the term within the environment.
+        '''
+        return self
+    
+    @abstractmethod
+    def __str__(self) -> str:
+        pass
+
+
+    def type_checking(self : TypedTerm, type : Types) -> None:
+        '''
+        The method to check the type of this expression. It will raise a TypeError if the type of expr is not target_type.
+        '''
+        if self.type != type and not isinstance(self.type, UncertainType):
+            raise ValueError(f"The parameter expression '{self}' should have type '{type}', but actually has type '{self.type}'.")
+
+class UncertainType(Types):
+    '''
+    The class for uncertain types.
+    '''
+    def __str__(self) -> str:
+        return "Uncertain"
+
+class Var(TypedTerm):
+    '''
+    The class for typed variables.
+    '''
+    def __init__(self, id : str, type : Types = UncertainType()):
+
+        super().__init__(type)
 
         if not isinstance(id, str):
-            raise EnvError("The id for the variable should be a string.")
-        if not isinstance(T, Type) and T is not None:
-            raise EnvError("The type T should be a Type or the None object.")
+            raise TermError("The id for the variable should be a string.")
         
-        self._id = id
-        self._T = T
+        self.id: str = id
 
     
-    @property
-    def T(self) -> None | Type:
-        if self._T is not None:
-            return self._T
-        
-        elif self._id in Env():
-            return Env()[self._id].T
-        
-        else:
-            return None
+    def eval(self, env: Env) -> TypedTerm:
+        val = env[self.id].eval(env)
 
-    def eval(self):
-        val = Env()[self._id].eval()
-
-        if self.T is not None:
-            if not isinstance(val, self.T):
-                raise EnvError("The variable '" + self._id + "' should be of type '" + str(self.T) + "', but the value defined in the environment is of type '" + str(type(val)) + "'.")
+        if (not isinstance(self.type, UncertainType)) and self.type != val.type:
+            raise TermError(f"The variable '{self.id}' should be of type '{self.type}', but the value defined in the environment is of type '{val.type}'.")
         
         return val
     
     def __str__(self) -> str:
-        return self._id
+        return self.id
 
-
-def expr_type_check(expr : Expr, target_type : Type) -> None:
-    '''
-    The method to check the type of this expression. It will raise a TypeError if the type of expr is not target_type.
-    '''
-    if expr.T is not None and expr.T != target_type:
-        raise EnvError("The parameter expression '" + str(expr) + "' should be of type '" + str(target_type) + "', but is of type '"+ str(expr.T) + "'.")
 
 class Env:
     '''
     The environment relates variable (string) to their definitions.
-    singleton model
     '''
-    __instance : Env | None = None
-    def __new__(cls):
-        '''
-        Initializing an empty value environment.
-        '''
-        if cls.__instance is None:
-            cls.__instance = object.__new__(cls)
-            cls.__instance._lib = {}
-            # the number for auto naming
-            cls.__instance._numbering = 0
-        return cls.__instance
 
+    DEFAULT_PREFIX = "X"
 
     def __init__(self) -> None:
 
-        self._lib : Dict[str, Expr]
-        self._numbering : int
+        self._lib : Dict[str, TypedTerm] = {}
 
-    @staticmethod
-    def restart():
-        Env.__instance = None
 
-    def get_name(self, prefix : str = DEFAULT_PREFIX) -> str:
+    def get_unique_name(self, prefix : str = DEFAULT_PREFIX) -> str:
         '''
         Return a key which is not used in the environment. The key will be in the form of `prefix` + number.
 
         Parameters: prefix = "VAL" : str.
         Returns: a key which is not used in this environment.
         '''
-        res = prefix + str(self._numbering)
-        self._numbering += 1
+        n = 0
+        res = prefix + str(n)
+        n += 1
         while res in self._lib:
-            res = prefix + str(self._numbering)
-            self._numbering += 1
+            res = prefix + str(n)
+            n += 1
         return res
 
 
-    def append(self, expr : Expr) -> str:
+    def append(self, term : TypedTerm) -> str:
         '''
         Check whether the value already exists in this environment.
         If yes, return the corresponding key.
@@ -150,31 +129,35 @@ class Env:
         '''
         
         for key in self._lib:
-            if self._lib[key] == expr:
+            if self._lib[key] == term:
                 return key
             
-        name = self.get_name()
-        self._lib[name] = expr
+        name = self.get_unique_name()
+        self._lib[name] = term
         return name
     
-    def __setitem__(self, key : str, expr : Expr) -> None:
-        if not isinstance(expr, Expr):
-            raise ValueError("Invalid value. Only Expr instances are allowed.")
+    def __setitem__(self, key : str, term : TypedTerm) -> None:
+        if not isinstance(term, TypedTerm):
+            raise ValueError("Invalid value. Only TypedTerm instances are allowed.")
         
         # it's not allowed to change the value.
         if key in self._lib:
-            raise EnvError(f"The variable '{str(key)}' has been defined.")
+            raise TermError(f"The variable '{str(key)}' has been defined.")
 
-        self._lib[key] = expr
+        self._lib[key] = term
 
-    def __getitem__(self, key : str) -> Expr:
+    def __getitem__(self, key : str) -> TypedTerm:
         if key not in self._lib:
-            raise EnvError(f"The variable '{key}' is not defined.")
+            raise TermError(f"The variable '{key}' is not defined.")
         return self._lib[key]
     
     def __contains__(self, key : str) -> bool:
         return key in self._lib
     
+
+    ##################################################################
+    # output
+
     def get_items_str(self, varls : list[str] = []) -> str:
         if len(varls) == 0:
             varls = list(self._lib.keys())

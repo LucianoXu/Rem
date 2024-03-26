@@ -15,6 +15,26 @@ def test_opt():
     '''
     quire.quire_code(code)
 
+
+def test_qwhile():
+    code = r'''
+        abort;
+        skip;
+        [q p] :=0;
+        (H \otimes X)[p q];
+        assert Pp[p];
+        < Pp[p], P1[p] >;
+        ( skip [\oplus 0.52] H[p] );
+        if (P1[q] \wedge P0[p]) then
+            CX[q p]
+        else
+            while Pm[p] do
+                H[p]
+            end
+        end
+    '''
+    quire.parse(code)
+
 def test_01():
     code = r'''
     Def prog := Prog
