@@ -6,7 +6,9 @@ from qplcomp import Env, prepare_env, EQOpt, QOpt, PLYError, QPLCompError
 from ..language import AstPres, TypedTerm, ValueError, EIQOptPair
 
 from .ast import *
-from ..language.semantics.forward import calc
+from ..language.semantics.state import calc
+
+from ..language import refine
 
 from copy import deepcopy
 
@@ -127,7 +129,10 @@ class Interpreter:
             if len(frame.current_goals) == 0:
                 raise ValueError("There is no prescriptions to refine.")
             
-            new_frame.current_goals[0].refine_wlp(cmd.statement, frame.env)
+            refine.wlp_check(
+                new_frame.current_goals[0], 
+                cmd.statement, 
+                frame.env)
 
             new_frame.current_goals = new_frame.current_goals[0].get_prescription() + new_frame.current_goals[1:]
             
@@ -138,7 +143,9 @@ class Interpreter:
             if len(frame.current_goals) == 0:
                 raise ValueError("There is no prescriptions to refine.")
             
-            new_frame.current_goals[0].refine_seq_break(cmd.mid_assertion)
+            refine.rule_seq_break(
+                new_frame.current_goals[0],
+                cmd.mid_assertion)
 
             new_frame.current_goals = new_frame.current_goals[0].get_prescription() + new_frame.current_goals[1:]
             
@@ -149,7 +156,9 @@ class Interpreter:
             if len(frame.current_goals) == 0:
                 raise ValueError("There is no prescriptions to refine.")
             
-            new_frame.current_goals[0].refine_if(cmd.P)
+            refine.rule_if(
+                new_frame.current_goals[0],
+                cmd.P)
 
             new_frame.current_goals = new_frame.current_goals[0].get_prescription() + new_frame.current_goals[1:]
             
@@ -160,7 +169,11 @@ class Interpreter:
             if len(frame.current_goals) == 0:
                 raise ValueError("There is no prescriptions to refine.")
             
-            new_frame.current_goals[0].refine_while(cmd.P, cmd.inv, frame.env)
+            refine.rule_while(
+                new_frame.current_goals[0],
+                cmd.P, 
+                cmd.inv, 
+                frame.env)
 
             new_frame.current_goals = new_frame.current_goals[0].get_prescription() + new_frame.current_goals[1:]
             
@@ -171,7 +184,10 @@ class Interpreter:
             if len(frame.current_goals) == 0:
                 raise ValueError("There is no prescriptions to refine.")
             
-            new_frame.current_goals[0].refine_weaken_pre(cmd.pre, frame.env)
+            refine.weaken_pre(
+                new_frame.current_goals[0],
+                cmd.pre, 
+                frame.env)
 
             new_frame.current_goals = new_frame.current_goals[0].get_prescription() + new_frame.current_goals[1:]
             
@@ -182,7 +198,10 @@ class Interpreter:
             if len(frame.current_goals) == 0:
                 raise ValueError("There is no prescriptions to refine.")
             
-            new_frame.current_goals[0].refine_strengthen_post(cmd.post, frame.env)
+            refine.strengthen_post(
+                new_frame.current_goals[0],
+                cmd.post, 
+                frame.env)
 
             new_frame.current_goals = new_frame.current_goals[0].get_prescription() + new_frame.current_goals[1:]
             
