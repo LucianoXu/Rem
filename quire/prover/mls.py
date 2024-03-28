@@ -45,6 +45,7 @@ class MLS:
 
         if isinstance(res, Exception):
             self._info = res
+            return None
         
         # res: tuple[RemAst, str]
         else:

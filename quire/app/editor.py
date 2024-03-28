@@ -21,24 +21,42 @@ from time import time
 class Editor(Screen):
 
     BINDINGS = [
-        Binding("ctrl+o", "step_forward", "Step Forward", priority=True),
-        Binding("ctrl+p", "step_backward", "Step Backward", priority=True),
+        Binding("ctrl+o", "step_forward", "▶", priority=True),
+        Binding("ctrl+p", "step_backward", "◀", priority=True),
+        Binding("ctrl+j", "play_forward", "▶▶", priority=True),
+        Binding("ctrl+l", "play_backward", "◀◀", priority=True),
     ]
 
-    def action_step_forward(self) -> None:
+    def action_step_forward(self) -> bool:
         res = self.mls.step_forward(self.code_area.text)
+
         if res is not None:
             self.code_area.text = res
+
         self.goal_area.text = self.mls.info
         self.verified_area.text = self.mls.verified_code
 
+        return res is not None
 
-    def action_step_backward(self) -> None:
+
+    def action_step_backward(self) -> bool:
         res = self.mls.step_backward()
+
         if res is not None:
             self.code_area.text = res + self.code_area.text
+
         self.goal_area.text = self.mls.info
         self.verified_area.text = self.mls.verified_code
+
+        return res is not None
+
+    def action_play_forward(self) -> None:
+        while self.action_step_forward():
+            pass
+
+    def action_play_backward(self) -> None:
+        while self.action_step_backward():
+            pass
 
     def compose(self) -> ComposeResult:
 
