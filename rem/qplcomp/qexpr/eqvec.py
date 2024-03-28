@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Type
 
-from ..env import TypedTerm, Env, Types
+from ...mTLC.env import TypedTerm, Env, Types
 
 from ..qval import QVec
 

@@ -5,7 +5,7 @@
 # ------------------------------------------------------------
 from __future__ import annotations
 
-from ..env import Env
+from ...mTLC.env import Env
 from .lexer_def import PLYError
 
 def type_match(p, types: tuple[str, ...]) -> bool:
@@ -46,7 +46,7 @@ def p_output(p):
 
     p[0] = p[1]
 
-from ..env import Var
+from ...mTLC.env import Var
 def p_variable(p):
     '''
     variable    : ID

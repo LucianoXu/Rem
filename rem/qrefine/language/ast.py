@@ -1,11 +1,10 @@
 from __future__ import annotations
 from typing import Type
 
-from qplcomp import IQOpt, QVar, IQOpt
-from qplcomp.env import TypedTerm, Var, Types
+from ...qplcomp import IQOpt, QVar, IQOpt
+from ...mTLC.env import TypedTerm, Var, Types
 
-from qplcomp.qexpr.eiqopt import *
-from qplcomp.qexpr.eiqopt import EIQOpt, Env
+from ...qplcomp.qexpr.eiqopt import *
 
 from ..error import ValueError
 

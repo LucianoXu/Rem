@@ -2,7 +2,7 @@ import numpy as np
 
 from textual.app import App
 
-from qplcomp import prepare_env
+from ..qplcomp import prepare_env
 
 
 from .opening import Opening
@@ -21,9 +21,6 @@ class Rem(App):
         prepare_env()
         self.switch_mode("opening")
 
-from .backends import set_opts
-
 def app_run(opts: dict[str, np.ndarray]):
     rem = Rem()
-    set_opts(opts)
     rem.run()

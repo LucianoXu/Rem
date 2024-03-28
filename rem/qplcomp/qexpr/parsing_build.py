@@ -30,7 +30,7 @@ parser = yacc.yacc()
 #############################################################
 # the encapsulation 
 
-from ..env import Env, TypedTerm
+from ...mTLC.env import Env, TypedTerm
 
 from ..qval import qvallib, QOpt, QSOpt
 

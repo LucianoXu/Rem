@@ -1,6 +1,6 @@
 
-from qplcomp.env import Env
-from qplcomp.qexpr.lexer_def import LexingError
+from ...mTLC.env import Env
+from ...qplcomp.qexpr.lexer_def import LexingError
 from .ast import RemAst, ParsingError
 
 from .prover_parsing_build import parser, parse_sentence, ParserState

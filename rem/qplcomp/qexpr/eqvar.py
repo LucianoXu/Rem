@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Type
 
-from qplcomp.env import Env
+from ...mTLC.env import Env
 
 from ..qval import QVar
-from ..env import TypedTerm, Types
+from ...mTLC.env import TypedTerm, Types
 
 class QVarType(Types):
     def __str__(self) -> str:

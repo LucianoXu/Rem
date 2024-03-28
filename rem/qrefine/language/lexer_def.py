@@ -1,8 +1,8 @@
 
 
-from qplcomp import lexer_def as QPLCompLexer
+from ...qplcomp import lexer_def as QPLCompLexer
 
-from qplcomp.qexpr.lexer_def import *
+from ...qplcomp.qexpr.lexer_def import *
 
 reserved = {
     'abort'     : 'ABORT',

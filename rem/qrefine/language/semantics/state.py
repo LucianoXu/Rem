@@ -5,7 +5,7 @@ The (finite step) forward calculation of this language.
 
 from .. import *
 import numpy as np
-from qplcomp import QOpt, IQOpt, QSOpt, IQSOpt
+from ....qplcomp import QOpt, IQOpt, QSOpt, IQSOpt
 
 from ...error import ValueError
 

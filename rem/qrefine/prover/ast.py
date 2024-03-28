@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from qplcomp import *
+from ...qplcomp import *
 from ..language import QWhileAst, AstPres
 
 from abc import ABC, abstractmethod

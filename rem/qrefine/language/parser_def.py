@@ -3,8 +3,8 @@ from __future__ import annotations
 
 from .ast import *
 
-from qplcomp import parser_def as QPLCompParser
-from qplcomp import ParsingError
+from ...qplcomp import parser_def as QPLCompParser
+from ...qplcomp import ParsingError
 
 precedence = (
     ('left', '>'),
@@ -102,7 +102,7 @@ def p_prescription(p):
     p[0] = AstPres(p[2], p[4])
     
     
-from qplcomp.qexpr.parser_def import p_eiqopt, p_eqopt, p_eqvar, p_num, p_qvar, p_qvar_pre, p_variable, p_eqvec
+from ...qplcomp.qexpr.parser_def import p_eiqopt, p_eqopt, p_eqvar, p_num, p_qvar, p_qvar_pre, p_variable, p_eqvec
 
 def p_error(p):
     if p is None:

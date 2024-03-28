@@ -1,23 +1,14 @@
-from typing import Coroutine
 from textual import on
 from textual.binding import Binding
 from textual.app import ComposeResult
-from textual.containers import Container, Horizontal, Vertical
-from textual.events import Event, Key, MouseDown
+from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
-from textual.widgets import Header, Footer, Placeholder, TextArea, Static, Button
-from textual.renderables.gradient import LinearGradient
-from qplcomp import ParsingError
-from textual.reactive import reactive
-from textual.app import ComposeResult, RenderableType # type: ignore
+from textual.widgets import Header, Footer, TextArea
+from ..qplcomp import prepare_env
+from textual.app import ComposeResult # type: ignore
 
-from qplcomp import prepare_env
+from ..qrefine.prover import mls
 
-from .backends import *
-
-from ..prover import mls
-
-from time import time
 
 
 class Editor(Screen):

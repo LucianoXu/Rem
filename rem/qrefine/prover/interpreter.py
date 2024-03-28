@@ -2,7 +2,7 @@
 from __future__ import annotations
 from typing import Any
 
-from qplcomp import Env, prepare_env, EQOpt, QOpt, PLYError, QPLCompError
+from ...qplcomp import Env, prepare_env, EQOpt, QOpt, PLYError, QPLCompError
 from ..language import AstPres, TypedTerm, ValueError, EIQOptPair
 
 from .ast import *

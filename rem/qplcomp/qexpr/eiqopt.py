@@ -3,7 +3,7 @@ from typing import Type
 
 from ..qval import QOpt, QVar, IQOpt
 
-from ..env import TypedTerm, Env, Types
+from ...mTLC.env import TypedTerm, Env, Types
 
 from abc import ABC, abstractmethod
 

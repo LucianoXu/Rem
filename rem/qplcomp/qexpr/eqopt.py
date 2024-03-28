@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Type
 
-from ..env import TypedTerm, Env, Types
+from ...mTLC.env import TypedTerm, Env, Types
 
 from .eqvec import EQVecAbstract, QVecType
 from .eqso import QSOptType, EQSOptAbstract
