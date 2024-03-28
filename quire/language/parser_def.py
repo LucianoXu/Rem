@@ -1,6 +1,5 @@
 
 from __future__ import annotations
-from typing import Tuple
 
 from .ast import *
 
@@ -13,7 +12,7 @@ precedence = (
 ) + QPLCompParser.precedence
 
 
-def type_match(p, types: Tuple[str, ...]) -> bool:
+def type_match(p, types: tuple[str, ...]) -> bool:
     '''
     The method to check whether the sentence match the corresponding types.
     '''

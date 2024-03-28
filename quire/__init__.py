@@ -5,6 +5,6 @@ from qplcomp import predefined
 
 from .language import parse
 # from .calc import calc
-# from .prover import *
+from .prover import *
 
-# from .app import app_run
+from .app import app_run

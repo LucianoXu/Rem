@@ -71,4 +71,13 @@ def t_newline(t):
     t.lexer.lineno += len(t.value)
 
 def t_error(t):
-    raise LexingError("Illegal character '" + t.value[0] + f"'. (line {t.lineno})")
+    raise LexingError(f"({t.lineno}, {find_column(t.lexer.lexdata, t)}) Illegal character '{t.value[0]}'.")
+
+def find_column(input, token):
+    '''
+    Compute column.
+    input is the input text string
+    token is a token instance
+    '''
+    line_start = input.rfind('\n', 0, token.lexpos) + 1
+    return (token.lexpos - line_start) + 1

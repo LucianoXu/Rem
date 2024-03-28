@@ -12,7 +12,7 @@ This package provides a simple variable system. It includes:
 
 from __future__ import annotations
 
-from typing import Dict, Type, Any
+from typing import Type, Any
 
 from abc import ABC, abstractmethod
 
@@ -102,7 +102,15 @@ class Env:
 
     def __init__(self) -> None:
 
-        self._lib : Dict[str, TypedTerm] = {}
+        self._lib : dict[str, TypedTerm] = {}
+
+    def copy(self) -> Env:
+        '''
+        Return a shallow copy of this environment.
+        '''
+        res = Env()
+        res._lib = self._lib.copy()
+        return res
 
 
     def get_unique_name(self, prefix : str = DEFAULT_PREFIX) -> str:

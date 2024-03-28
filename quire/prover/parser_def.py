@@ -4,28 +4,30 @@ from __future__ import annotations
 from .prover import *
 
 from ..language import parser_def as AstParser
-from ..language.parser_def import type_match
+from ..language.parser_def import *
 
 from .ast import *
+
+# global variables to store the parsed information
+class ParserState:
+    input_code = ""
+
+    @staticmethod
+    def reset():
+        ParserState.input_code = ""
+
+def find_column(token):
+    '''
+    Compute column.
+    token is a token instance
+    '''
+    line_start = ParserState.input_code.rfind('\n', 0, token.lexpos) + 1
+    return (token.lexpos - line_start) + 1
+
 
 precedence = (
     ('right', '.'),
 ) + AstParser.precedence
-
-def p_cmd_stack(p):
-    '''
-    cmd-stack : 
-              | cmd
-              | cmd-stack cmd
-    '''
-    if type_match(p, ()):
-        p[0] = CMDStack(())
-    elif type_match(p, ('cmd',)):
-        p[0] = CMDStack((p[1],))
-    elif type_match(p, ('cmd-stack', 'cmd')):
-        p[0] = p[1] + p[2]
-    else:
-        raise Exception()
 
 
 def p_cmd(p):
@@ -57,6 +59,7 @@ def p_cmd(p):
         | TEST eiqopt LEQ eiqopt '.'
 
     '''
+
     if type_match(p, ('PAUSE', '.')):
         p[0] = Pause()
 
@@ -130,3 +133,8 @@ def p_cmd(p):
     else:
         raise Exception()
 
+
+def p_error(p):
+    if p is None:
+        raise ParsingError("EOF encountered. (end of input).")
+    raise ParsingError(f"({p.lineno}, {find_column(p)}) Syntax error in input: '{p.value}'.")

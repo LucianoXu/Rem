@@ -4,7 +4,6 @@
 # ------------------------------------------------------------
 
 import numpy as np
-from typing import Dict
 
 # TODO #3
 # So that it can make use of symbolic expressions.
@@ -184,7 +183,7 @@ from .val import QVal
 from .qopt import QOpt
 from .qso import QSOpt
 
-qvallib : Dict[str, QVal]= {}
+qvallib : dict[str, QVal]= {}
 for key in optlib:
     qvallib[key] = QOpt(optlib[key])
 

@@ -1,7 +1,7 @@
 '''
 The (finite step) forward calculation of this language.
 '''
-from typing import Tuple
+from typing import tuple
 
 
 from .language import *

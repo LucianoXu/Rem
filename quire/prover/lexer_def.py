@@ -42,3 +42,6 @@ def t_ID(t):
     r'[a-zA-Z\'][a-zA-Z\'0-9]*'
     t.type = reserved.get(t.value, 'ID')
     return t
+
+def t_error(t):
+    raise LexingError(f"({t.lineno}, {find_column(t.lexer.lexdata, t)}) Illegal character '{t.value[0]}'.")

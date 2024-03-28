@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, Tuple, Type, List
+from typing import Type
 
 from ..error import QPLCompError
 
@@ -7,7 +7,7 @@ class QVar:
     '''
     The class for quantum variables (indices).
     '''
-    def __init__(self, qvls : List[str]):
+    def __init__(self, qvls : list[str]):
 
         # check for repetition
         temp = []
@@ -27,11 +27,11 @@ class QVar:
         return len(self._qvls)
     
     @property
-    def tuple(self) -> Tuple[str, ...]:
+    def tuple(self) -> tuple[str, ...]:
         return tuple(self._qvls)
     
     @staticmethod
-    def _qvls_str(qvls : List[str]) -> str:
+    def _qvls_str(qvls : list[str]) -> str:
         '''
         Return the formatting of [qvls] as qvar.
         '''
@@ -116,7 +116,7 @@ class QVar:
             
         return True
     
-    def to(self, other : QVar) -> List[int]:
+    def to(self, other : QVar) -> list[int]:
         '''
         return the positions of variables of `other` in `self`
         '''

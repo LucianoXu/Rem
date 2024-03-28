@@ -1,6 +1,6 @@
 
 from __future__ import annotations
-from typing import Sequence, List
+from typing import Sequence
 
 from ..error import QPLCompError
 
@@ -11,7 +11,7 @@ from .qopt import QOpt
 
 from .val import QVal
 
-def Kraus_str(ls : List[QOpt]) -> str:
+def Kraus_str(ls : list[QOpt]) -> str:
     res = "{ " + str(ls[0])
     for i in range(1, len(ls)):
         res += ", " + str(ls[i])
@@ -30,7 +30,7 @@ class QSOpt(QVal):
 
         Parameters:
             - `data`:
-                - `List[QOpt]`, the Kraus operators `E_i`. Note that the E_i should be of the same qubit number.
+                - `list[QOpt]`, the Kraus operators `E_i`. Note that the E_i should be of the same qubit number.
             - `is_qo`: `None | bool`, whether this superoperator is quantum operation. In otherwords, whether the Kraus operators `E_i` satisfy `0 <= sum E_i E_i^dagger <= I`.
         '''
         self._qnum : int
@@ -56,7 +56,7 @@ class QSOpt(QVal):
         self._qo : None | bool = is_qo
         
     @property
-    def Kraus(self) -> List[QOpt]:
+    def Kraus(self) -> list[QOpt]:
         '''
         Return the list of corresponding Kraus operators.
         '''

@@ -47,6 +47,3 @@ def t_COMMENT(t):
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
-
-def t_error(t):
-    raise LexingError("Illegal character '" + t.value[0] + f"'. (line {t.lineno})")
