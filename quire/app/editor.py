@@ -42,6 +42,10 @@ class Editor(Screen):
         # verified_area scroll to end
         self.verified_area.scroll_end(animate = False)
 
+        # set the cursor to the end
+        self.verified_area.select_all()
+        self.verified_area.move_cursor(self.verified_area.cursor_location)
+
         return res is not None
 
 
@@ -57,6 +61,10 @@ class Editor(Screen):
 
         # verified_area scroll to end
         self.verified_area.scroll_end(animate = False)
+
+        # set the cursor to the end
+        self.verified_area.select_all()
+        self.verified_area.move_cursor(self.verified_area.cursor_location)
 
         return res is not None
 
