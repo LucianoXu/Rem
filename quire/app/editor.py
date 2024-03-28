@@ -105,16 +105,16 @@ class Editor(Screen):
 
         yield Footer()
 
-    @on(TextArea.Changed)
-    def process(self, event: TextArea.Changed):
-        pass
+    @on(TextArea.SelectionChanged)
+    def show_frame(self, event: TextArea.SelectionChanged) -> None:
+        if event.text_area.id == 'verified-area':
 
+            # calculate the pos of the cursor 
+            pos = len(self.verified_area.get_text_range((0,0), event.selection.end)) + 1
+            
+            self.mls.set_cursor(pos)
 
-        # if event.text_area.id == 'code-area':
-        #     prover = Prover(operators)
-        #     cmd_stack = parse(event.text_area.text)
-
-        #     for cmd in cmd_stack.stack:
-        #         prover.execute(cmd)
-        #         self.goal_area.text = str(prover)
+            self.mls_info.text = self.mls.info
+            self.goal_area.text = self.mls.prover_info
+            
     

@@ -6,7 +6,7 @@ from qplcomp import Env, prepare_env, EQOpt, QOpt, PLYError, QPLCompError
 from ..language import AstPres, TypedTerm, ValueError, EIQOptPair
 
 from .ast import *
-from ..calc import calc
+from ..language.semantics.forward import calc
 
 from copy import deepcopy
 
@@ -90,6 +90,7 @@ class Interpreter:
             rho = calc(cmd.statement, rho0, frame.env)
 
             new_frame.env[cmd.id] = EIQOptPair(EQOpt(rho.qval), EQVar(rho.qvar))
+            new_frame.info = f"Defined Calculation {cmd.id}."
         
         # DEF ID ASSIGN PROG statement '.'
         elif isinstance(cmd, DefProg):

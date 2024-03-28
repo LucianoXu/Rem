@@ -3,11 +3,11 @@ The (finite step) forward calculation of this language.
 '''
 
 
-from .language import *
+from .. import *
 import numpy as np
 from qplcomp import QOpt, IQOpt, QSOpt, IQSOpt
 
-from .error import ValueError
+from ...error import ValueError
 
 P0 = QOpt(np.array([[1., 0.], [0., 0.]]))
 E10 = QOpt(np.array([[0., 1.], [0., 0.]]))

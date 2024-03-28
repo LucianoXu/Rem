@@ -24,7 +24,7 @@ class MLS:
         # the index of the last charactor of the command (typically, '.')
         self.code_stack: list[str] = []  
 
-        self.current_frame = -1
+        self.cur_frame_id = -1
 
         self._info = ""
 
@@ -34,7 +34,8 @@ class MLS:
 
     @property
     def prover_info(self) -> str:
-        return str(self.prover)
+        # note that the prover frame is always one frame longer because of the initial one
+        return str(self.prover.frame_stack[self.cur_frame_id+1])
 
     @property
     def info(self) -> str:
@@ -42,6 +43,22 @@ class MLS:
     
     def __len__(self) -> int:
         return len(self.cmd_stack)
+    
+    def set_cursor(self, pos: int) -> None:
+        '''
+        set the cursor to the position and select the frame accordingly
+        '''
+        # calculate the current frame
+        new_frame_id = -1
+        total_len = 0
+        for code in self.code_stack:
+            new_frame_id += 1
+            total_len += len(code)
+            if total_len >= pos:
+                break
+
+        self.cur_frame_id = new_frame_id
+            
 
     def step_forward(self, new_code: str) -> str | None:
         '''
@@ -72,7 +89,7 @@ class MLS:
         self.code_stack.append(res[1])
 
         # focus on the latest frame
-        self.current_frame = len(self) - 1
+        self.cur_frame_id = len(self) - 1
 
         return remaining
 
@@ -82,6 +99,8 @@ class MLS:
 
         if succeeded, return the code popped. Else return None.
         '''
+        self._info = ''
+
         if len(self) == 0:
             self._info = "No more steps to go back."
             return None
@@ -91,8 +110,7 @@ class MLS:
             self.cmd_stack.pop()
             self.prover.pop_frame()
 
-        # adjust current_frame
-        if self.current_frame >= len(self):
-            self.current_frame = len(self) - 1
+        # adjust cur_frame_id
+        self.cur_frame_id = len(self) - 1
 
         return res
