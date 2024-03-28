@@ -39,7 +39,7 @@ from .eqso import EQSOpt
 
 
 
-def prepare_env() -> None:
+def prepare_env() -> Env:
     '''
     Append the environment with predefined quantum values.
     '''
@@ -52,6 +52,8 @@ def prepare_env() -> None:
             env[key] = EQSOpt(val)
         else:
             raise Exception("Unexpected Exception.")
+    
+    return env
 
 
 class Parser:

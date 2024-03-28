@@ -24,8 +24,7 @@ class QWhileAst(TypedTerm):
     def eval(self, env: Env) -> QWhileAst:
         pass
 
-    @property
-    def definite(self) -> bool:
+    def definite(self, env: Env) -> bool:
         '''
         Whether this program is definite. In other words, whether there is no prescription statements in this program.
         '''
@@ -80,9 +79,10 @@ class AstSubprog(QWhileAst):
             raise ValueError("The variable '" + str(self.subprog) + "' is not a program.")
         return east.eval(env)
 
-    @property
-    def definite(self) -> bool:
-        return False
+    def definite(self, env: Env) -> bool:
+        prog = self.subprog.eval(env)
+        assert isinstance(prog, QWhileAst)
+        return prog.definite(env)
 
     
     def prefix_str(self, prefix = "") -> str:
@@ -110,8 +110,7 @@ class AstAbort(QWhileAst):
     def eval(self, env: Env) -> QWhileAst:
         return self
 
-    @property
-    def definite(self) -> bool:
+    def definite(self, env: Env) -> bool:
         return True
     
     def prefix_str(self, prefix="") -> str:
@@ -135,8 +134,7 @@ class AstSkip(QWhileAst):
     def eval(self, env: Env) -> QWhileAst:
         return self
 
-    @property
-    def definite(self) -> bool:
+    def definite(self, env: Env) -> bool:
         return True
     
     def prefix_str(self, prefix="") -> str:
@@ -161,8 +159,7 @@ class AstInit(QWhileAst):
     def eval(self, env: Env) -> QWhileAst:
         return self
 
-    @property
-    def definite(self) -> bool:
+    def definite(self, env: Env) -> bool:
         return True
     
     def prefix_str(self, prefix="") -> str:
@@ -194,8 +191,7 @@ class AstUnitary(QWhileAst):
         
         return self
 
-    @property
-    def definite(self) -> bool:
+    def definite(self, env: Env) -> bool:
         return True
     
     def prefix_str(self, prefix="") -> str:
@@ -227,8 +223,7 @@ class AstAssert(QWhileAst):
         
         return self
 
-    @property
-    def definite(self) -> bool:
+    def definite(self, env: Env) -> bool:
         return True
     
     def prefix_str(self, prefix="") -> str:
@@ -409,12 +404,11 @@ class AstPres(QWhileAst):
 
     #############################################################
 
-    @property
-    def definite(self) -> bool:
+    def definite(self, env: Env) -> bool:
         if self.SRefined is None:
             return False
         else:
-            return self.SRefined.definite
+            return self.SRefined.definite(env)
         
     def pres_str(self) -> str:
         return "< " + str(self.P) + ", " + str(self.Q) + " >"
@@ -469,9 +463,8 @@ class AstSeq(QWhileAst):
             self.S1.eval(env)
         )
 
-    @property
-    def definite(self) -> bool:
-        return self.S0.definite and self.S1.definite
+    def definite(self, env) -> bool:
+        return self.S0.definite(env) and self.S1.definite(env)
     
     def prefix_str(self, prefix="") -> str:
         return self.S0.prefix_str(prefix) + ";\n" + self.S1.prefix_str(prefix)
@@ -505,9 +498,8 @@ class AstProb(QWhileAst):
         )
 
 
-    @property
-    def definite(self) -> bool:
-        return self.S0.definite and self.S1.definite
+    def definite(self, env: Env) -> bool:
+        return self.S0.definite(env) and self.S1.definite(env)
     
     def prefix_str(self, prefix="") -> str:
         res = prefix + "(\n" + self.S0.prefix_str(prefix + INDENT) + "\n"
@@ -547,10 +539,8 @@ class AstIf(QWhileAst):
             self.S0.eval(env))
 
 
-
-    @property
-    def definite(self) -> bool:
-        return self.S1.definite and self.S0.definite
+    def definite(self, env: Env) -> bool:
+        return self.S1.definite(env) and self.S0.definite(env)
     
     def prefix_str(self, prefix="") -> str:
         res = prefix + "if " + str(self.P) + " then\n"
@@ -591,9 +581,8 @@ class AstWhile(QWhileAst):
         )
 
     
-    @property
-    def definite(self) -> bool:
-        return self.S.definite
+    def definite(self, env: Env) -> bool:
+        return self.S.definite(env)
     
     def prefix_str(self, prefix="") -> str:
         res = prefix + "while " + str(self.P) + " do\n"

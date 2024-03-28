@@ -71,16 +71,12 @@ def p_cmd(p):
 
     elif type_match(p, ('DEF', 'ID', 'ASSIGN', '[', '[', 'statement', ']', ']', '(', 'eiqopt', ')', '.')):
         p[0] = DefCalc(p[2], p[6], p[10])
-        # rho0 = p[10].eval()
-        # rho = calc(p[6], rho0)
-        # Prover().define(p[2], EIQOpt(EQOpt(rho.qval), EQVar(rho.qvar)))
 
     elif type_match(p, ('DEF', 'ID', 'ASSIGN', 'PROG', 'statement', '.')):
         p[0] = DefProg(p[2], p[5])
 
     elif type_match(p, ('DEF', 'ID', 'ASSIGN', 'EXTRACT', 'ID', '.')):
         p[0] = DefExtract(p[2], p[5])
-        # Prover().define(p[2], EAst(Env()[p[5]].eval().extract)) # type: ignore
 
     elif type_match(p, ("REFINE", "ID", ':', 'prescription', '.')):
         p[0] = StartRefine(p[2], p[4])

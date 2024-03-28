@@ -17,11 +17,8 @@ class Prover:
     '''
     The object that interprates language, store the frames and host the formal verification.
     '''
-    def __init__(self, opts: dict[str, np.ndarray]):
-        self.frame_stack : list[Frame] = [Frame(Env(), None, [], "Empty Prover.")]   
-
-        for id in opts:
-            self.current_frame.env[id] = EQOpt(QOpt(opts[id]))
+    def __init__(self, env: Env):
+        self.frame_stack : list[Frame] = [Frame(env, None, [], "Empty Prover.")]
 
     @property
     def current_frame(self) -> Frame:
@@ -29,6 +26,7 @@ class Prover:
     
     def __str__(self) -> str:
         return str(self.current_frame)
+
     
     def execute(self, cmd: RemAst) -> None:
         '''

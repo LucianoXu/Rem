@@ -11,6 +11,8 @@ from qplcomp import ParsingError
 from textual.reactive import reactive
 from textual.app import ComposeResult, RenderableType # type: ignore
 
+from qplcomp import prepare_env
+
 from .backends import *
 
 from ..prover import mls
@@ -21,10 +23,10 @@ from time import time
 class Editor(Screen):
 
     BINDINGS = [
-        Binding("ctrl+o", "step_forward", "▶", priority=True),
-        Binding("ctrl+p", "step_backward", "◀", priority=True),
-        Binding("ctrl+j", "play_forward", "▶▶", priority=True),
         Binding("ctrl+l", "play_backward", "◀◀", priority=True),
+        Binding("ctrl+p", "step_backward", "◀", priority=True),
+        Binding("ctrl+o", "step_forward", "▶", priority=True),
+        Binding("ctrl+j", "play_forward", "▶▶", priority=True),
     ]
 
     def action_step_forward(self) -> bool:
@@ -33,7 +35,8 @@ class Editor(Screen):
         if res is not None:
             self.code_area.text = res
 
-        self.goal_area.text = self.mls.info
+        self.mls_info.text = self.mls.info
+        self.goal_area.text = self.mls.prover_info
         self.verified_area.text = self.mls.verified_code
 
         return res is not None
@@ -45,7 +48,8 @@ class Editor(Screen):
         if res is not None:
             self.code_area.text = res + self.code_area.text
 
-        self.goal_area.text = self.mls.info
+        self.mls_info.text = self.mls.info
+        self.goal_area.text = self.mls.prover_info
         self.verified_area.text = self.mls.verified_code
 
         return res is not None
@@ -70,10 +74,12 @@ class Editor(Screen):
             "// put your code here ...", 
             id='code-area',
             show_line_numbers=True)
-        
+
         self.goal_area = TextArea(read_only=True)
 
-        self.mls = mls.MLS()
+        self.mls_info = TextArea(read_only=True)
+
+        self.mls = mls.MLS(prepare_env())
 
         yield Header()
 
@@ -82,7 +88,11 @@ class Editor(Screen):
                 self.verified_area,
                 self.code_area,
             ),
-            self.goal_area,
+            Vertical(
+                self.goal_area,
+                self.mls_info,
+            ),
+                
         )
 
         yield Footer()
