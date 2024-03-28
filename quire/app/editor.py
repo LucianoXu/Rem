@@ -23,10 +23,10 @@ from time import time
 class Editor(Screen):
 
     BINDINGS = [
-        Binding("ctrl+l", "play_backward", "◀◀", priority=True),
-        Binding("ctrl+p", "step_backward", "◀", priority=True),
-        Binding("ctrl+o", "step_forward", "▶", priority=True),
-        Binding("ctrl+j", "play_forward", "▶▶", priority=True),
+        Binding("ctrl+j", "play_backward", "◀◀", priority=True),
+        Binding("ctrl+o", "step_backward", "◀", priority=True),
+        Binding("ctrl+p", "step_forward", "▶", priority=True),
+        Binding("ctrl+l", "play_forward", "▶▶", priority=True),
     ]
 
     def action_step_forward(self) -> bool:
@@ -38,6 +38,9 @@ class Editor(Screen):
         self.mls_info.text = self.mls.info
         self.goal_area.text = self.mls.prover_info
         self.verified_area.text = self.mls.verified_code
+
+        # verified_area scroll to end
+        self.verified_area.scroll_end(animate = False)
 
         return res is not None
 
@@ -51,6 +54,9 @@ class Editor(Screen):
         self.mls_info.text = self.mls.info
         self.goal_area.text = self.mls.prover_info
         self.verified_area.text = self.mls.verified_code
+
+        # verified_area scroll to end
+        self.verified_area.scroll_end(animate = False)
 
         return res is not None
 
@@ -73,7 +79,9 @@ class Editor(Screen):
         self.code_area = TextArea(
             "// put your code here ...", 
             id='code-area',
-            show_line_numbers=True)
+            show_line_numbers=True,
+            tab_behavior='indent'
+        )
 
         self.goal_area = TextArea(read_only=True)
 

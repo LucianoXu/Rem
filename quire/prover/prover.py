@@ -18,7 +18,7 @@ class Prover:
     The object that interprates language, store the frames and host the formal verification.
     '''
     def __init__(self, env: Env):
-        self.frame_stack : list[Frame] = [Frame(env, None, [], "Empty Prover.")]
+        self.frame_stack : list[Frame] = [Frame(env, '', None, "Empty Prover.")]
 
     @property
     def current_frame(self) -> Frame:

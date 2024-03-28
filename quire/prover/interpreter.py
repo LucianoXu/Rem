@@ -8,6 +8,8 @@ from ..language import AstPres, TypedTerm, ValueError, EIQOptPair
 from .ast import *
 from ..calc import calc
 
+from copy import deepcopy
+
 import numpy as np
 
 
@@ -16,14 +18,18 @@ class Frame:
     An exclusive proof frame of the prover.
     '''
     def __init__(self, env: Env, 
-                 refine_proof: AstPres|None, 
-                 current_goals: list[AstPres],
+                 refine_proof_name: str,
+                 refine_proof: AstPres|None,
                  info: str | Exception = ""):
         self.env : Env = env.copy()
-        self.refine_proof = refine_proof
-        self.current_goals = current_goals.copy()
+        self.refine_proof_name = refine_proof_name
+        self.refine_proof = deepcopy(refine_proof)
         self.info : str | Exception = info
 
+        if self.refine_proof is None:
+            self.current_goals = []
+        if self.refine_proof:
+            self.current_goals = self.refine_proof.get_prescription()
 
     @property
     def goals_str(self) -> str:
@@ -44,8 +50,8 @@ class Frame:
     def copy(self) -> Frame:
         return Frame(
             self.env, 
-            self.refine_proof, 
-            self.current_goals,
+            self.refine_proof_name,
+            self.refine_proof,
             self.info)
     
     def __str__(self) -> str:
@@ -108,7 +114,7 @@ class Interpreter:
             if not isinstance(cmd.prescription, AstPres):
                 raise ValueError("The program to be refined must be a prescription.")
             
-            new_frame.env[cmd.id] = cmd.prescription
+            new_frame.refine_proof_name = cmd.id
             new_frame.refine_proof = cmd.prescription
             new_frame.current_goals = [cmd.prescription]
 
@@ -122,7 +128,7 @@ class Interpreter:
             
             new_frame.current_goals[0].refine_wlp(cmd.statement, frame.env)
 
-            new_frame.current_goals = frame.current_goals[0].get_prescription() + frame.current_goals[1:]
+            new_frame.current_goals = new_frame.current_goals[0].get_prescription() + new_frame.current_goals[1:]
             
             new_frame.info = f"Refinement step succeeded."
 
@@ -133,7 +139,7 @@ class Interpreter:
             
             new_frame.current_goals[0].refine_seq_break(cmd.mid_assertion)
 
-            new_frame.current_goals = frame.current_goals[0].get_prescription() + frame.current_goals[1:]
+            new_frame.current_goals = new_frame.current_goals[0].get_prescription() + new_frame.current_goals[1:]
             
             new_frame.info = f"Refinement step succeeded."
 
@@ -144,7 +150,7 @@ class Interpreter:
             
             new_frame.current_goals[0].refine_if(cmd.P)
 
-            new_frame.current_goals = frame.current_goals[0].get_prescription() + frame.current_goals[1:]
+            new_frame.current_goals = new_frame.current_goals[0].get_prescription() + new_frame.current_goals[1:]
             
             new_frame.info = f"Refinement step succeeded."
 
@@ -155,7 +161,7 @@ class Interpreter:
             
             new_frame.current_goals[0].refine_while(cmd.P, cmd.inv, frame.env)
 
-            new_frame.current_goals = frame.current_goals[0].get_prescription() + frame.current_goals[1:]
+            new_frame.current_goals = new_frame.current_goals[0].get_prescription() + new_frame.current_goals[1:]
             
             new_frame.info = f"Refinement step succeeded."
 
@@ -166,7 +172,7 @@ class Interpreter:
             
             new_frame.current_goals[0].refine_weaken_pre(cmd.pre, frame.env)
 
-            new_frame.current_goals = frame.current_goals[0].get_prescription() + frame.current_goals[1:]
+            new_frame.current_goals = new_frame.current_goals[0].get_prescription() + new_frame.current_goals[1:]
             
             new_frame.info = f"Refinement step succeeded."
 
@@ -177,7 +183,7 @@ class Interpreter:
             
             new_frame.current_goals[0].refine_strengthen_post(cmd.post, frame.env)
 
-            new_frame.current_goals = frame.current_goals[0].get_prescription() + frame.current_goals[1:]
+            new_frame.current_goals = new_frame.current_goals[0].get_prescription() + new_frame.current_goals[1:]
             
             new_frame.info = f"Refinement step succeeded."
 
@@ -187,7 +193,7 @@ class Interpreter:
                 raise ValueError(f"Invalid goal number {cmd.n}. Choose a number from {1} to {len(frame.current_goals)}. ")
             
             # switch the goals
-            new_frame.current_goals = [frame.current_goals[cmd.n-1]] + frame.current_goals[:cmd.n-1] + frame.current_goals[cmd.n:]
+            new_frame.current_goals = [new_frame.current_goals[cmd.n-1]] + new_frame.current_goals[:cmd.n-1] + new_frame.current_goals[cmd.n:]
 
             new_frame.info = f"Goal switched."
 
@@ -198,6 +204,9 @@ class Interpreter:
             
             if len(frame.current_goals) != 0:
                 raise ValueError("Goals not clear.")
+
+            # register this refinement result
+            new_frame.env[frame.refine_proof_name] = frame.refine_proof
 
             new_frame.refine_proof = None
             new_frame.current_goals = []
