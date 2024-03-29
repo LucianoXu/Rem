@@ -21,7 +21,7 @@ class EQVar(TypedTerm):
     def __init__(self, qvar : QVar):
         super().__init__(QVarType())
 
-        assert isinstance(qvar, QVar)
+        assert isinstance(qvar, QVar), "ASSERTION FAILED"
         self.qvar = qvar
 
     def eval(self, env: Env) -> EQVar:

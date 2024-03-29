@@ -35,7 +35,7 @@ class EQOpt(EQOptAbstract):
 
     def __init__(self, qopt : QOpt):
         super().__init__()
-        assert isinstance(qopt, QOpt)
+        assert isinstance(qopt, QOpt), "ASSERTION FAILED"
         self.qopt = qopt
 
     def eval(self, env: Env) -> EQOpt:
@@ -56,7 +56,7 @@ class EQOptKetProj(EQOptAbstract):
     def __init__(self, vec : EQVecAbstract):
         super().__init__()
 
-        assert isinstance(vec, EQVecAbstract)
+        assert isinstance(vec, EQVecAbstract), "ASSERTION FAILED"
         self.vec = vec
 
     
@@ -171,7 +171,7 @@ class EQOptScale(EQOptAbstract):
     def __init__(self, c : complex, opt : EQOptAbstract):
         super().__init__()
 
-        assert isinstance(c, (complex, float))
+        assert isinstance(c, (complex, float)), "ASSERTION FAILED"
         self.c = c
 
         self.opt = opt

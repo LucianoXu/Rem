@@ -30,10 +30,10 @@ class IQVal:
     Indexed Quantum Values.
     '''
     def __init__(self, qval : QVal, qvar : QVar):
-        assert isinstance(qval, QVal)
+        assert isinstance(qval, QVal), "ASSERTION FAILED"
         self._qval = qval
 
-        assert isinstance(qvar, QVar)
+        assert isinstance(qvar, QVar), "ASSERTION FAILED"
         self._qvar = qvar
 
         if qval.qnum != qvar.qnum:

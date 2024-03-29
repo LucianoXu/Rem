@@ -3,7 +3,7 @@ from ...mTLC.env import Env
 from ..prover.ast import RemAst
 
 
-from .prover_parsing_build import parse_sentence
+from .prover_parsing_build import parse_sentence, ParsingError, LexingError, ValueError
 
 from ..prover.prover import Prover
 
@@ -81,6 +81,7 @@ class MLS:
         # STEP 2, execute the command
         try:
             self.prover.execute(res[0])
+
         except Exception as e:
             self._info = e
             return None

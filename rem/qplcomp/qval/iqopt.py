@@ -18,7 +18,7 @@ class IQOpt(IQVal):
     def __init__(self, qopt: QOpt, qvar: QVar, rho_extend : bool = False):
         super().__init__(qopt, qvar)
         
-        assert isinstance(qopt, QOpt)
+        assert isinstance(qopt, QOpt), "ASSERTION FAILED"
         self._qval : QOpt
 
         # controls how the extension is carrried out
@@ -95,7 +95,7 @@ class IQOpt(IQVal):
         - Returns: `IQOpt`.
         '''
 
-        assert isinstance(other, IQOpt)
+        assert isinstance(other, IQOpt), "ASSERTION FAILED"
 
         # the common qvar
         qvar_all = self.qvar + other.qvar
@@ -148,7 +148,7 @@ class IQOpt(IQVal):
         - Parameters: `self`, `other` : `IQOpt`.
         - Returns: `IQOpt`.
         '''
-        assert isinstance(other, IQOpt)
+        assert isinstance(other, IQOpt), "ASSERTION FAILED"
 
         # the common qvar
         qvar_all = self.qvar + other.qvar
@@ -184,7 +184,7 @@ class IQOpt(IQVal):
         - Parameters: `self`, `other` : `IQOpt`.
         - Returns: `IQOpt`.
         '''
-        assert isinstance(other, IQOpt)
+        assert isinstance(other, IQOpt), "ASSERTION FAILED"
 
         if not self.qvar.disjoint(other.qvar):
             raise QPLCompError("The quantum variable '" + str(self.qvar) + "' is not disjoint with '" + str(other.qvar) + "'.")
@@ -199,7 +199,7 @@ class IQOpt(IQVal):
         - Parameters: `self`, `other` : `IQOpt`.
         - Returns: `bool`, whether `self` is smaller than `other`.
         '''
-        assert isinstance(other, IQOpt)
+        assert isinstance(other, IQOpt), "ASSERTION FAILED"
 
         # the common qvar
         qvar_all = self.qvar + other.qvar
@@ -221,7 +221,7 @@ class IQOpt(IQVal):
         - Returns: `IQOpt`.
         - Error: `ValueError` when `self` or `other` is not a projector.
         '''
-        assert isinstance(other, IQOpt)
+        assert isinstance(other, IQOpt), "ASSERTION FAILED"
 
         # the common qvar
         qvar_all = self.qvar + other.qvar
@@ -244,7 +244,7 @@ class IQOpt(IQVal):
         - Returns: `IQOpt`.
         - Error: `ValueError` when `self` or `other` is not a projector.
         '''
-        assert isinstance(other, IQOpt)
+        assert isinstance(other, IQOpt), "ASSERTION FAILED"
 
         # the common qvar
         qvar_all = self.qvar + other.qvar

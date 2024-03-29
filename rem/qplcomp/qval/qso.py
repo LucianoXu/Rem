@@ -41,7 +41,7 @@ class QSOpt(QVal):
                 raise QPLCompError("The Kraus representation should have at least one operator.")
             
             for E in data:
-                assert isinstance(E, QOpt)
+                assert isinstance(E, QOpt), "ASSERTION FAILED"
 
             self._qnum = data[0].qnum
             for E in data:
@@ -95,7 +95,7 @@ class QSOpt(QVal):
             - `opt` : `QOpt`, the operator.
         - Returns: `QOpt`, the result.
         '''
-        assert isinstance(opt, QOpt)
+        assert isinstance(opt, QOpt), "ASSERTION FAILED"
 
         if self.qnum != opt.qnum:
             raise QPLCompError("The QSOpt instance cannot apply on the QOpt instance. The QSOpt instance is of " + str(self.qnum) + " qubits, but the QOpt instance is of "+ str(opt.qnum) + "qubits.")
@@ -126,7 +126,7 @@ class QSOpt(QVal):
         - Parameters: `self`, `other` : `QSOpt`.
         - Returns: `QSOpt`.
         '''
-        assert isinstance(other, QOpt)
+        assert isinstance(other, QOpt), "ASSERTION FAILED"
 
         if self.qnum != other.qnum:
             raise QPLCompError(f"Inconsistent qubit numbers: {self.qnum} and {other.qnum}. The two QSOpt should have the same number of qubit numbers.")

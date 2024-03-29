@@ -21,7 +21,7 @@ class IQSOpt(IQVal):
     def __init__(self, qso: QSOpt, qvar: QVar):
         super().__init__(qso, qvar)
 
-        assert isinstance(qso, QSOpt)
+        assert isinstance(qso, QSOpt), "ASSERTION FAILED"
         self._qval : QSOpt
 
     @property
@@ -57,7 +57,7 @@ class IQSOpt(IQVal):
             - `iopt` : `IQOpt`, the indexed operator.
         - Returns: `IQOpt`, the indexed result.
         '''
-        assert isinstance(iopt, IQOpt)
+        assert isinstance(iopt, IQOpt), "ASSERTION FAILED"
 
         # the common qvar
         qvar_all = self.qvar + iopt.qvar
@@ -76,7 +76,7 @@ class IQSOpt(IQVal):
         - Returns: `IQSOpt`.
         '''
 
-        assert isinstance(other, IQSOpt)
+        assert isinstance(other, IQSOpt), "ASSERTION FAILED"
 
         # the common qvar
         qvar_all = self.qvar + other.qvar

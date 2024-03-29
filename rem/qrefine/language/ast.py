@@ -36,13 +36,6 @@ class QProgAst(TypedTerm):
     def __str__(self) -> str:
         return self.prefix_str()
     
-    @property
-    def extract(self) -> QProgAst:
-        '''
-        Extract the refinement result as a program syntax (without refinement proofs).
-        '''
-        raise NotImplementedError()
-    
     def get_prescription(self) -> list[AstPres]:
         '''
         Return the unsolved prescriptions.
@@ -67,10 +60,6 @@ class AstAbort(QProgAst):
     def prefix_str(self, prefix="") -> str:
         return prefix + "abort"
     
-    @property
-    def extract(self) -> QProgAst:
-        return self
-    
     def get_prescription(self) -> list[AstPres]:
         return []
 
@@ -87,10 +76,6 @@ class AstSkip(QProgAst):
     
     def prefix_str(self, prefix="") -> str:
         return prefix + "skip"
-    
-    @property
-    def extract(self) -> QProgAst:
-        return self
 
     def get_prescription(self) -> list[AstPres]:
         return []
@@ -109,10 +94,6 @@ class AstInit(QProgAst):
     
     def prefix_str(self, prefix="") -> str:
         return prefix + str(self.eqvar) + ":=0"
-
-    @property
-    def extract(self) -> QProgAst:
-        return self
 
     def get_prescription(self) -> list[AstPres]:
         return []
@@ -138,10 +119,6 @@ class AstUnitary(QProgAst):
     def prefix_str(self, prefix="") -> str:
         return prefix + str(self.U) + ";"
 
-    @property
-    def extract(self) -> QProgAst:
-        return self
-
     def get_prescription(self) -> list[AstPres]:
         return []
 
@@ -165,10 +142,6 @@ class AstAssert(QProgAst):
     
     def prefix_str(self, prefix="") -> str:
         return prefix + "assert " + str(self.P)
-    
-    @property
-    def extract(self) -> QProgAst:
-        return self
 
     def get_prescription(self) -> list[AstPres]:
         return []
@@ -219,14 +192,6 @@ class AstPres(QProgAst):
             res += prefix + ")"
             return res
 
-
-    @property
-    def extract(self) -> QProgAst:
-        if self.SRefined is not None:
-            return self.SRefined.extract
-        else:
-            return self
-
     def get_prescription(self) -> list[AstPres]:
         if self.SRefined is not None:
             return self.SRefined.get_prescription()
@@ -257,10 +222,6 @@ class AstSeq(QProgAst):
     
     def prefix_str(self, prefix="") -> str:
         return self.S0.prefix_str(prefix) + "\n" + self.S1.prefix_str(prefix)
-    
-    @property
-    def extract(self) -> QProgAst:
-        return AstSeq(self.S0.extract, self.S1.extract)
     
     def get_prescription(self) -> list[AstPres]:
         return self.S0.get_prescription() + self.S1.get_prescription()
@@ -293,10 +254,6 @@ class AstProb(QProgAst):
         res += self.S1.prefix_str(prefix + INDENT) + "\n"
         res += prefix + "}"
         return res
-    
-    @property
-    def extract(self) -> QProgAst:
-        return AstProb(self.S0.extract, self.S1.extract, self.p)
         
     def get_prescription(self) -> list[AstPres]:
         return self.S0.get_prescription() + self.S1.get_prescription()
@@ -331,10 +288,6 @@ class AstIf(QProgAst):
         res += prefix + "end"
         return res
 
-    @property
-    def extract(self) -> QProgAst:
-        return AstIf(self.P, self.S1.extract, self.S0.extract)
-
     def get_prescription(self) -> list[AstPres]:
         return self.S1.get_prescription() + self.S0.get_prescription()
     
@@ -364,10 +317,6 @@ class AstWhile(QProgAst):
         res += self.S.prefix_str(prefix + INDENT) + "\n"
         res += prefix + "end"
         return res
-
-    @property
-    def extract(self) -> QProgAst:
-        return AstWhile(self.P, self.S.extract)
 
     def get_prescription(self) -> list[AstPres]:
         return self.S.get_prescription()

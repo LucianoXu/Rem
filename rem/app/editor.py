@@ -47,6 +47,7 @@ class Editor(Screen):
         if res is not None:
             self.code_area.text = res + self.code_area.text
 
+
         self.mls_info.text = self.mls.info
         self.goal_area.text = self.mls.prover_info
         self.verified_area.text = self.mls.verified_code
@@ -54,9 +55,15 @@ class Editor(Screen):
         # verified_area scroll to end
         self.verified_area.scroll_end(animate = False)
 
-        # set the cursor to the end
+        # set the verified_area cursor to the end
         self.verified_area.select_all()
         self.verified_area.move_cursor(self.verified_area.cursor_location)
+
+        # push the code_area cursor backwards
+        if res is not None:
+            row_offset = res.count('\n')
+            col_offset = len(res.split('\n')[-1])
+            self.code_area.move_cursor_relative(row_offset, col_offset)
 
         return res is not None
 

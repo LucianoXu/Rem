@@ -80,7 +80,7 @@ def p_1(p):
     '''
     term    : term eqvar
     '''
-    p[1].type_checking(QOptType(), ParserState.env)
+    p[1].type_checking(QOptType())
     p[0] = EIQOptPair(p[1], p[2])
 
 def p_2(p):
@@ -321,6 +321,12 @@ def p_stt_0(p):
     '''
     p[0] = p[1]
 
+def p_stt_var(p):
+    '''
+    statement   : var
+    '''
+    p[0] = p[1]
+
 def p_stt_1(p):
     '''
     statement   : ABORT
@@ -357,9 +363,9 @@ def p_pres(p):
     '''
     statement    : '<' term ',' term '>'
     '''
-    p[1].type_checking(IQOptType())
-    p[3].type_checking(IQOptType())
-    p[0] = AstPres(p[1], p[3])
+    p[2].type_checking(IQOptType())
+    p[4].type_checking(IQOptType())
+    p[0] = AstPres(p[2], p[4])
 
 def p_stt_6(p):
     '''
@@ -407,34 +413,28 @@ def p_stt_10(p):
     p[0] = p[1]
 
 
+from ..language.semantics.state import EIQOptCalc
+def p_calc_iqopt(p):
+    '''
+    term    : '[' '[' statement ']' ']' '(' term ')'
+    '''
+    p[3].type_checking(QProgType())
+    p[7].type_checking(IQOptType())
+    p[0] = EIQOptCalc(p[3], p[7])
+
+from ..language.semantics.extract import QProgExtract
+def p_extract_prog(p):
+    '''
+    term    : EXTRACT statement
+    '''
+    p[2].type_checking(QProgType())
+    p[0] = QProgExtract(p[2])
+
 from ..prover.ast import *
 
 ########################################################
 # commands                                             #
 ########################################################
-
-'''
-cmd : DEF ID ASSIGN term '.'
-    | DEF ID ASSIGN eiqopt '.'
-    | DEF ID ASSIGN '[' '[' statement ']' ']' '(' eiqopt ')' '.'
-    | DEF ID ASSIGN PROG statement '.'
-    | DEF ID ASSIGN EXTRACT ID '.'
-    | REFINE ID ':' prescription '.'
-
-    | STEP statement '.'
-    | STEP REFINE_SEQ eiqopt '.'
-    | STEP REFINE_IF eiqopt '.'
-    | STEP REFINE_WHILE eiqopt REFINE_INV eiqopt '.'
-    | REFINE_WEAKEN_PRE eiqopt '.'
-    | REFINE_STRENGTHEN_POST eiqopt '.'
-
-    | CHOOSE FLOATNUM '.'
-    | META_END '.'
-
-    | SHOW ID '.'
-    | SHOW DEF '.'
-
-'''
 
 def p_cmd_0(p):
     '''

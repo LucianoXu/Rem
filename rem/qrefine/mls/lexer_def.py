@@ -18,8 +18,6 @@ reserved = {
     'while'     : 'WHILE',
     'do'        : 'DO',
 
-    'proc'      : 'PROC',
-
 
     # for refinement control
     'Refine'    : 'REFINE',
@@ -35,18 +33,16 @@ reserved = {
     'WeakenPre' : 'REFINE_WEAKEN_PRE',
     'StrengthenPost' :  'REFINE_STRENGTHEN_POST',
 
-    'Extract'   : 'EXTRACT',
 
     # for the meta-language and types
     'Var'       : 'VAR',
     'Def'       : 'DEF',
 
-    'Show'      : 'SHOW',
-    'Draw'      : 'DRAW',
-    'Test'      : 'TEST',
+    'Extract'   : 'EXTRACT',
 
+    'Show'      : 'SHOW',
     'Eval'      : 'EVAL',
-    'Prog'      : 'PROG',
+    'Test'      : 'TEST',
 
     # types
     'IQOpt'     : 'IQOPT',

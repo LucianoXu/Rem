@@ -59,7 +59,7 @@ class QVar:
         '''
         return the quantum variable that contains [self] and [other]
         '''
-        assert isinstance(other, QVar)
+        assert isinstance(other, QVar), "ASSERTION FAILED"
         
         r = self._qvls.copy()
         for qv in other._qvls:
@@ -79,7 +79,7 @@ class QVar:
         '''
         return the quantum variable that removes variables of `other` in `self`
         '''
-        assert isinstance(other, QVar)
+        assert isinstance(other, QVar), "ASSERTION FAILED"
         
         r = []
         for qv in self._qvls:
@@ -92,7 +92,7 @@ class QVar:
         '''
         Test whether the quantum variable `self` contains `other`.
         '''
-        assert isinstance(other, QVar)
+        assert isinstance(other, QVar), "ASSERTION FAILED"
 
         for qv in other._qvls:
             if qv not in self._qvls:
@@ -108,7 +108,7 @@ class QVar:
         '''
         Test whether the quantum variable `self` and `other` are disjoint.
         '''
-        assert isinstance(other, QVar)
+        assert isinstance(other, QVar), "ASSERTION FAILED"
 
         for qv in self._qvls:
             if qv in other._qvls:

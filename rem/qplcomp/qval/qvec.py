@@ -108,7 +108,7 @@ class QVec(QVal):
         - Returns: `QVec`.
         '''
 
-        assert isinstance(other, QVec)
+        assert isinstance(other, QVec), "ASSERTION FAILED"
         if self.qnum != other.qnum:
             raise QPLCompError(f"Inconsistent qubit number: {self.qnum} and {other.qnum}. The two QVec should have the same number of qubit numbers.")
         

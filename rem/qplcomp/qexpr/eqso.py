@@ -31,7 +31,7 @@ class EQSOpt(EQSOptAbstract):
     def __init__(self, qso : QSOpt):
         super().__init__()
 
-        assert isinstance(qso, QSOpt)
+        assert isinstance(qso, QSOpt), "ASSERTION FAILED"
         self.qso = qso
 
 
@@ -53,10 +53,10 @@ class EQSOptAdd(EQSOptAbstract):
     def __init__(self, soA : EQSOptAbstract, soB : EQSOptAbstract):
         super().__init__()
 
-        assert isinstance(soA, EQSOptAbstract)
+        assert isinstance(soA, EQSOptAbstract), "ASSERTION FAILED"
         self.soA = soA
 
-        assert isinstance(soB, EQSOptAbstract)
+        assert isinstance(soB, EQSOptAbstract), "ASSERTION FAILED"
         self.soB = soB
 
     def eval(self, env: Env) -> EQSOpt:

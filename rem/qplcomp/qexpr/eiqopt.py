@@ -38,7 +38,7 @@ class EIQOpt(EIQOptAbstract):
     def __init__(self, iqopt: IQOpt):
         super().__init__()
 
-        assert isinstance(iqopt, IQOpt)
+        assert isinstance(iqopt, IQOpt), "ASSERTION FAILED"
         self.iqopt = iqopt
 
     
@@ -151,7 +151,7 @@ class EIQOptScale(EIQOptAbstract):
     def __init__(self, c : complex, iopt : EIQOptAbstract):
         super().__init__()
 
-        assert isinstance(c, (complex, float))
+        assert isinstance(c, (complex, float)), "ASSERTION FAILED"
         self.c = c
         self.iopt = iopt
     

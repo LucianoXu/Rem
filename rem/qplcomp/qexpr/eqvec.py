@@ -30,7 +30,7 @@ class EQVec(EQVecAbstract):
     def __init__(self, qvec : QVec):
         super().__init__()
 
-        assert isinstance(qvec, QVec)
+        assert isinstance(qvec, QVec), "ASSERTION FAILED"
         self.qvec = qvec
     
     def eval(self, env: Env) -> EQVec:
@@ -67,10 +67,10 @@ class EQVecAdd(EQVecAbstract):
     def __init__(self, vec1 : EQVecAbstract, vec2 : EQVecAbstract):
         super().__init__()
 
-        assert isinstance(vec1, EQVecAbstract)
+        assert isinstance(vec1, EQVecAbstract), "ASSERTION FAILED"
         self.vec1 = vec1
 
-        assert isinstance(vec2, EQVecAbstract)
+        assert isinstance(vec2, EQVecAbstract), "ASSERTION FAILED"
         self.vec2 = vec2
 
     def eval(self, env: Env) -> EQVec:
@@ -96,10 +96,10 @@ class EQVecScale(EQVecAbstract):
     def __init__(self, c : complex, vec : EQVecAbstract):
         super().__init__()
 
-        assert isinstance(c, (complex, float))
+        assert isinstance(c, (complex, float)), "ASSERTION FAILED"
         self.c = c
 
-        assert isinstance(vec, EQVecAbstract)
+        assert isinstance(vec, EQVecAbstract), "ASSERTION FAILED"
         
         self.vec = vec
 

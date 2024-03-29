@@ -14,20 +14,20 @@ Refine Rep : < Pe[q1 q2 q3 a], Pe0[q1 q2 q3 a] >.
 	Step If Peq[q2 q3].
 
 	WeakenPre Pe0[q1 q2 q3 a]. Step skip.
-	WeakenPre Pe3[q1 q2 q3 a]. Step X[q3].
+	WeakenPre Pe3[q1 q2 q3 a]. Step X[q3];.
 
 	Step If Peq[q2 q3].
 
-	WeakenPre Pe1[q1 q2 q3 a]. Step X[q1].
-	WeakenPre Pe2[q1 q2 q3 a]. Step X[q2].
+	WeakenPre Pe1[q1 q2 q3 a]. Step X[q1];.
+	WeakenPre Pe2[q1 q2 q3 a]. Step X[q2];.
 End.
 
 Def RepExtr := Extract Rep.
 Show RepExtr.
 
-Def Noise := Prog 
-	(X[q1] [\oplus 0.5] (X[q2] [\oplus 0.5] (X[q3] [\oplus 0.5] skip))).
+Def Noise :=
+	{X[q1]; [\oplus 0.5] {X[q2]; [\oplus 0.5] {X[q3]; [\oplus 0.5] skip}}}.
 
-Def noisy := [[proc Noise]]([0.6|000> + 0.8|111>][q1 q2 q3]).
-Def recovered := [[proc RepExtr]](IQOPT noisy).
+Def noisy := [[Noise]]([0.6|000> + 0.8|111>][q1 q2 q3]).
+Def recovered := [[RepExtr]](noisy).
 Eval recovered.

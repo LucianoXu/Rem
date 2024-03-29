@@ -7,11 +7,42 @@ from .. import *
 import numpy as np
 from ....qplcomp import QOpt, IQOpt, QSOpt, IQSOpt
 
+from .extract import extract
+
 from ...error import ValueError
+
 
 P0 = QOpt(np.array([[1., 0.], [0., 0.]]))
 E10 = QOpt(np.array([[0., 1.], [0., 0.]]))
 ESet0 = QSOpt([P0, E10])
+
+class EIQOptCalc(EIQOptAbstract):
+    '''
+    The Expression of forward calculation.
+    
+    EIQOpt ::= [[ statement ]] ( rho )
+    '''
+    def __init__(self, prog: TypedTerm, rho: TypedTerm):
+        super().__init__()
+
+        self.prog = prog
+        self.rho = rho
+
+    def eval(self, env: Env) -> EIQOpt:
+        prog = self.prog.eval(env)
+        rho = self.rho.eval(env)
+
+        prog.type_checking(QProgType())
+        assert isinstance(prog, QProgAst), "ASSERTION FAILED"
+
+        rho.type_checking(IQOptType())
+        assert isinstance(rho, EIQOpt), "ASSERTION FAILED"
+
+        return EIQOpt(calc(prog, rho.iqopt, env))
+    
+    def __str__(self) -> str:
+        return f"[[{self.prog}]]({self.rho})"
+
 
 def calc(prog : QProgAst, rho : IQOpt, env: Env) -> IQOpt:
     '''
@@ -21,7 +52,7 @@ def calc(prog : QProgAst, rho : IQOpt, env: Env) -> IQOpt:
 
     rho.rho_extend = True
 
-    extracted_prog = prog.extract
+    extracted_prog = extract(prog)
 
     # check whether the program can be calculated
     if not extracted_prog.definite(env):
@@ -35,7 +66,7 @@ def calc(prog : QProgAst, rho : IQOpt, env: Env) -> IQOpt:
     
 
 
-def calc_iter(prog : QProgAst, rho : IQOpt, env: Env) -> IQOpt:
+def calc_iter(prog : TypedTerm, rho : IQOpt, env: Env) -> IQOpt:
     '''
     Calculate the execution result of program `prog` on input state `rho`.
 
@@ -46,11 +77,11 @@ def calc_iter(prog : QProgAst, rho : IQOpt, env: Env) -> IQOpt:
     # return zero if the input is zero
     if rho == IQOpt.zero(is_rho=True):
         return IQOpt.zero(is_rho=True)
-
-    if isinstance(prog, AstSubprog):
-        return calc_iter(prog.eval(env), rho, env)
     
-    elif isinstance(prog, AstAbort):
+    prog.type_checking(QProgType())
+    prog = prog.eval(env)
+
+    if isinstance(prog, AstAbort):
         return IQOpt.zero(is_rho=True)
     
     elif isinstance(prog, AstSkip):
@@ -111,4 +142,4 @@ def calc_iter(prog : QProgAst, rho : IQOpt, env: Env) -> IQOpt:
         return rho_break + rho_continue
     
     else:
-        raise Exception()
+        raise ValueError(f"Cannot execute the program\n\n{prog}")

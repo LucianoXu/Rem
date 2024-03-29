@@ -4,10 +4,7 @@ def wlp(prog: QProgAst, post: IQOpt, env: Env) -> IQOpt:
     '''
     Compute the weakest liberal precondition.
     '''
-    if isinstance(prog, AstSubprog):
-        return wlp(prog.eval(env), post, env)
-    
-    elif isinstance(prog, AstAbort):
+    if isinstance(prog, AstAbort):
         return IQOpt.identity(False)
     
     elif isinstance(prog, AstSkip):
@@ -70,9 +67,4 @@ def sp_ex(prog: QProgAst, pre : EIQOpt, env: Env) -> EIQOpt:
     '''
     Calculate the strongest postcondition (expression).
     '''
-    
-    if isinstance(prog, AstSubprog):
-        return sp_ex(prog.eval(env), pre, env)
-    
-    else:
-        raise ValueError(f"Unsupported type: {prog}")
+    raise ValueError(f"Unsupported type: {prog}")

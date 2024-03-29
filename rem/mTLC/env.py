@@ -65,6 +65,9 @@ class Var(TypedTerm):
     The class for typed variables.
     '''
     def __init__(self, id : str, env : Env):
+        if not id in env.decs:
+            raise TermError(f"The variable '{id}' is not declared.")
+        
         super().__init__(env.decs[id])
 
         if not isinstance(id, str):
