@@ -10,7 +10,7 @@ from .semantics.assertion import wlp
 #############################################################
 
 
-def wlp_check(pres: AstPres, SRefined: QProgAst, env: Env) -> None:
+def wlp_check(pres: AstPres, SRefined: TypedTerm, env: Env) -> None:
     '''
         == Refinement Rule ==
         ```
@@ -22,6 +22,11 @@ def wlp_check(pres: AstPres, SRefined: QProgAst, env: Env) -> None:
         It checks the weakest liberal precondition.
         (it is in the semantics level)
     '''
+    SRefined = SRefined.eval(env)
+
+    if not isinstance(SRefined, QProgAst):
+        raise ValueError("The refined program should be a QProgAst instance.")
+
     if not pres.P.eval(env).iqopt <= wlp(SRefined, pres.Q.eval(env).iqopt, env):
         msg = "Refinement failed. The relation P <= wlp.S.Q is not satisfied for: \n"
         msg += "P = \n\t" + str(pres.P) + "\n"

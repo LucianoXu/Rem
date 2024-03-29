@@ -43,6 +43,10 @@ class QProgAst(TypedTerm):
         '''
         raise NotImplementedError()
     
+    @property
+    def all_qvar(self) -> QVar:
+        raise NotImplementedError()
+    
     
 
 #####################################################################
@@ -64,6 +68,9 @@ class AstAbort(QProgAst):
     def get_prescription(self) -> list[AstPres]:
         return []
 
+    @property
+    def all_qvar(self) -> QVar:
+        return QVar([])
 
 class AstSkip(QProgAst):
     def __init__(self):
@@ -81,6 +88,10 @@ class AstSkip(QProgAst):
     def get_prescription(self) -> list[AstPres]:
         return []
     
+    @property
+    def all_qvar(self) -> QVar:
+        return QVar([])
+
 
 class AstInit(QProgAst):
     def __init__(self, eqvar : EQVar):
@@ -99,6 +110,10 @@ class AstInit(QProgAst):
     def get_prescription(self) -> list[AstPres]:
         return []
     
+    @property
+    def all_qvar(self) -> QVar:
+        return self.eqvar.qvar
+
     
 class AstUnitary(QProgAst):
     def __init__(self, U : EIQOptAbstract):
@@ -123,6 +138,10 @@ class AstUnitary(QProgAst):
     def get_prescription(self) -> list[AstPres]:
         return []
 
+    @property
+    def all_qvar(self) -> QVar:
+        return self.U.all_qvar
+
     
 class AstAssert(QProgAst):
     def __init__(self, P : EIQOptAbstract):
@@ -146,6 +165,10 @@ class AstAssert(QProgAst):
 
     def get_prescription(self) -> list[AstPres]:
         return []
+
+    @property
+    def all_qvar(self) -> QVar:
+        return self.P.all_qvar
 
     
 
@@ -199,6 +222,10 @@ class AstPres(QProgAst):
         else:
             return [self]
     
+    @property
+    def all_qvar(self) -> QVar:
+        return self.P.all_qvar + self.Q.all_qvar
+
 
 
 class AstSeq(QProgAst):
@@ -227,6 +254,10 @@ class AstSeq(QProgAst):
     def get_prescription(self) -> list[AstPres]:
         return self.S0.get_prescription() + self.S1.get_prescription()
     
+    @property
+    def all_qvar(self) -> QVar:
+        return self.S0.all_qvar + self.S1.all_qvar
+
 class AstProb(QProgAst):
     def __init__(self, S0 : QProgAst, S1 : QProgAst, p : float):
         super().__init__()
@@ -258,6 +289,11 @@ class AstProb(QProgAst):
         
     def get_prescription(self) -> list[AstPres]:
         return self.S0.get_prescription() + self.S1.get_prescription()
+
+    @property
+    def all_qvar(self) -> QVar:
+        return self.S0.all_qvar + self.S1.all_qvar
+
 
 class AstIf(QProgAst):
     def __init__(self, P : EIQOptAbstract, S1 : QProgAst, S0 : QProgAst):
@@ -292,6 +328,11 @@ class AstIf(QProgAst):
     def get_prescription(self) -> list[AstPres]:
         return self.S1.get_prescription() + self.S0.get_prescription()
     
+    @property
+    def all_qvar(self) -> QVar:
+        return self.P.all_qvar + self.S1.all_qvar + self.S0.all_qvar
+
+    
 class AstWhile(QProgAst):
     def __init__(self, P : EIQOptAbstract, S : QProgAst):
         super().__init__()
@@ -321,3 +362,7 @@ class AstWhile(QProgAst):
 
     def get_prescription(self) -> list[AstPres]:
         return self.S.get_prescription()
+    
+    @property
+    def all_qvar(self) -> QVar:
+        return self.P.all_qvar + self.S.all_qvar

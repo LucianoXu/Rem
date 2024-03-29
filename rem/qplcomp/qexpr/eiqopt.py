@@ -29,6 +29,10 @@ class EIQOptAbstract(TypedTerm):
     def eval(self, env: Env) -> EIQOpt:
         pass
 
+    @property
+    def all_qvar(self) -> QVar:
+        raise NotImplementedError()
+
 class EIQOpt(EIQOptAbstract):
     '''
     The Expression of Indexed Quantum Operators.
@@ -48,6 +52,10 @@ class EIQOpt(EIQOptAbstract):
     
     def __str__(self) -> str:
         return str(self.iqopt)
+
+    @property
+    def all_qvar(self) -> QVar:
+        return self.iqopt.qvar
     
 class EIQOptPair(EIQOptAbstract):
     '''
@@ -74,7 +82,9 @@ class EIQOptPair(EIQOptAbstract):
     def __str__(self) -> str:
         return str(self.qopt) + str(self.qvar)
 
-
+    @property
+    def all_qvar(self) -> QVar:
+        return self.qvar.qvar
     
 class EIQOptAdd(EIQOptAbstract):
     '''
@@ -99,6 +109,11 @@ class EIQOptAdd(EIQOptAbstract):
     
     def __str__(self) -> str:
         return "(" + str(self.ioptA) + "+" + str(self.ioptB) + ")"
+    
+    @property
+    def all_qvar(self) -> QVar:
+        return self.ioptA.all_qvar + self.ioptB.all_qvar
+
 
 
 
@@ -125,6 +140,10 @@ class EIQOptNeg(EIQOptAbstract):
     def __str__(self) -> str:
         return "(-" + str(self.iopt) + ")"
     
+    @property
+    def all_qvar(self) -> QVar:
+        return self.iopt.all_qvar
+
 
 
 class EIQOptSub(EIQOptAbstract):
@@ -152,6 +171,9 @@ class EIQOptSub(EIQOptAbstract):
     def __str__(self) -> str:
         return "(" + str(self.ioptA) + "-" + str(self.ioptB) + ")"
 
+    @property
+    def all_qvar(self) -> QVar:
+        return self.ioptA.all_qvar + self.ioptB.all_qvar
 
 class EIQOptScale(EIQOptAbstract):
     '''
@@ -178,7 +200,9 @@ class EIQOptScale(EIQOptAbstract):
     def __str__(self) -> str:
         return "(" + str(self.c) + " " + str(self.iopt) + ")"
     
-
+    @property
+    def all_qvar(self) -> QVar:
+        return self.iopt.all_qvar
 
 class EIQOptMul(EIQOptAbstract):
     '''
@@ -204,6 +228,9 @@ class EIQOptMul(EIQOptAbstract):
     def __str__(self) -> str:
         return "(" + str(self.ioptA) + " " + str(self.ioptB) + ")"
 
+    @property
+    def all_qvar(self) -> QVar:
+        return self.ioptA.all_qvar + self.ioptB.all_qvar
 
 class EIQOptDagger(EIQOptAbstract):
     '''
@@ -229,6 +256,9 @@ class EIQOptDagger(EIQOptAbstract):
         return "(" + str(self.iopt) + "†" + ")"
     
 
+    @property
+    def all_qvar(self) -> QVar:
+        return self.iopt.all_qvar
 
 class EIQOptTensor(EIQOptAbstract):
     '''
@@ -256,8 +286,9 @@ class EIQOptTensor(EIQOptAbstract):
     def __str__(self) -> str:
         return "(" + str(self.ioptA) + " ⊗ " + str(self.ioptB) + ")"
     
-
-
+    @property
+    def all_qvar(self) -> QVar:
+        return self.ioptA.all_qvar + self.ioptB.all_qvar
 
 class EIQOptDisjunct(EIQOptAbstract):
     '''
@@ -284,7 +315,10 @@ class EIQOptDisjunct(EIQOptAbstract):
     def __str__(self) -> str:
         return "(" + str(self.ioptA) + " ∨ " + str(self.ioptB) + ")"
     
-
+    @property
+    def all_qvar(self) -> QVar:
+        return self.ioptA.all_qvar + self.ioptB.all_qvar
+    
 class EIQOptConjunct(EIQOptAbstract):
     '''
     The expression for conjunction of projective indexed quantum operators.
@@ -311,7 +345,9 @@ class EIQOptConjunct(EIQOptAbstract):
     def __str__(self) -> str:
         return "(" + str(self.ioptA) + " ∧ " + str(self.ioptB) + ")"
     
-
+    @property
+    def all_qvar(self) -> QVar:
+        return self.ioptA.all_qvar + self.ioptB.all_qvar
 
 class EIQOptComplement(EIQOptAbstract):
     '''
@@ -336,7 +372,9 @@ class EIQOptComplement(EIQOptAbstract):
     def __str__(self) -> str:
         return "(" + str(self.iopt) + "^⊥)"
     
-
+    @property
+    def all_qvar(self) -> QVar:
+        return self.iopt.all_qvar
 
 class EIQOptSasakiImply(EIQOptAbstract):
     '''
@@ -364,6 +402,9 @@ class EIQOptSasakiImply(EIQOptAbstract):
     def __str__(self) -> str:
         return "(" + str(self.ioptA) + " ⇝ " + str(self.ioptB) + ")"
     
+    @property
+    def all_qvar(self) -> QVar:
+        return self.ioptA.all_qvar + self.ioptB.all_qvar
 
 class EIQOptSasakiConjunct(EIQOptAbstract):
     '''
@@ -391,3 +432,6 @@ class EIQOptSasakiConjunct(EIQOptAbstract):
     def __str__(self) -> str:
         return "(" + str(self.ioptA) + " ⋒ " + str(self.ioptB) + ")"
     
+    @property
+    def all_qvar(self) -> QVar:
+        return self.ioptA.all_qvar + self.ioptB.all_qvar

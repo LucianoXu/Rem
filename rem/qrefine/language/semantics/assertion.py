@@ -4,6 +4,7 @@ def wlp(prog: QProgAst, post: IQOpt, env: Env) -> IQOpt:
     '''
     Compute the weakest liberal precondition.
     '''
+
     if isinstance(prog, AstAbort):
         return IQOpt.identity(False)
     

@@ -5,9 +5,13 @@ from ..prover.ast import RemAst
 
 from .prover_parsing_build import parse_sentence, ParsingError, LexingError, ValueError
 
-from ..prover.prover import Prover
+from ..language import AstPres
+
+from ..prover.prover import Prover, Frame
 
 import numpy as np
+
+from ...qplcomp import prepare_env
 
 class MLS:
     '''
@@ -16,8 +20,8 @@ class MLS:
     it integrates the parser, pass input to prover and pass the output to TUI
     '''
 
-    def __init__(self, env: Env):
-        self.prover = Prover(env)
+    def __init__(self):
+        self.prover = Prover(prepare_env())
 
         self.cmd_stack: list[RemAst] = []
 
@@ -35,8 +39,23 @@ class MLS:
     @property
     def prover_info(self) -> str:
         # note that the prover frame is always one frame longer because of the initial one
-        return str(self.prover.frame_stack[self.cur_frame_id+1])
+        return str(self.current_frame)
+    
 
+    @property
+    def current_frame(self) -> Frame:
+        return self.prover.frame_stack[self.cur_frame_id+1]
+    
+    @property
+    def current_goal(self) -> AstPres | None:
+        return self.current_frame.current_goals[0] if len(self.current_frame.current_goals) > 0 else None
+    
+    def latest_selected(self) -> bool:
+        '''
+        Check whether the latest frame is selected.
+        '''
+        return self.cur_frame_id == len(self) - 1
+    
     @property
     def info(self) -> str:
         return str(self._info)

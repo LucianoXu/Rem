@@ -1,15 +1,15 @@
 from textual import on
 from textual.binding import Binding
 from textual.app import ComposeResult
-from textual.containers import Horizontal, Vertical
+from textual.containers import Horizontal, Vertical, Container
 from textual.screen import Screen
 from textual.widgets import Header, Footer, TextArea
 from textual.app import ComposeResult # type: ignore
+from textual.reactive import reactive
 
-from ..qplcomp import prepare_env
+from ..qrefine import mls, AstPres
 
-from ..qrefine import mls
-
+from ..qrefine.prover.gen.gen_machine import GenMachine
 
 
 class Editor(Screen):
@@ -20,6 +20,73 @@ class Editor(Screen):
         Binding("ctrl+p", "step_forward", "▶", priority=True),
         Binding("ctrl+l", "play_forward", "▶▶", priority=True),
     ]
+
+    #############################################################
+    # auto-gen switch
+    # controls whether the generation is carried out and updated automatically
+    auto_gen = reactive(True)
+
+    def watch_auto_gen(self, value: bool) -> None:
+        if value:
+            self.gen_update_timer.resume()
+        else:
+            self.gen_update_timer.pause()
+            self.gen_machine.terminate()
+    ############################################################
+
+
+    def compose(self) -> ComposeResult:
+
+        self.gen_update_timer = self.set_interval(1 / 60, self.update_gen, pause=True)
+
+        self.verified_area = TextArea(
+            "",
+            id='verified-area',
+            show_line_numbers=True,
+            read_only=True
+        )
+        self.code_area = TextArea(
+            "// put your code here ...", 
+            id='code-area',
+            show_line_numbers=True,
+            tab_behavior='indent'
+        )
+
+        self.goal_area = TextArea(read_only=True)
+
+        self.mls_info = TextArea(read_only=True)
+
+        self.mls = mls.MLS()
+
+        self.gen_area = TextArea(read_only=True)
+
+        self.gen_machine = GenMachine()
+
+        # the switch that controls whether auto generation is on
+        self.auto_gen = True
+
+
+        yield Header()
+
+        yield Horizontal(
+            Vertical(
+                self.verified_area,
+                self.code_area,
+            ),
+            Vertical(
+                self.goal_area,
+
+                Horizontal(
+                    self.mls_info,
+                    self.gen_area,
+                )
+            ),
+                
+        )
+
+        yield Footer()
+
+
 
     def action_step_forward(self) -> bool:
         res = self.mls.step_forward(self.code_area.text)
@@ -68,52 +135,62 @@ class Editor(Screen):
         return res is not None
 
     def action_play_forward(self) -> None:
+        # turn off the auto-gen temporarily
+        auto_gen = self.auto_gen
+        self.auto_gen = False
+
         while self.action_step_forward():
             pass
 
+        self.auto_gen = auto_gen
+
     def action_play_backward(self) -> None:
+        # turn off the auto-gen temporarily
+        auto_gen = self.auto_gen
+        self.auto_gen = False
+
         while self.action_step_backward():
             pass
+        
+        self.auto_gen = auto_gen
 
-    def compose(self) -> ComposeResult:
 
-        self.verified_area = TextArea(
-            "",
-            id='verified-area',
-            show_line_numbers=True,
-            read_only=True
-        )
-        self.code_area = TextArea(
-            "// put your code here ...", 
-            id='code-area',
-            show_line_numbers=True,
-            tab_behavior='indent'
-        )
+    def update_gen(self) -> None:
+        '''
+        Update the generation area.
+        '''
+        self.gen_area.text = str(self.gen_machine)
 
-        self.goal_area = TextArea(read_only=True)
+        if self.auto_gen:
+            current_goal = self.mls.current_goal
+            
+            # conditions to trigger the generation
+            # 1. the latest frame is selected
+            # 2. there is a current goal
+            # 3. the current goal is different from the last generated goal
+            if self.mls.latest_selected and \
+                current_goal is not None and \
+                current_goal != self.gen_machine.goal:
 
-        self.mls_info = TextArea(read_only=True)
+                self.gen_machine.terminate()
 
-        self.mls = mls.MLS(prepare_env())
+                self.gen_machine.gen(
+                    goal = current_goal,
+                    worker_num = 1,
+                    gen_env = self.mls.current_frame.env,
+                )
 
-        yield Header()
+            # terminate the generation if the solution found
+            if self.gen_machine.sol is not None and self.gen_machine.working:
 
-        yield Horizontal(
-            Vertical(
-                self.verified_area,
-                self.code_area,
-            ),
-            Vertical(
-                self.goal_area,
-                self.mls_info,
-            ),
-                
-        )
+                self.gen_machine.terminate()
 
-        yield Footer()
 
     @on(TextArea.SelectionChanged)
     def show_frame(self, event: TextArea.SelectionChanged) -> None:
+        '''
+        Select the code in verified-area and show the corresponding frame.
+        '''
         if event.text_area.id == 'verified-area':
             
             # avoid the empty selection
