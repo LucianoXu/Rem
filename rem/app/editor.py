@@ -176,7 +176,7 @@ class Editor(Screen):
 
                 self.gen_machine.gen(
                     goal = current_goal,
-                    worker_num = 1,
+                    worker_num = 8,
                     gen_env = self.mls.current_frame.env,
                 )
 

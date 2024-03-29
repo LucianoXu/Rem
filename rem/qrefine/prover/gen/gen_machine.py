@@ -34,12 +34,12 @@ def worker_gen(pres: AstPres, workers: list[GenWorker], index: int):
                 wlp_check(pres, worker.current_prog, worker.gen_env)
 
                 # return if the current program pass the checking
-
+                worker.sol = worker.current_prog
                 workers[index] = worker
                 return
             
             except:
-                pass
+                workers[index] = worker
                 
 class GenMachine:
 
@@ -65,8 +65,8 @@ class GenMachine:
         return the solution if it is found
         '''
         for w in self.workers:
-            if w.current_prog is not None:
-                return w.current_prog
+            if w.sol is not None:
+                return w.sol
         return None
     
     def __str__(self) -> str:
@@ -75,7 +75,9 @@ class GenMachine:
         '''
 
         if self.sol is not None:
-            return f"({self.attempt_total})\nSOL FOUND:\n\n{self.sol}"
+            res = str(self.goal)
+            res += f"({self.attempt_total})\nSOL FOUND:\n\n{self.sol}"
+            return res
         elif len(self.workers) > 0:
             return f"({self.attempt_total})\n{self.workers[0].current_prog}"
         else:
@@ -137,7 +139,7 @@ class GenWorker:
     The worker for executing an generation.
 
     Generation rule:
-    - abort, prescription, assertion is forbidden
+    - abort, prescription, assertion and while are forbidden
     - only provided operators can be utilized
     '''
     def __init__(self, gen_env: Env, qvars: QVar, retry_times = 10, max_depth = 5):
@@ -150,6 +152,7 @@ class GenWorker:
 
         self.prog_count = 0
         self.current_prog : TypedTerm | None = None
+        self.sol : TypedTerm | None = None
 
     def prog_gen(self) -> TypedTerm|None:
         '''
@@ -184,16 +187,17 @@ class GenWorker:
             # randomly execute one generation rule
             res = random.choice(
                 [self.opt_gen_def] * 10 +
-                [self.opt_gen_add,
-                 self.opt_gen_sub,
-                 self.opt_gen_mul,
-                 self.opt_gen_dagger,
-                 self.opt_gen_tensor,
-                 self.opt_gen_disjunct,
-                 self.opt_gen_conjunct,
-                 self.opt_gen_complement,
-                 self.opt_gen_sasaki_imply,
-                 self.opt_gen_sasaki_conjunct
+                [
+                    self.opt_gen_add,
+                    self.opt_gen_sub,
+                    self.opt_gen_mul,
+                    self.opt_gen_dagger,
+                    self.opt_gen_tensor,
+                    self.opt_gen_disjunct,
+                    self.opt_gen_conjunct,
+                    self.opt_gen_complement,
+                    self.opt_gen_sasaki_imply,
+                    self.opt_gen_sasaki_conjunct
                  ]
             )(qubit_num, depth)
 
@@ -402,12 +406,14 @@ class GenWorker:
 
             # randomly execute one generation rule
             res = random.choice(
-                [self.prog_gen_def,
-                 self.prog_gen_skip,
-                 self.prog_gen_init,
-                 self.prog_gen_unitary,
-                 self.prog_gen_if,
-                 self.prog_gen_while]
+                [
+                    self.prog_gen_def,
+                    self.prog_gen_skip,
+                    self.prog_gen_init,
+                    self.prog_gen_unitary,
+                    self.prog_gen_if,
+                    #self.prog_gen_while
+                 ]
             )(depth)
 
             if res is not None:
