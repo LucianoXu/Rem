@@ -8,8 +8,14 @@ from ..qval import QVar
 from ...mTLC.env import TypedTerm, Types
 
 class QVarType(Types):
+    symbol = "QVar"
+    
+    def __init__(self, qnum: int):
+        super().__init__()
+        self.qnum = qnum
+
     def __str__(self) -> str:
-        return "QVar"
+        return f"QVar[{self.qnum}]"
 
 
 class EQVar(TypedTerm):
@@ -19,7 +25,7 @@ class EQVar(TypedTerm):
     Terminal.
     '''
     def __init__(self, qvar : QVar):
-        super().__init__(QVarType())
+        self.type : QVarType = QVarType(qvar.qnum)
 
         assert isinstance(qvar, QVar), "ASSERTION FAILED"
         self.qvar = qvar

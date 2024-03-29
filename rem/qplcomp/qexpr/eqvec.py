@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Type
+from typing import Type, Any
 
 from ...mTLC.env import TypedTerm, Env, Types
 
@@ -10,16 +10,25 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 class QVecType(Types):
+    symbol = "QVec"
+    
+    def __init__(self, qnum: int):
+        super().__init__()
+        self.qnum = qnum
+
     def __str__(self) -> str:
-        return "QVec"
+        return f"QVec[{self.qnum}]"
+    
+    def __eq__(self, other: Any) -> bool:
+        return isinstance(other, QVecType) and self.qnum == other.qnum
 
 class EQVecAbstract(TypedTerm, ABC):
     '''
     The expression for quantum vectors.
     '''
 
-    def __init__(self):
-        super().__init__(QVecType())
+    def __init__(self, qnum: int):
+        self.type: QVecType = QVecType(qnum)
 
     @abstractmethod
     def eval(self, env: Env) -> EQVec:
@@ -28,7 +37,7 @@ class EQVecAbstract(TypedTerm, ABC):
     
 class EQVec(EQVecAbstract):
     def __init__(self, qvec : QVec):
-        super().__init__()
+        super().__init__(qvec.qnum)
 
         assert isinstance(qvec, QVec), "ASSERTION FAILED"
         self.qvec = qvec
@@ -65,12 +74,16 @@ class EQVecAdd(EQVecAbstract):
     '''
 
     def __init__(self, vec1 : EQVecAbstract, vec2 : EQVecAbstract):
-        super().__init__()
 
-        assert isinstance(vec1, EQVecAbstract), "ASSERTION FAILED"
+        vec1.type_checking(QVecType)
+        vec2.type_checking(QVecType)
+
+        if not vec1.type.qnum == vec2.type.qnum:
+            raise ValueError("The quantum numbers of the two vectors should be the same.")
+
+        super().__init__(vec1.type.qnum)
+
         self.vec1 = vec1
-
-        assert isinstance(vec2, EQVecAbstract), "ASSERTION FAILED"
         self.vec2 = vec2
 
     def eval(self, env: Env) -> EQVec:
@@ -94,13 +107,12 @@ class EQVecScale(EQVecAbstract):
     '''
 
     def __init__(self, c : complex, vec : EQVecAbstract):
-        super().__init__()
+        vec.type_checking(QVecType)
+
+        super().__init__(vec.type.qnum)
 
         assert isinstance(c, (complex, float)), "ASSERTION FAILED"
         self.c = c
-
-        assert isinstance(vec, EQVecAbstract), "ASSERTION FAILED"
-        
         self.vec = vec
 
     def eval(self, env: Env) -> EQVec:

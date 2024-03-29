@@ -11,6 +11,7 @@ from ..error import ValueError
 INDENT = "  "
 
 class QProgType(Types, ABC):
+    symbol = "QProg"
     def __str__(self) -> str:
         return "QProg"
 

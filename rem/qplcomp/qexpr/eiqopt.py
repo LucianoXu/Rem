@@ -14,6 +14,7 @@ from .eqvar import QVarType, EQVar
 
 
 class IQOptType(Types):
+    symbol = "IQOpt"
     def __str__(self) -> str:
         return "IQOpt"
     
@@ -56,6 +57,12 @@ class EIQOptPair(EIQOptAbstract):
     '''
 
     def __init__(self, qopt : EQOptAbstract, qvar : EQVar):
+        qopt.type_checking(QOptType)
+        qvar.type_checking(QVarType)
+
+        if qopt.type.qnum != qvar.type.qnum:
+            raise TypeError(f"Type Mismatch for operator {qopt} and qvar {qvar}.")
+
         super().__init__()
 
         self.qopt = qopt
@@ -79,6 +86,9 @@ class EIQOptAdd(EIQOptAbstract):
     '''
 
     def __init__(self, ioptA : EIQOptAbstract, ioptB : EIQOptAbstract):
+        ioptA.type_checking(IQOptType())
+        ioptB.type_checking(IQOptType())
+
         super().__init__()
 
         self.ioptA = ioptA
@@ -102,6 +112,8 @@ class EIQOptNeg(EIQOptAbstract):
     '''
 
     def __init__(self, iopt : EIQOptAbstract):
+        iopt.type_checking(IQOptType())
+
         super().__init__()
 
         self.iopt = iopt
@@ -125,6 +137,9 @@ class EIQOptSub(EIQOptAbstract):
     '''
 
     def __init__(self, ioptA : EIQOptAbstract, ioptB : EIQOptAbstract):
+        ioptA.type_checking(IQOptType())
+        ioptB.type_checking(IQOptType())
+
         super().__init__()
 
         self.ioptA = ioptA
@@ -149,6 +164,8 @@ class EIQOptScale(EIQOptAbstract):
     '''
 
     def __init__(self, c : complex, iopt : EIQOptAbstract):
+        iopt.type_checking(IQOptType())
+
         super().__init__()
 
         assert isinstance(c, (complex, float)), "ASSERTION FAILED"
@@ -173,6 +190,9 @@ class EIQOptMul(EIQOptAbstract):
     '''
 
     def __init__(self, ioptA : EIQOptAbstract, ioptB : EIQOptAbstract):
+        ioptA.type_checking(IQOptType())
+        ioptB.type_checking(IQOptType())
+
         super().__init__()
 
         self.ioptA = ioptA
@@ -196,6 +216,8 @@ class EIQOptDagger(EIQOptAbstract):
     '''
 
     def __init__(self, iopt : EIQOptAbstract):
+        iopt.type_checking(IQOptType())
+
         super().__init__()
 
         self.iopt = iopt
@@ -219,6 +241,9 @@ class EIQOptTensor(EIQOptAbstract):
     '''
 
     def __init__(self, ioptA : EIQOptAbstract, ioptB : EIQOptAbstract):
+        ioptA.type_checking(IQOptType())
+        ioptB.type_checking(IQOptType())
+
         super().__init__()
 
         self.ioptA = ioptA
@@ -245,6 +270,9 @@ class EIQOptDisjunct(EIQOptAbstract):
     '''
 
     def __init__(self, ioptA : EIQOptAbstract, ioptB : EIQOptAbstract):
+        ioptA.type_checking(IQOptType())
+        ioptB.type_checking(IQOptType())
+
         super().__init__()
 
         self.ioptA = ioptA
@@ -268,6 +296,9 @@ class EIQOptConjunct(EIQOptAbstract):
     '''
 
     def __init__(self, ioptA : EIQOptAbstract, ioptB : EIQOptAbstract):
+        ioptA.type_checking(IQOptType())
+        ioptB.type_checking(IQOptType())
+
         super().__init__()
 
         self.ioptA = ioptA
@@ -293,6 +324,8 @@ class EIQOptComplement(EIQOptAbstract):
     '''
 
     def __init__(self, iopt : EIQOptAbstract):
+        iopt.type_checking(IQOptType())
+
         super().__init__()
 
         self.iopt = iopt
@@ -316,6 +349,9 @@ class EIQOptSasakiImply(EIQOptAbstract):
     '''
 
     def __init__(self, ioptA : EIQOptAbstract, ioptB : EIQOptAbstract):
+        ioptA.type_checking(IQOptType())
+        ioptB.type_checking(IQOptType())
+
         super().__init__()
 
         self.ioptA = ioptA
@@ -340,6 +376,9 @@ class EIQOptSasakiConjunct(EIQOptAbstract):
     '''
 
     def __init__(self, ioptA : EIQOptAbstract, ioptB : EIQOptAbstract):
+        ioptA.type_checking(IQOptType())
+        ioptB.type_checking(IQOptType())
+
         super().__init__()
 
         self.ioptA = ioptA

@@ -80,16 +80,15 @@ def p_1(p):
     '''
     term    : term eqvar
     '''
-    p[1].type_checking(QOptType())
     p[0] = EIQOptPair(p[1], p[2])
 
 def p_2(p):
     '''
     term    : '-' term
     '''
-    if p[2].type == IQOptType():
+    if isinstance(p[2].type, IQOptType):
         p[0] = EIQOptNeg(p[2])
-    elif p[2].type == QOptType():
+    elif isinstance(p[2].type, QOptType):
         p[0] = EQOptNeg(p[2])
     else:
         raise ValueError("Invalid term for expression '- term'.")
@@ -98,11 +97,9 @@ def p_3(p):
     '''
     term    : term '+' term
     '''
-    if p[1].type == IQOptType():
-        p[3].type_checking(IQOptType())
+    if isinstance(p[1].type, IQOptType):
         p[0] = EIQOptAdd(p[1], p[3])
-    elif p[1].type == QOptType():
-        p[3].type_checking(QOptType())
+    elif isinstance(p[1].type, QOptType):
         p[0] = EQOptAdd(p[1], p[3])
     else:
         raise ValueError("Invalid term for expression 'term + term'.")
@@ -112,11 +109,9 @@ def p_4(p):
     '''
     term    : term '-' term
     '''
-    if p[1].type == IQOptType():
-        p[3].type_checking(IQOptType())
+    if isinstance(p[1].type, IQOptType):
         p[0] = EIQOptSub(p[1], p[3])
-    elif p[1].type == QOptType():
-        p[3].type_checking(QOptType())
+    elif isinstance(p[1].type, QOptType):
         p[0] = EQOptSub(p[1], p[3])
     else:
         raise ValueError("Invalid term for expression 'term - term'.")
@@ -125,9 +120,9 @@ def p_5(p):
     '''
     term    : num '*' term
     '''
-    if p[3].type == IQOptType():
+    if isinstance(p[3].type, IQOptType):
         p[0] = EIQOptScale(p[1], p[3])
-    elif p[3].type == QOptType():
+    elif isinstance(p[3].type, QOptType):
         p[0] = EQOptScale(p[1], p[3])
     else:
         raise ValueError("Invalid term for expression 'num * term'.")
@@ -136,9 +131,9 @@ def p_5SIMP(p):
     '''
     term    : num term
     '''
-    if p[2].type == IQOptType():
+    if isinstance(p[2].type, IQOptType):
         p[0] = EIQOptScale(p[1], p[2])
-    elif p[2].type == QOptType():
+    elif isinstance(p[2].type, QOptType):
         p[0] = EQOptScale(p[1], p[2])
     else:
         raise ValueError("Invalid term for expression 'num term'.")
@@ -148,11 +143,9 @@ def p_6(p):
     '''
     term    : term '*' term
     '''
-    if p[1].type == IQOptType():
-        p[3].type_checking(IQOptType())
+    if isinstance(p[1].type, IQOptType):
         p[0] = EIQOptMul(p[1], p[3])
-    elif p[1].type == QOptType():
-        p[3].type_checking(QOptType())
+    elif isinstance(p[1].type, QOptType):
         p[0] = EQOptMul(p[1], p[3])
     else:
         raise ValueError("Invalid term for expression 'term * term'.")
@@ -161,9 +154,9 @@ def p_7(p):
     '''
     term    : term DAGGER
     '''
-    if p[1].type == IQOptType():
+    if isinstance(p[1].type, IQOptType):
         p[0] = EIQOptDagger(p[1])
-    elif p[1].type == QOptType():
+    elif isinstance(p[1].type, QOptType):
         p[0] = EQOptDagger(p[1])
     else:
         raise ValueError("Invalid term for expression 'term DAGGER'.")
@@ -172,11 +165,9 @@ def p_8(p):
     '''
     term    : term OTIMES term
     '''
-    if p[1].type == IQOptType():
-        p[3].type_checking(IQOptType())
+    if isinstance(p[1].type, IQOptType):
         p[0] = EIQOptTensor(p[1], p[3])
-    elif p[1].type == QOptType():
-        p[3].type_checking(QOptType())
+    elif isinstance(p[1].type, QOptType):
         p[0] = EQOptTensor(p[1], p[3])
     else:
         raise ValueError("Invalid term for expression 'term OTIMES term'.")
@@ -185,11 +176,9 @@ def p_9(p):
     '''
     term    : term DISJUNCT term
     '''
-    if p[1].type == IQOptType():
-        p[3].type_checking(IQOptType())
+    if isinstance(p[1].type, IQOptType):
         p[0] = EIQOptDisjunct(p[1], p[3])
-    elif p[1].type == QOptType():
-        p[3].type_checking(QOptType())
+    elif isinstance(p[1].type, QOptType):
         p[0] = EQOptDisjunct(p[1], p[3])
     else:
         raise ValueError("Invalid term for expression 'term DISJUNCT term'.")
@@ -198,11 +187,9 @@ def p_10(p):
     '''
     term    : term CONJUNCT term
     '''
-    if p[1].type == IQOptType():
-        p[3].type_checking(IQOptType())
+    if isinstance(p[1].type, IQOptType):
         p[0] = EIQOptConjunct(p[1], p[3])
-    elif p[1].type == QOptType():
-        p[3].type_checking(QOptType())
+    elif isinstance(p[1].type, QOptType):
         p[0] = EQOptConjunct(p[1], p[3])
     else:
         raise ValueError("Invalid term for expression 'term CONJUNCT term'.")
@@ -211,9 +198,9 @@ def p_11(p):
     '''
     term    : term COMPLEMENT
     '''
-    if p[1].type == IQOptType():
+    if isinstance(p[1].type, IQOptType):
         p[0] = EIQOptComplement(p[1])
-    elif p[1].type == QOptType():
+    elif isinstance(p[1].type, QOptType):
         p[0] = EQOptComplement(p[1])
     else:
         raise ValueError("Invalid term for expression 'term COMPLEMENT'.")
@@ -222,11 +209,9 @@ def p_12(p):
     '''
     term    : term SASAKI_IMPLY term
     '''
-    if p[1].type == IQOptType():
-        p[3].type_checking(IQOptType())
+    if isinstance(p[1].type, IQOptType):
         p[0] = EIQOptSasakiImply(p[1], p[3])
-    elif p[1].type == QOptType():
-        p[3].type_checking(QOptType())
+    elif isinstance(p[1].type, QOptType):
         p[0] = EQOptSasakiImply(p[1], p[3])
     else:
         raise ValueError("Invalid term for expression 'term SASAKI_IMPLY term'.")
@@ -235,11 +220,9 @@ def p_13(p):
     '''
     term    : term SASAKI_CONJUNCT term
     '''
-    if p[1].type == IQOptType():
-        p[3].type_checking(IQOptType())
+    if isinstance(p[1].type, IQOptType):
         p[0] = EIQOptSasakiConjunct(p[1], p[3])
-    elif p[1].type == QOptType():
-        p[3].type_checking(QOptType())
+    elif isinstance(p[1].type, QOptType):
         p[0] = EQOptSasakiConjunct(p[1], p[3])
     else:
         raise ValueError("Invalid term for expression 'term SASAKI_CONJUNCT term'.")
@@ -250,7 +233,6 @@ def p_14(p):
     '''
     term    : '[' eqvec ']'
     '''
-    p[2].type_checking(QVecType())
     p[0] = EQOptKetProj(p[2])
 
 
@@ -349,66 +331,51 @@ def p_stt_4(p):
     '''
     statement    : term ';'
     '''
-    p[1].type_checking(IQOptType())
     p[0] = AstUnitary(p[1])
 
 def p_stt_5(p):
     '''
     statement    : ASSERT term
     '''
-    p[2].type_checking(IQOptType())
     p[0] = AstAssert(p[2])
 
 def p_pres(p):
     '''
     statement    : '<' term ',' term '>'
     '''
-    p[2].type_checking(IQOptType())
-    p[4].type_checking(IQOptType())
     p[0] = AstPres(p[2], p[4])
 
 def p_stt_6(p):
     '''
     statement    : statement statement
     '''
-    p[1].type_checking(QProgType())
-    p[2].type_checking(QProgType())
     p[0] = AstSeq(p[1], p[2])
 
 def p_stt_7(p):
     '''
     statement    : '{' statement '[' OPLUS FLOATNUM ']' statement '}'
     '''
-    p[2].type_checking(QProgType())
-    p[7].type_checking(QProgType())
     p[0] = AstProb(p[2], p[7], float(p[5]))
 
 def p_stt_8(p):
     '''
     statement    : IF term THEN statement ELSE statement END
     '''
-    p[2].type_checking(IQOptType())
-    p[4].type_checking(QProgType())
-    p[6].type_checking(QProgType())
     p[0] = AstIf(p[2], p[4], p[6])
 
 def p_stt_9(p):
     '''
     statement    : WHILE term DO statement END
     '''
-    p[2].type_checking(IQOptType())
-    p[4].type_checking(QProgType())
     p[0] = AstWhile(p[2], p[4])
 
 def p_stt_10(p):
     '''
     statement    : statement LEQ statement
     '''
-    p[1].type_checking(QProgType())
     # particularly, the first term should be a prescription
     if not isinstance(p[1], AstPres):
         raise ValueError("The first term should be a prescription.")
-    p[3].type_checking(QProgType())
     p[1].refine_wlp(p[3])
     p[0] = p[1]
 
@@ -418,8 +385,6 @@ def p_calc_iqopt(p):
     '''
     term    : '[' '[' statement ']' ']' '(' term ')'
     '''
-    p[3].type_checking(QProgType())
-    p[7].type_checking(IQOptType())
     p[0] = EIQOptCalc(p[3], p[7])
 
 from ..language.semantics.extract import QProgExtract
@@ -427,7 +392,6 @@ def p_extract_prog(p):
     '''
     term    : EXTRACT statement
     '''
-    p[2].type_checking(QProgType())
     p[0] = QProgExtract(p[2])
 
 from ..prover.ast import *
@@ -438,12 +402,12 @@ from ..prover.ast import *
 
 def p_cmd_0(p):
     '''
-    cmd : VAR ID ':' QOPT '.'
+    cmd : VAR ID ':' QOPT '[' FLOATNUM ']' '.'
         | VAR ID ':' IQOPT '.'
         | VAR ID ':' QPROG '.'
     '''
     if p[4] == 'QOpt':
-        p[0] = Declaration(p[2], QOptType())
+        p[0] = Declaration(p[2], QOptType(int(p[6])))
     elif p[4] == 'IQOpt':
         p[0] = Declaration(p[2], IQOptType())
     elif p[4] == 'QProg':
@@ -461,7 +425,6 @@ def p_cmd_2(p):
     '''
     cmd : REFINE ID ':' term '.'
     '''
-    p[4].type_checking(QProgType())
     # particularly, the term should be a prescription
     if not isinstance(p[4], AstPres):
         raise ValueError("The term should be a prescription.")
@@ -472,43 +435,36 @@ def p_cmd_3(p):
     '''
     cmd : STEP term '.'
     '''
-    p[2].type_checking(QProgType())
     p[0] = StepStatement(p[2])
 
 def p_cmd_4(p):
     '''
     cmd : STEP REFINE_SEQ term '.'
     '''
-    p[3].type_checking(IQOptType())
     p[0] = StepRefineSeq(p[3])
 
 def p_cmd_5(p):
     '''
     cmd : STEP REFINE_IF term '.'
     '''
-    p[3].type_checking(IQOptType())
     p[0] = StepRefineIf(p[3])
 
 def p_cmd_6(p):
     '''
     cmd : STEP REFINE_WHILE term REFINE_INV term '.'
     '''
-    p[3].type_checking(IQOptType())
-    p[5].type_checking(IQOptType())
     p[0] = StepRefineWhile(p[3], p[5])
 
 def p_cmd_7(p):
     '''
     cmd : REFINE_WEAKEN_PRE term '.'
     '''
-    p[2].type_checking(IQOptType())
     p[0] = RefineWeakenPre(p[2])
 
 def p_cmd_8(p):
     '''
     cmd : REFINE_STRENGTHEN_POST term '.'
     '''
-    p[2].type_checking(IQOptType())
     p[0] = RefineStrengthenPost(p[2])
 
 def p_cmd_9(p):
@@ -545,12 +501,10 @@ def p_cmd_14(p):
     '''
     cmd : TEST term '=' term '.'
     '''
-    if p[2].type == IQOptType():
-        p[4].type_checking(IQOptType())
+    if isinstance(p[2].type, IQOptType):
         p[0] = TestEIQOptEQ(p[2], p[4])
 
-    elif p[2].type == QOptType():
-        p[4].type_checking(QOptType())
+    elif isinstance(p[2].type, QOptType):
         p[0] = TestEQOptEQ(p[2], p[4])
 
     else:
@@ -560,12 +514,10 @@ def p_cmd_15(p):
     '''
     cmd : TEST term LEQ term '.'
     '''
-    if p[2].type == IQOptType():
-        p[4].type_checking(IQOptType())
+    if isinstance(p[2].type, IQOptType):
         p[0] = TestEIQOptLEQ(p[2], p[4])
 
-    elif p[2].type == QOptType():
-        p[4].type_checking(QOptType())
+    elif isinstance(p[2].type, QOptType):
         p[0] = TestEQOptLEQ(p[2], p[4])
 
     else:

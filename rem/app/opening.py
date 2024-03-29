@@ -46,6 +46,7 @@ class Splash(Container):
         yield Static("Quantum Program Refinement with Rem")
         yield Button("New File", id="new-file")
         yield Button("Exit", id="exit")
+        yield Static("created with ♥")
 
     def render(self) -> RenderableType:
         return LinearGradient(time() * 90, STOPS)

@@ -23,6 +23,8 @@ class Types(ABC):
     '''
     The class for types.
     '''
+    symbol = "T"
+
     @abstractmethod
     def __str__(self) -> str:
         pass
@@ -53,12 +55,16 @@ class TypedTerm(ABC):
         pass
 
 
-    def type_checking(self, type : Types) -> None:
+    def type_checking(self, type : Types|Type[Types]) -> None:
         '''
         The method to check the type of this expression. It will raise a TypeError if the type of expr is not target_type.
         '''
-        if self.type != type:
-            raise ValueError(f"The parameter expression '{self}' should have type '{type}', but actually has type '{self.type}'.")
+        if isinstance(type, Types):
+            if self.type != type:
+                raise ValueError(f"The parameter expression '{self}' should have type '{type}', but actually has type '{self.type}'.")
+        else:
+            if not isinstance(self.type, type):
+                raise ValueError(f"The parameter expression '{self}' should have type '{type.symbol}', but actually has type '{self.type}'.")
 
 class Var(TypedTerm):
     '''

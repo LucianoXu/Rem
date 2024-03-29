@@ -11,15 +11,21 @@ import numpy as np
 
 
 class QSOptType(Types):
+    symbol = "QSOpt"
+
+    def __init__(self, qnum: int):
+        super().__init__()
+        self.qnum = qnum
+
     def __str__(self) -> str:
-        return "QSOpt"
+        return f"QSOpt[{self.qnum}]"
     
 class EQSOptAbstract(TypedTerm, ABC):
     '''
     The expression for Quantum Super Operators.
     '''
-    def __init__(self):
-        super().__init__(QSOptType())
+    def __init__(self, qnum: int):
+        self.type: QSOptType = QSOptType(qnum)
     
     @abstractmethod
     def eval(self, env: Env) -> EQSOpt:
@@ -29,7 +35,7 @@ class EQSOptAbstract(TypedTerm, ABC):
 class EQSOpt(EQSOptAbstract):
 
     def __init__(self, qso : QSOpt):
-        super().__init__()
+        super().__init__(qso.qnum)
 
         assert isinstance(qso, QSOpt), "ASSERTION FAILED"
         self.qso = qso
@@ -51,12 +57,14 @@ class EQSOptAdd(EQSOptAbstract):
     '''
 
     def __init__(self, soA : EQSOptAbstract, soB : EQSOptAbstract):
-        super().__init__()
+        soA.type_checking(QSOptType)
+        soB.type_checking(QSOptType)
 
-        assert isinstance(soA, EQSOptAbstract), "ASSERTION FAILED"
+        if soA.type.qnum != soB.type.qnum:
+            raise ValueError(f"The quantum number of the two superoperators should be the same, but actually {soA.type.qnum} and {soB.type.qnum}.")
+        super().__init__(soA.type.qnum)
+
         self.soA = soA
-
-        assert isinstance(soB, EQSOptAbstract), "ASSERTION FAILED"
         self.soB = soB
 
     def eval(self, env: Env) -> EQSOpt:

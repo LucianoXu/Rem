@@ -12,15 +12,21 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 class QOptType(Types):
+    symbol = "QOpt"
+    
+    def __init__(self, qnum: int):
+        super().__init__()
+        self.qnum = qnum
+
     def __str__(self) -> str:
-        return "QOpt"
+        return f"QOpt[{self.qnum}]"
 
 class EQOptAbstract(TypedTerm, ABC):
     '''
     The expression for Quantum Operators.
     '''
-    def __init__(self):
-        super().__init__(QOptType())
+    def __init__(self, qnum: int):
+        self.type : QOptType = QOptType(qnum)
     
     @abstractmethod
     def eval(self, env: Env) -> EQOpt:
@@ -34,7 +40,7 @@ class EQOpt(EQOptAbstract):
     '''
 
     def __init__(self, qopt : QOpt):
-        super().__init__()
+        super().__init__(qopt.qnum)
         assert isinstance(qopt, QOpt), "ASSERTION FAILED"
         self.qopt = qopt
 
@@ -54,9 +60,10 @@ class EQOptKetProj(EQOptAbstract):
     '''
 
     def __init__(self, vec : EQVecAbstract):
-        super().__init__()
+        vec.type_checking(QVecType)
 
-        assert isinstance(vec, EQVecAbstract), "ASSERTION FAILED"
+        super().__init__(vec.type.qnum)
+
         self.vec = vec
 
     
@@ -78,7 +85,13 @@ class EQOptAdd(EQOptAbstract):
     '''
 
     def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
-        super().__init__()
+        optA.type_checking(QOptType)
+        optB.type_checking(QOptType)
+
+        if optA.type.qnum != optB.type.qnum:
+            raise ValueError("Quantum operator addition with different dimensions.")
+        
+        super().__init__(optA.type.qnum)
 
         self.optA = optA
         self.optB = optB
@@ -100,7 +113,9 @@ class EQOptNeg(EQOptAbstract):
     '''
 
     def __init__(self, opt : EQOptAbstract):
-        super().__init__()
+        opt.type_checking(QOptType)
+
+        super().__init__(opt.type.qnum)
 
         self.opt = opt
 
@@ -124,7 +139,13 @@ class EQOptSub(EQOptAbstract):
     '''
 
     def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
-        super().__init__()
+        optA.type_checking(QOptType)
+        optB.type_checking(QOptType)
+
+        if optA.type.qnum != optB.type.qnum:
+            raise ValueError("Quantum operator subtraction with different dimensions.")
+        
+        super().__init__(optA.type.qnum)
 
         self.optA = optA
         self.optB = optB
@@ -146,7 +167,13 @@ class EQOptMul(EQOptAbstract):
     '''
 
     def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
-        super().__init__()
+        optA.type_checking(QOptType)
+        optB.type_checking(QOptType)
+
+        if optA.type.qnum != optB.type.qnum:
+            raise ValueError("Quantum operator multiplication with different dimensions.")
+        
+        super().__init__(optA.type.qnum)
 
         self.optA = optA
         self.optB = optB
@@ -169,11 +196,12 @@ class EQOptScale(EQOptAbstract):
     '''
 
     def __init__(self, c : complex, opt : EQOptAbstract):
-        super().__init__()
+        opt.type_checking(QOptType)
+
+        super().__init__(opt.type.qnum)
 
         assert isinstance(c, (complex, float)), "ASSERTION FAILED"
         self.c = c
-
         self.opt = opt
     
     def eval(self, env: Env) -> EQOpt:
@@ -195,7 +223,9 @@ class EQOptDagger(EQOptAbstract):
     '''
 
     def __init__(self, opt : EQOptAbstract):
-        super().__init__()
+        opt.type_checking(QOptType)
+
+        super().__init__(opt.type.qnum)
 
         self.opt = opt
 
@@ -220,7 +250,10 @@ class EQOptTensor(EQOptAbstract):
     '''
 
     def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
-        super().__init__()
+        optA.type_checking(QOptType)
+        optB.type_checking(QOptType)
+
+        super().__init__(optA.type.qnum + optB.type.qnum)
 
         self.optA = optA
         self.optB = optB
@@ -245,7 +278,13 @@ class EQOptDisjunct(EQOptAbstract):
     '''
 
     def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
-        super().__init__()
+        optA.type_checking(QOptType)
+        optB.type_checking(QOptType)
+
+        if optA.type.qnum != optB.type.qnum:
+            raise ValueError("Quantum operator disjunction with different dimensions.")
+        
+        super().__init__(optA.type.qnum)
 
         self.optA = optA
         self.optB = optB
@@ -269,7 +308,13 @@ class EQOptConjunct(EQOptAbstract):
     '''
 
     def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
-        super().__init__()
+        optA.type_checking(QOptType)
+        optB.type_checking(QOptType)
+
+        if optA.type.qnum != optB.type.qnum:
+            raise ValueError("Quantum operator conjunction with different dimensions.")
+        
+        super().__init__(optA.type.qnum)
 
         self.optA = optA
         self.optB = optB
@@ -291,7 +336,9 @@ class EQOptComplement(EQOptAbstract):
     '''
 
     def __init__(self, opt : EQOptAbstract):
-        super().__init__()
+        opt.type_checking(QOptType)
+
+        super().__init__(opt.type.qnum)
 
         self.opt = opt
     
@@ -314,7 +361,13 @@ class EQOptSasakiImply(EQOptAbstract):
     '''
 
     def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
-        super().__init__()
+        optA.type_checking(QOptType)
+        optB.type_checking(QOptType)
+
+        if optA.type.qnum != optB.type.qnum:
+            raise ValueError("Quantum operator Sasaki implication with different dimensions.")
+        
+        super().__init__(optA.type.qnum)
 
         self.optA = optA
         self.optB = optB
@@ -339,7 +392,13 @@ class EQOptSasakiConjunct(EQOptAbstract):
     '''
 
     def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
-        super().__init__()
+        optA.type_checking(QOptType)
+        optB.type_checking(QOptType)
+
+        if optA.type.qnum != optB.type.qnum:
+            raise ValueError("Quantum operator Sasaki conjunction with different dimensions.")
+
+        super().__init__(optA.type.qnum)
 
         self.optA = optA
         self.optB = optB
@@ -362,7 +421,13 @@ class EQSOptApply(EQOptAbstract):
     '''
 
     def __init__(self, so : EQSOptAbstract, opt : EQOptAbstract):
-        super().__init__()
+        so.type_checking(QSOptType)
+        opt.type_checking(QSOptType)
+
+        if so.type.qnum != opt.type.qnum:
+            raise ValueError("Quantum operator application with different dimensions.")
+        
+        super().__init__(so.type.qnum)
 
         self.so = so
         self.opt = opt
