@@ -1,6 +1,6 @@
 from ..ast import *
 
-def wlp(prog: QWhileAst, post: IQOpt, env: Env) -> IQOpt:
+def wlp(prog: QProgAst, post: IQOpt, env: Env) -> IQOpt:
     '''
     Compute the weakest liberal precondition.
     '''
@@ -66,7 +66,7 @@ def wlp(prog: QWhileAst, post: IQOpt, env: Env) -> IQOpt:
         raise ValueError(f"Unsupported type: {prog}")
 
 
-def sp_ex(prog: QWhileAst, pre : EIQOpt, env: Env) -> EIQOpt:
+def sp_ex(prog: QProgAst, pre : EIQOpt, env: Env) -> EIQOpt:
     '''
     Calculate the strongest postcondition (expression).
     '''

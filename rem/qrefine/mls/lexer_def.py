@@ -20,25 +20,26 @@ reserved = {
 
     'proc'      : 'PROC',
 
-    'Def'       : 'DEF',
+
+    # for refinement control
     'Refine'    : 'REFINE',
     'End'       : 'META_END',
     'Choose'    : 'CHOOSE',
 
-    # for refinement control
     'Step'      : 'STEP',
     'Seq'       : 'REFINE_SEQ',
     'If'        : 'REFINE_IF',
     'While'     : 'REFINE_WHILE',
     'Inv'       : 'REFINE_INV',
 
-    # pause the prover to see the state.
-    'Pause'     : 'PAUSE',
     'WeakenPre' : 'REFINE_WEAKEN_PRE',
     'StrengthenPost' :  'REFINE_STRENGTHEN_POST',
 
-
     'Extract'   : 'EXTRACT',
+
+    # for the meta-language and types
+    'Var'       : 'VAR',
+    'Def'       : 'DEF',
 
     'Show'      : 'SHOW',
     'Draw'      : 'DRAW',
@@ -46,6 +47,11 @@ reserved = {
 
     'Eval'      : 'EVAL',
     'Prog'      : 'PROG',
+
+    # types
+    'IQOpt'     : 'IQOPT',
+    'QOpt'      : 'QOPT',
+    'QProg'     : 'QPROG',
 }
 
 tokens = [

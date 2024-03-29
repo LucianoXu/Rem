@@ -10,7 +10,7 @@ from .semantics.assertion import wlp
 #############################################################
 
 
-def wlp_check(pres: AstPres, SRefined: QWhileAst, env: Env) -> None:
+def wlp_check(pres: AstPres, SRefined: QProgAst, env: Env) -> None:
     '''
         == Refinement Rule ==
         ```

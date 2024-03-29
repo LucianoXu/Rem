@@ -13,7 +13,7 @@ P0 = QOpt(np.array([[1., 0.], [0., 0.]]))
 E10 = QOpt(np.array([[0., 1.], [0., 0.]]))
 ESet0 = QSOpt([P0, E10])
 
-def calc(prog : QWhileAst, rho : IQOpt, env: Env) -> IQOpt:
+def calc(prog : QProgAst, rho : IQOpt, env: Env) -> IQOpt:
     '''
     The method for initiating a execution calculation.
     Check of program and input state is implemented here.
@@ -35,7 +35,7 @@ def calc(prog : QWhileAst, rho : IQOpt, env: Env) -> IQOpt:
     
 
 
-def calc_iter(prog : QWhileAst, rho : IQOpt, env: Env) -> IQOpt:
+def calc_iter(prog : QProgAst, rho : IQOpt, env: Env) -> IQOpt:
     '''
     Calculate the execution result of program `prog` on input state `rho`.
 

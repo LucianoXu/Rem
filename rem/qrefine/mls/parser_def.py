@@ -87,9 +87,9 @@ def p_2(p):
     '''
     term    : '-' term
     '''
-    if p[1].type == IQOptType():
+    if p[2].type == IQOptType():
         p[0] = EIQOptNeg(p[2])
-    elif p[1].type == QOptType():
+    elif p[2].type == QOptType():
         p[0] = EQOptNeg(p[2])
     else:
         raise ValueError("Invalid term for expression '- term'.")
@@ -315,41 +315,47 @@ def p_num(p):
 
 from ..language.ast import *
 
+def p_stt_0(p):
+    '''
+    term    : statement
+    '''
+    p[0] = p[1]
+
 def p_stt_1(p):
     '''
-    term    : ABORT ';'
+    statement   : ABORT
     '''
     p[0] = AstAbort()
 
 def p_stt_2(p):
     '''
-    term    : SKIP ';'
+    statement    : SKIP
     '''
     p[0] = AstSkip()
 
 def p_stt_3(p):
     '''
-    term    : eqvar ASSIGN0 ';'
+    statement    : eqvar ASSIGN0
     '''
     p[0] = AstInit(p[1])
 
 def p_stt_4(p):
     '''
-    term    : term ';'
+    statement    : term ';'
     '''
     p[1].type_checking(IQOptType())
     p[0] = AstUnitary(p[1])
 
 def p_stt_5(p):
     '''
-    term    : ASSERT term ';'
+    statement    : ASSERT term
     '''
     p[2].type_checking(IQOptType())
     p[0] = AstAssert(p[2])
 
 def p_pres(p):
     '''
-    term    : '<' term ',' term '>'
+    statement    : '<' term ',' term '>'
     '''
     p[1].type_checking(IQOptType())
     p[3].type_checking(IQOptType())
@@ -357,46 +363,46 @@ def p_pres(p):
 
 def p_stt_6(p):
     '''
-    term    : term term
+    statement    : statement statement
     '''
-    p[1].type_checking(QWhileType())
-    p[2].type_checking(QWhileType())
+    p[1].type_checking(QProgType())
+    p[2].type_checking(QProgType())
     p[0] = AstSeq(p[1], p[2])
 
 def p_stt_7(p):
     '''
-    term    : '{' term '[' OPLUS FLOATNUM ']' term '}'
+    statement    : '{' statement '[' OPLUS FLOATNUM ']' statement '}'
     '''
-    p[2].type_checking(QWhileType())
-    p[7].type_checking(QWhileType())
+    p[2].type_checking(QProgType())
+    p[7].type_checking(QProgType())
     p[0] = AstProb(p[2], p[7], float(p[5]))
 
 def p_stt_8(p):
     '''
-    term    : IF term THEN term ELSE term END
+    statement    : IF term THEN statement ELSE statement END
     '''
     p[2].type_checking(IQOptType())
-    p[4].type_checking(QWhileType())
-    p[6].type_checking(QWhileType())
+    p[4].type_checking(QProgType())
+    p[6].type_checking(QProgType())
     p[0] = AstIf(p[2], p[4], p[6])
 
 def p_stt_9(p):
     '''
-    term    : WHILE term DO term END
+    statement    : WHILE term DO statement END
     '''
     p[2].type_checking(IQOptType())
-    p[4].type_checking(QWhileType())
+    p[4].type_checking(QProgType())
     p[0] = AstWhile(p[2], p[4])
 
 def p_stt_10(p):
     '''
-    term    : term LEQ term
+    statement    : statement LEQ statement
     '''
-    p[1].type_checking(QWhileType())
+    p[1].type_checking(QProgType())
     # particularly, the first term should be a prescription
     if not isinstance(p[1], AstPres):
         raise ValueError("The first term should be a prescription.")
-    p[3].type_checking(QWhileType())
+    p[3].type_checking(QProgType())
     p[1].refine_wlp(p[3])
     p[0] = p[1]
 
@@ -427,26 +433,35 @@ cmd : DEF ID ASSIGN term '.'
 
     | SHOW ID '.'
     | SHOW DEF '.'
-    | EVAL ID '.'
-    | TEST eqopt '=' eqopt '.'
-    | TEST eqopt LEQ eqopt '.'
-    | TEST eiqopt '=' eiqopt '.'
-    | TEST eiqopt LEQ eiqopt '.'
 
 '''
 
+def p_cmd_0(p):
+    '''
+    cmd : VAR ID ':' QOPT '.'
+        | VAR ID ':' IQOPT '.'
+        | VAR ID ':' QPROG '.'
+    '''
+    if p[4] == 'QOpt':
+        p[0] = Declaration(p[2], QOptType())
+    elif p[4] == 'IQOpt':
+        p[0] = Declaration(p[2], IQOptType())
+    elif p[4] == 'QProg':
+        p[0] = Declaration(p[2], QProgType())
+    else:
+        raise ValueError("Invalid declaration.")
 
 def p_cmd_1(p):
     '''
     cmd : DEF ID ASSIGN term '.'
     '''
-    p[0] = DefTerm(p[2], p[4])
+    p[0] = Definition(p[2], p[4])
 
 def p_cmd_2(p):
     '''
     cmd : REFINE ID ':' term '.'
     '''
-    p[4].type_checking(QWhileType())
+    p[4].type_checking(QProgType())
     # particularly, the term should be a prescription
     if not isinstance(p[4], AstPres):
         raise ValueError("The term should be a prescription.")
@@ -457,7 +472,7 @@ def p_cmd_3(p):
     '''
     cmd : STEP term '.'
     '''
-    p[2].type_checking(QWhileType())
+    p[2].type_checking(QProgType())
     p[0] = StepStatement(p[2])
 
 def p_cmd_4(p):
@@ -522,9 +537,9 @@ def p_cmd_12(p):
 
 def p_cmd_13(p):
     '''
-    cmd : EVAL ID '.'
+    cmd : EVAL term '.'
     '''
-    p[0] = EvalId(p[2])
+    p[0] = EvalTerm(p[2])
 
 def p_cmd_14(p):
     '''

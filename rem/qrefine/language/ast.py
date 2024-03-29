@@ -10,17 +10,17 @@ from ..error import ValueError
 
 INDENT = "  "
 
-class QWhileType(Types, ABC):
+class QProgType(Types, ABC):
     def __str__(self) -> str:
-        return "QWhile"
+        return "QProg"
 
-class QWhileAst(TypedTerm):
+class QProgAst(TypedTerm):
 
     def __init__(self):
-        super().__init__(QWhileType())
+        super().__init__(QProgType())
 
     @abstractmethod
-    def eval(self, env: Env) -> QWhileAst:
+    def eval(self, env: Env) -> QProgAst:
         pass
 
     def definite(self, env: Env) -> bool:
@@ -37,7 +37,7 @@ class QWhileAst(TypedTerm):
         return self.prefix_str()
     
     @property
-    def extract(self) -> QWhileAst:
+    def extract(self) -> QProgAst:
         '''
         Extract the refinement result as a program syntax (without refinement proofs).
         '''
@@ -54,41 +54,11 @@ class QWhileAst(TypedTerm):
 #####################################################################
 # different program structures
 
-class AstSubprog(QWhileAst):
-    def __init__(self, subprog : Var):
-        super().__init__()
-
-        self.subprog = subprog
-
-    def eval(self, env: Env) -> QWhileAst:
-        east = self.subprog.eval(env)
-        if not isinstance(east, QWhileAst):
-            raise ValueError("The variable '" + str(self.subprog) + "' is not a program.")
-        return east.eval(env)
-
-    def definite(self, env: Env) -> bool:
-        prog = self.subprog.eval(env)
-        assert isinstance(prog, QWhileAst)
-        return prog.definite(env)
-
-    
-    def prefix_str(self, prefix = "") -> str:
-        return prefix + "proc " + str(self.subprog)
-
-    
-    @property
-    def extract(self) -> QWhileAst:
-        return self
-    
-    def get_prescription(self) -> list[AstPres]:
-        return []
-
-
-class AstAbort(QWhileAst):
+class AstAbort(QProgAst):
     def __init__(self):
         super().__init__()
 
-    def eval(self, env: Env) -> QWhileAst:
+    def eval(self, env: Env) -> QProgAst:
         return self
 
     def definite(self, env: Env) -> bool:
@@ -98,18 +68,18 @@ class AstAbort(QWhileAst):
         return prefix + "abort"
     
     @property
-    def extract(self) -> QWhileAst:
+    def extract(self) -> QProgAst:
         return self
     
     def get_prescription(self) -> list[AstPres]:
         return []
 
 
-class AstSkip(QWhileAst):
+class AstSkip(QProgAst):
     def __init__(self):
         super().__init__()
 
-    def eval(self, env: Env) -> QWhileAst:
+    def eval(self, env: Env) -> QProgAst:
         return self
 
     def definite(self, env: Env) -> bool:
@@ -119,19 +89,19 @@ class AstSkip(QWhileAst):
         return prefix + "skip"
     
     @property
-    def extract(self) -> QWhileAst:
+    def extract(self) -> QProgAst:
         return self
 
     def get_prescription(self) -> list[AstPres]:
         return []
     
 
-class AstInit(QWhileAst):
+class AstInit(QProgAst):
     def __init__(self, eqvar : EQVar):
         super().__init__()
         self.eqvar = eqvar
 
-    def eval(self, env: Env) -> QWhileAst:
+    def eval(self, env: Env) -> QProgAst:
         return self
 
     def definite(self, env: Env) -> bool:
@@ -141,20 +111,20 @@ class AstInit(QWhileAst):
         return prefix + str(self.eqvar) + ":=0"
 
     @property
-    def extract(self) -> QWhileAst:
+    def extract(self) -> QProgAst:
         return self
 
     def get_prescription(self) -> list[AstPres]:
         return []
     
     
-class AstUnitary(QWhileAst):
+class AstUnitary(QProgAst):
     def __init__(self, U : EIQOptAbstract):
         super().__init__()
 
         self.U = U
 
-    def eval(self, env: Env) -> QWhileAst:
+    def eval(self, env: Env) -> QProgAst:
         
         # check whether this is a unitary
         if not self.U.eval(env).iqopt.qval.is_unitary:
@@ -166,23 +136,23 @@ class AstUnitary(QWhileAst):
         return True
     
     def prefix_str(self, prefix="") -> str:
-        return prefix + str(self.U)
+        return prefix + str(self.U) + ";"
 
     @property
-    def extract(self) -> QWhileAst:
+    def extract(self) -> QProgAst:
         return self
 
     def get_prescription(self) -> list[AstPres]:
         return []
 
     
-class AstAssert(QWhileAst):
+class AstAssert(QProgAst):
     def __init__(self, P : EIQOptAbstract):
         super().__init__()
 
         self.P = P
 
-    def eval(self, env: Env) -> QWhileAst:
+    def eval(self, env: Env) -> QProgAst:
         
         # check whether this is a projector
         if not self.P.eval(env).iqopt.qval.is_projector:
@@ -197,7 +167,7 @@ class AstAssert(QWhileAst):
         return prefix + "assert " + str(self.P)
     
     @property
-    def extract(self) -> QWhileAst:
+    def extract(self) -> QProgAst:
         return self
 
     def get_prescription(self) -> list[AstPres]:
@@ -205,18 +175,18 @@ class AstAssert(QWhileAst):
 
     
 
-class AstPres(QWhileAst):
-    def __init__(self, P : EIQOptAbstract, Q : EIQOptAbstract, SRefined: QWhileAst|None = None):
+class AstPres(QProgAst):
+    def __init__(self, P : EIQOptAbstract, Q : EIQOptAbstract, SRefined: QProgAst|None = None):
         '''
         This `SRefined` attribute can refer to the subsequent refined programs for this program. If `None`, then the current program is used.
         '''
         super().__init__()
-        self.SRefined : QWhileAst | None = SRefined
+        self.SRefined : QProgAst | None = SRefined
         
         self.P = P
         self.Q = Q
 
-    def eval(self, env: Env) -> QWhileAst:
+    def eval(self, env: Env) -> QProgAst:
         # check whether P and Q are projectors
         if not self.P.eval(env).iqopt.qval.is_projector:
             raise ValueError("The operator '" + str(self.P) + "' for assertion statement is not projective.")
@@ -244,14 +214,14 @@ class AstPres(QWhileAst):
         if self.SRefined is None:
             return res
         else:
-            res += "\n" + prefix + INDENT + "<= {\n"
+            res += "\n" + prefix + INDENT + "<= (\n"
             res += self.SRefined.prefix_str(prefix + INDENT) + "\n"
-            res += prefix + "}"
+            res += prefix + ")"
             return res
 
 
     @property
-    def extract(self) -> QWhileAst:
+    def extract(self) -> QProgAst:
         if self.SRefined is not None:
             return self.SRefined.extract
         else:
@@ -265,8 +235,8 @@ class AstPres(QWhileAst):
     
 
 
-class AstSeq(QWhileAst):
-    def __init__(self, S0 : QWhileAst, S1 : QWhileAst):
+class AstSeq(QProgAst):
+    def __init__(self, S0 : QProgAst, S1 : QProgAst):
         super().__init__()
 
         # restructure the sequential composition, so that it is always associated to the right
@@ -276,7 +246,7 @@ class AstSeq(QWhileAst):
         self.S0 = S0
         self.S1 = S1
 
-    def eval(self, env: Env) -> QWhileAst:
+    def eval(self, env: Env) -> QProgAst:
         return AstSeq(
             self.S0.eval(env),
             self.S1.eval(env)
@@ -286,17 +256,17 @@ class AstSeq(QWhileAst):
         return self.S0.definite(env) and self.S1.definite(env)
     
     def prefix_str(self, prefix="") -> str:
-        return self.S0.prefix_str(prefix) + ";\n" + self.S1.prefix_str(prefix)
+        return self.S0.prefix_str(prefix) + "\n" + self.S1.prefix_str(prefix)
     
     @property
-    def extract(self) -> QWhileAst:
+    def extract(self) -> QProgAst:
         return AstSeq(self.S0.extract, self.S1.extract)
     
     def get_prescription(self) -> list[AstPres]:
         return self.S0.get_prescription() + self.S1.get_prescription()
     
-class AstProb(QWhileAst):
-    def __init__(self, S0 : QWhileAst, S1 : QWhileAst, p : float):
+class AstProb(QProgAst):
+    def __init__(self, S0 : QProgAst, S1 : QProgAst, p : float):
         super().__init__()
         self.S0 = S0
         self.S1 = S1
@@ -306,7 +276,7 @@ class AstProb(QWhileAst):
         
         self.p = p
 
-    def eval(self, env: Env) -> QWhileAst:
+    def eval(self, env: Env) -> QProgAst:
         return AstProb(
             self.S0.eval(env),
             self.S1.eval(env),
@@ -318,28 +288,28 @@ class AstProb(QWhileAst):
         return self.S0.definite(env) and self.S1.definite(env)
     
     def prefix_str(self, prefix="") -> str:
-        res = prefix + "(\n" + self.S0.prefix_str(prefix + INDENT) + "\n"
+        res = prefix + "{\n" + self.S0.prefix_str(prefix + INDENT) + "\n"
         res += prefix + "[⊕ " + str(self.p) +"]\n"
         res += self.S1.prefix_str(prefix + INDENT) + "\n"
-        res += prefix + ")"
+        res += prefix + "}"
         return res
     
     @property
-    def extract(self) -> QWhileAst:
+    def extract(self) -> QProgAst:
         return AstProb(self.S0.extract, self.S1.extract, self.p)
         
     def get_prescription(self) -> list[AstPres]:
         return self.S0.get_prescription() + self.S1.get_prescription()
 
-class AstIf(QWhileAst):
-    def __init__(self, P : EIQOptAbstract, S1 : QWhileAst, S0 : QWhileAst):
+class AstIf(QProgAst):
+    def __init__(self, P : EIQOptAbstract, S1 : QProgAst, S0 : QProgAst):
         super().__init__()
         
         self.P = P
         self.S1 = S1
         self.S0 = S0
     
-    def eval(self, env: Env) -> QWhileAst:
+    def eval(self, env: Env) -> QProgAst:
         # check whether P is a projector
         if not self.P.eval(env).iqopt.qval.is_projector:
             raise ValueError("The operator '" + str(self.P) + "' for assertion statement is not projective.")
@@ -362,20 +332,20 @@ class AstIf(QWhileAst):
         return res
 
     @property
-    def extract(self) -> QWhileAst:
+    def extract(self) -> QProgAst:
         return AstIf(self.P, self.S1.extract, self.S0.extract)
 
     def get_prescription(self) -> list[AstPres]:
         return self.S1.get_prescription() + self.S0.get_prescription()
     
-class AstWhile(QWhileAst):
-    def __init__(self, P : EIQOptAbstract, S : QWhileAst):
+class AstWhile(QProgAst):
+    def __init__(self, P : EIQOptAbstract, S : QProgAst):
         super().__init__()
 
         self.P = P
         self.S = S
 
-    def eval(self, env: Env) -> QWhileAst:
+    def eval(self, env: Env) -> QProgAst:
         # check whether P is a projector
         if not self.P.eval(env).iqopt.qval.is_projector:
             raise ValueError("The operator '" + str(self.P) + "' for assertion statement is not projective.")
@@ -396,7 +366,7 @@ class AstWhile(QWhileAst):
         return res
 
     @property
-    def extract(self) -> QWhileAst:
+    def extract(self) -> QProgAst:
         return AstWhile(self.P, self.S.extract)
 
     def get_prescription(self) -> list[AstPres]:

@@ -74,8 +74,13 @@ class Interpreter:
         '''
         new_frame = frame.copy()
 
+        # VAR ID ':' ... '.'
+        if isinstance(cmd, Declaration):
+            new_frame.env.declare(cmd.id, cmd.type)
+            new_frame.info = f"Declared Var: {cmd.id}."
+
         # DEF ID ASSIGN eqopt '.'
-        if isinstance(cmd, DefTerm):
+        elif isinstance(cmd, Definition):
             new_frame.env[cmd.id] = cmd.term
             new_frame.info = f"Defined Term: {cmd.id}."
             
@@ -91,7 +96,7 @@ class Interpreter:
         # DEF ID ASSIGN EXTRACT ID '.'
         elif isinstance(cmd, DefExtract):
             term = frame.env[cmd.id2].eval(frame.env)
-            if not isinstance(term, QWhileAst):
+            if not isinstance(term, QProgAst):
                 raise ValueError("The term is not a While Program.")
             
             new_frame.env[cmd.id] = term.extract
@@ -233,9 +238,9 @@ class Interpreter:
             new_frame.info = f"Definitions: \n{frame.env.get_items()}"
         
         # EVAL ID '.'
-        elif isinstance(cmd, EvalId):
-            res = frame.env[cmd.id].eval(frame.env)
-            new_frame.info = f"Evaluated {cmd.id} to:\n {res}"
+        elif isinstance(cmd, EvalTerm):
+            res = cmd.term.eval(frame.env)
+            new_frame.info = f"Evaluated\n\n{cmd.term}\n\nto:\n\n{res}"
 
         # TEST eqopt '=' eqopt '.'
         elif isinstance(cmd, TestEQOptEQ):

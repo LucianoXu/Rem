@@ -55,7 +55,7 @@ def parse_sentence(env: Env, code: str) -> tuple[tuple[RemAst, str]|Exception, s
 
     try:
         res = parser.parse(sentence, lexer = lexer)
-    except (LexingError, ParsingError) as e:
+    except Exception as e:
         return e, code
     
     return (res, sentence), remained_part

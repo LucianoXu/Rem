@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from ...mTLC import TypedTerm, Types
 from ...qplcomp import *
-from ..language import QWhileAst, AstPres
+from ..language import QProgAst, AstPres
 
 from abc import ABC, abstractmethod
         
@@ -14,20 +15,24 @@ class RemAst(ABC):
     def __eq__(self, __value: object) -> bool:
         pass
 
-class Pause(RemAst):
-    def __init__(self):
-        pass
+
+class Declaration(RemAst):
+    def __init__(self, id: str, type: Types):
+        self.id = id
+        self.type = type
 
     def __eq__(self, __value: object) -> bool:
-        return isinstance(__value, Pause)
+        if isinstance(__value, Declaration):
+            return self.id == __value.id and self.type == __value.type
+        return False
 
-class DefTerm(RemAst):
+class Definition(RemAst):
     def __init__(self, id: str, term: TypedTerm):
         self.id = id
         self.term = term
 
     def __eq__(self, __value: object) -> bool:
-        if isinstance(__value, DefTerm):
+        if isinstance(__value, Definition):
             return self.id == __value.id and self.term == __value.term
         return False
 
@@ -42,7 +47,7 @@ class DefEIQOpt(RemAst):
         return False
 
 class DefCalc(RemAst):
-    def __init__(self, id: str, statement: QWhileAst, eiqopt: EIQOpt):
+    def __init__(self, id: str, statement: QProgAst, eiqopt: EIQOpt):
         self.id = id
         self.statement = statement
         self.eiqopt = eiqopt
@@ -53,7 +58,7 @@ class DefCalc(RemAst):
         return False
 
 class DefProg(RemAst):
-    def __init__(self, id: str, statement: QWhileAst):
+    def __init__(self, id: str, statement: QProgAst):
         self.id = id
         self.statement = statement
 
@@ -83,7 +88,7 @@ class StartRefine(RemAst):
         return False
 
 class StepStatement(RemAst):
-    def __init__(self, statement: QWhileAst):
+    def __init__(self, statement: QProgAst):
         self.statement = statement
 
     def __eq__(self, __value: object) -> bool:
@@ -170,13 +175,13 @@ class ShowDef(RemAst):
     def __eq__(self, __value: object) -> bool:
         return isinstance(__value, ShowDef)
 
-class EvalId(RemAst):
-    def __init__(self, id: str):
-        self.id = id
+class EvalTerm(RemAst):
+    def __init__(self, term: TypedTerm):
+        self.term = term
 
     def __eq__(self, __value: object) -> bool:
-        if isinstance(__value, EvalId):
-            return self.id == __value.id
+        if isinstance(__value, EvalTerm):
+            return self.term == __value.term
         return False
 
 class TestEQOptEQ(RemAst):
