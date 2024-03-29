@@ -1,9 +1,8 @@
 
 from __future__ import annotations
-from typing import Any
 
-from ...qplcomp import Env, prepare_env, EQOpt, QOpt, PLYError, QPLCompError
-from ..language import AstPres, TypedTerm, ValueError, EIQOptPair
+from ...qplcomp import Env, EQOpt
+from ..language import AstPres, ValueError, EIQOptPair
 
 from .ast import *
 from ..language.semantics.state import calc
@@ -12,7 +11,6 @@ from ..language import refine
 
 from copy import deepcopy
 
-import numpy as np
 
 
 class Frame:
@@ -77,15 +75,10 @@ class Interpreter:
         new_frame = frame.copy()
 
         # DEF ID ASSIGN eqopt '.'
-        if isinstance(cmd, DefEQOpt):
-            new_frame.env[cmd.id] = cmd.eqopt
-            new_frame.info = f"Defined EQOpt {cmd.id}."
+        if isinstance(cmd, DefTerm):
+            new_frame.env[cmd.id] = cmd.term
+            new_frame.info = f"Defined Term: {cmd.id}."
             
-        # DEF ID ASSIGN eiqopt '.'
-        elif isinstance(cmd, DefEIQOpt):
-            new_frame.env[cmd.id] = cmd.eiqopt
-            new_frame.info = f"Defined EIQOpt {cmd.id}."
-
         # DEF ID ASSIGN '[' '[' statement ']' ']' '(' eiqopt ')' '.'
         elif isinstance(cmd, DefCalc):
             rho0 = cmd.eiqopt.eval(frame.env).iqopt
@@ -94,10 +87,6 @@ class Interpreter:
             new_frame.env[cmd.id] = EIQOptPair(EQOpt(rho.qval), EQVar(rho.qvar))
             new_frame.info = f"Defined Calculation {cmd.id}."
         
-        # DEF ID ASSIGN PROG statement '.'
-        elif isinstance(cmd, DefProg):
-            new_frame.env[cmd.id] = cmd.statement
-            new_frame.info = f"Defined Program {cmd.id}."
 
         # DEF ID ASSIGN EXTRACT ID '.'
         elif isinstance(cmd, DefExtract):
@@ -145,7 +134,8 @@ class Interpreter:
             
             refine.rule_seq_break(
                 new_frame.current_goals[0],
-                cmd.mid_assertion)
+                cmd.mid_assertion,
+                frame.env)
 
             new_frame.current_goals = new_frame.current_goals[0].get_prescription() + new_frame.current_goals[1:]
             
@@ -158,7 +148,8 @@ class Interpreter:
             
             refine.rule_if(
                 new_frame.current_goals[0],
-                cmd.P)
+                cmd.P,
+                frame.env)
 
             new_frame.current_goals = new_frame.current_goals[0].get_prescription() + new_frame.current_goals[1:]
             

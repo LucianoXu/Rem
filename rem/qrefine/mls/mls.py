@@ -1,11 +1,11 @@
 
 from ...mTLC.env import Env
-from ...qplcomp.qexpr.lexer_def import LexingError
-from .ast import RemAst, ParsingError
+from ..prover.ast import RemAst
 
-from .prover_parsing_build import parser, parse_sentence, ParserState
 
-from .prover import Prover
+from .prover_parsing_build import parse_sentence
+
+from ..prover.prover import Prover
 
 import numpy as np
 
@@ -70,7 +70,7 @@ class MLS:
         self._info = ''
         
         # STEP 1, parse the command
-        res, remaining = parse_sentence(new_code)
+        res, remaining = parse_sentence(self.prover.current_frame.env, new_code)
 
         if isinstance(res, Exception):
             self._info = res

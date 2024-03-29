@@ -1,5 +1,5 @@
 
-from .prover import Prover
+from ..prover.prover import Prover
 #############################################################
 # the lexer
 
@@ -38,7 +38,7 @@ start = "cmd"
 # Build the parser
 parser = yacc.yacc()
 
-def parse_sentence(code: str) -> tuple[tuple[RemAst, str]|Exception, str]:
+def parse_sentence(env: Env, code: str) -> tuple[tuple[RemAst, str]|Exception, str]:
     '''
     parse one sentence of the code, return the result and the remaining part.
     '''
@@ -50,7 +50,7 @@ def parse_sentence(code: str) -> tuple[tuple[RemAst, str]|Exception, str]:
 
     # reset lexer
     lexer.lineno = 1
-    ParserState.reset()
+    ParserState.reset(env)
     ParserState.input_code = sentence
 
     try:

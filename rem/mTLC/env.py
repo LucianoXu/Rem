@@ -53,27 +53,19 @@ class TypedTerm(ABC):
         pass
 
 
-    def type_checking(self : TypedTerm, type : Types) -> None:
+    def type_checking(self, type : Types) -> None:
         '''
         The method to check the type of this expression. It will raise a TypeError if the type of expr is not target_type.
         '''
-        if self.type != type and not isinstance(self.type, UncertainType):
+        if self.type != type:
             raise ValueError(f"The parameter expression '{self}' should have type '{type}', but actually has type '{self.type}'.")
-
-class UncertainType(Types):
-    '''
-    The class for uncertain types.
-    '''
-    def __str__(self) -> str:
-        return "Uncertain"
 
 class Var(TypedTerm):
     '''
     The class for typed variables.
     '''
-    def __init__(self, id : str, type : Types = UncertainType()):
-
-        super().__init__(type)
+    def __init__(self, id : str, env : Env):
+        super().__init__(env.decs[id])
 
         if not isinstance(id, str):
             raise TermError("The id for the variable should be a string.")
@@ -84,7 +76,7 @@ class Var(TypedTerm):
     def eval(self, env: Env) -> TypedTerm:
         val = env[self.id].eval(env)
 
-        if (not isinstance(self.type, UncertainType)) and self.type != val.type:
+        if self.type != val.type:
             raise TermError(f"The variable '{self.id}' should be of type '{self.type}', but the value defined in the environment is of type '{val.type}'.")
         
         return val
@@ -102,18 +94,21 @@ class Env:
 
     def __init__(self) -> None:
 
-        self._lib : dict[str, TypedTerm] = {}
+        self.decs : dict[str, Types] = {}
+
+        self.defs : dict[str, TypedTerm] = {}
 
     def copy(self) -> Env:
         '''
         Return a shallow copy of this environment.
         '''
         res = Env()
-        res._lib = self._lib.copy()
+        res.decs = self.decs.copy()
+        res.defs = self.defs.copy()
         return res
 
 
-    def get_unique_name(self, prefix : str = DEFAULT_PREFIX) -> str:
+    def _get_unique_name(self, prefix : str = DEFAULT_PREFIX) -> str:
         '''
         Return a key which is not used in the environment. The key will be in the form of `prefix` + number.
 
@@ -123,7 +118,7 @@ class Env:
         n = 0
         res = prefix + str(n)
         n += 1
-        while res in self._lib:
+        while res in self.defs:
             res = prefix + str(n)
             n += 1
         return res
@@ -136,31 +131,53 @@ class Env:
         If not, create a new item with an auto key and return the key used.
         '''
         
-        for key in self._lib:
-            if self._lib[key] == term:
+        for key in self.defs:
+            if self.defs[key] == term:
                 return key
             
-        name = self.get_unique_name()
-        self._lib[name] = term
+        name = self._get_unique_name()
+
+        self.decs[name] = term.type
+        self.defs[name] = term
+
         return name
     
+    def declare(self, name: str, t : Types) -> None:
+        '''
+        Declare a variable with a type.
+        '''
+        if name in self.decs:
+            raise ValueError(f"The variable '{name}' has been declared.")
+        
+        if name in self.defs:
+            raise ValueError(f"The variable '{name}' has been defined.")
+        
+        self.decs[name] = t
+    
     def __setitem__(self, key : str, term : TypedTerm) -> None:
+
         if not isinstance(term, TypedTerm):
             raise ValueError("Invalid value. Only TypedTerm instances are allowed.")
         
+        # check the type
+        if key in self.decs:
+            if self.decs[key] != term.type:
+                raise ValueError(f"The variable '{key}' should have type '{self.decs[key]}', but the value has type '{term.type}'.")
+
         # it's not allowed to change the value.
-        if key in self._lib:
+        if key in self.defs:
             raise TermError(f"The variable '{str(key)}' has been defined.")
 
-        self._lib[key] = term
+        self.decs[key] = term.type
+        self.defs[key] = term
 
     def __getitem__(self, key : str) -> TypedTerm:
-        if key not in self._lib:
+        if key not in self.defs:
             raise TermError(f"The variable '{key}' is not defined.")
-        return self._lib[key]
+        return self.defs[key]
     
     def __contains__(self, key : str) -> bool:
-        return key in self._lib
+        return key in self.defs
     
 
     ##################################################################
@@ -168,15 +185,15 @@ class Env:
 
     def get_items_str(self, varls : list[str] = []) -> str:
         if len(varls) == 0:
-            varls = list(self._lib.keys())
+            varls = list(self.defs.keys())
         res = ""
         for key in varls:
-            res += key + " := \n" + str(self._lib[key]) + "\n\n"
+            res += key + " := \n" + str(self.defs[key]) + "\n\n"
         return res
     
     def get_items(self) -> str:
         res = ""
-        for key in self._lib:
+        for key in self.defs:
             res += key + "\n"
         return res
     

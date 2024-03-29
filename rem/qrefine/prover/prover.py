@@ -1,17 +1,12 @@
 
 from __future__ import annotations
-from typing import Any
 
-from ...qplcomp import Env, prepare_env, EQOpt, QOpt, PLYError, QPLCompError
-from ..language import AstPres, TypedTerm, ValueError
+from ...qplcomp import Env
 
 from .ast import *
 from .interpreter import *
 
-from ply.yacc import LRParser
-from ply.lex import Lexer
 
-import numpy as np
 
 class Prover:
     '''

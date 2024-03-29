@@ -21,14 +21,14 @@ class Pause(RemAst):
     def __eq__(self, __value: object) -> bool:
         return isinstance(__value, Pause)
 
-class DefEQOpt(RemAst):
-    def __init__(self, id: str, eqopt: EQOpt):
+class DefTerm(RemAst):
+    def __init__(self, id: str, term: TypedTerm):
         self.id = id
-        self.eqopt = eqopt
+        self.term = term
 
     def __eq__(self, __value: object) -> bool:
-        if isinstance(__value, DefEQOpt):
-            return self.id == __value.id and self.eqopt == __value.eqopt
+        if isinstance(__value, DefTerm):
+            return self.id == __value.id and self.term == __value.term
         return False
 
 class DefEIQOpt(RemAst):

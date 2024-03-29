@@ -16,7 +16,6 @@ from .error import QPLCompError
 
 from ..mTLC.env import TypedTerm, Env, Var
 
-from .qexpr import Parser
 from .qexpr import prepare_env
 
 
@@ -28,9 +27,6 @@ from .qval import predefined
 # qexpr outputs the parsing details for downstream applications
 # the lexer and parser is constructed by ply
 
-from .qexpr.eqopt import EQOpt
-from .qexpr.eiqopt import EIQOpt
+from .qexpr.eqopt import EQOpt, QOptType
+from .qexpr.eiqopt import EIQOpt, IQOptType
 from .qexpr.eqvar import EQVar
-from .qexpr import lexer_def
-from .qexpr import parser_def
-from .qexpr import PLYError, LexingError, ParsingError

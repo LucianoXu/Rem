@@ -57,7 +57,6 @@ class QWhileAst(TypedTerm):
 class AstSubprog(QWhileAst):
     def __init__(self, subprog : Var):
         super().__init__()
-        subprog.type_checking(QWhileType())
 
         self.subprog = subprog
 
@@ -130,7 +129,6 @@ class AstSkip(QWhileAst):
 class AstInit(QWhileAst):
     def __init__(self, eqvar : EQVar):
         super().__init__()
-        eqvar.type_checking(QVarType())
         self.eqvar = eqvar
 
     def eval(self, env: Env) -> QWhileAst:
@@ -153,7 +151,6 @@ class AstInit(QWhileAst):
 class AstUnitary(QWhileAst):
     def __init__(self, U : EIQOptAbstract):
         super().__init__()
-        U.type_checking(IQOptType())
 
         self.U = U
 
@@ -182,7 +179,6 @@ class AstUnitary(QWhileAst):
 class AstAssert(QWhileAst):
     def __init__(self, P : EIQOptAbstract):
         super().__init__()
-        P.type_checking(IQOptType())
 
         self.P = P
 
@@ -216,10 +212,6 @@ class AstPres(QWhileAst):
         '''
         super().__init__()
         self.SRefined : QWhileAst | None = SRefined
-
-        P.type_checking(IQOptType())
-        Q.type_checking(IQOptType())
-
         
         self.P = P
         self.Q = Q
@@ -342,8 +334,6 @@ class AstProb(QWhileAst):
 class AstIf(QWhileAst):
     def __init__(self, P : EIQOptAbstract, S1 : QWhileAst, S0 : QWhileAst):
         super().__init__()
-        P.type_checking(IQOptType())
-
         
         self.P = P
         self.S1 = S1
@@ -381,7 +371,6 @@ class AstIf(QWhileAst):
 class AstWhile(QWhileAst):
     def __init__(self, P : EIQOptAbstract, S : QWhileAst):
         super().__init__()
-        P.type_checking(IQOptType())
 
         self.P = P
         self.S = S

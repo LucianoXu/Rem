@@ -40,7 +40,7 @@ def weaken_pre(pres: AstPres, R: EIQOptAbstract, env: Env) -> None:
         [P, Q] ⊑ [R, Q]
     ```
     '''
-    R.type_checking(IQOptType())
+    R.type_checking(IQOptType(), env)
     if not pres.P.eval(env).iqopt <= R.eval(env).iqopt:
         msg = "Refinement failed. The relation P ⊑ R is not satisfied for: \n"
         msg += "P = \n\t" + str(pres.P) + "\n"
@@ -60,7 +60,7 @@ def strengthen_post(pres: AstPres, R: EIQOptAbstract, env: Env) -> None:
         [P, Q] ⊑ [P, R]
     ```
     '''
-    R.type_checking(IQOptType())
+    R.type_checking(IQOptType(), env)
     if not R.eval(env).iqopt <= pres.Q.eval(env).iqopt:
         msg = "Refinement failed. The relation R ⊑ Q is not satisfied for: \n"
         msg += "R = \n\t" + str(R) + "\n"
@@ -71,7 +71,7 @@ def strengthen_post(pres: AstPres, R: EIQOptAbstract, env: Env) -> None:
 
 
 
-def rule_seq_break(pres: AstPres, middle: EIQOptAbstract) -> None:
+def rule_seq_break(pres: AstPres, middle: EIQOptAbstract, env: Env) -> None:
     '''
     == Refinement Rule == 
     ```
@@ -79,14 +79,14 @@ def rule_seq_break(pres: AstPres, middle: EIQOptAbstract) -> None:
         [P, Q] ⊑ [P, R]; [R, Q]
     ```
     '''
-    middle.type_checking(IQOptType())
+    middle.type_checking(IQOptType(), env)
 
     pres.SRefined = AstSeq(
         AstPres(pres.P, middle),
         AstPres(middle, pres.Q)
     )
 
-def rule_if(pres: AstPres, R : EIQOptAbstract) -> None:
+def rule_if(pres: AstPres, R : EIQOptAbstract, env: Env) -> None:
     '''
     == Refinement Rule == 
     ```
@@ -94,7 +94,7 @@ def rule_if(pres: AstPres, R : EIQOptAbstract) -> None:
         [P, Q] ⊑ if R then [R ⋒ P,Q] else [R^⊥ ⋒ P, Q] end
     ```
     '''
-    R.type_checking(IQOptType())
+    R.type_checking(IQOptType(), env)
 
     S1 = AstPres(
         EIQOptSasakiConjunct(R, pres.P),
@@ -116,8 +116,8 @@ def rule_while(pres: AstPres, R : EIQOptAbstract, Inv : EIQOptAbstract, env: Env
         [P, Q] ⊑ while R do [R ⋒ Inv, Inv] end
     ```
     '''
-    R.type_checking(IQOptType())
-    Inv.type_checking(IQOptType())
+    R.type_checking(IQOptType(), env)
+    Inv.type_checking(IQOptType(), env)
 
     if not pres.P.eval(env).iqopt <= Inv.eval(env).iqopt:
         msg = "Refinement failed. The relation P <= Inv is not satisfied for: \n"

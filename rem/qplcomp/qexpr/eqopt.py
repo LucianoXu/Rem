@@ -57,7 +57,6 @@ class EQOptKetProj(EQOptAbstract):
         super().__init__()
 
         assert isinstance(vec, EQVecAbstract)
-        vec.type_checking(QVecType())
         self.vec = vec
 
     
@@ -81,10 +80,7 @@ class EQOptAdd(EQOptAbstract):
     def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
         super().__init__()
 
-        optA.type_checking(QOptType())
         self.optA = optA
-
-        optB.type_checking(QOptType())
         self.optB = optB
 
     def eval(self, env: Env) -> EQOpt:
@@ -106,7 +102,6 @@ class EQOptNeg(EQOptAbstract):
     def __init__(self, opt : EQOptAbstract):
         super().__init__()
 
-        opt.type_checking(QOptType())
         self.opt = opt
 
     
@@ -131,10 +126,7 @@ class EQOptSub(EQOptAbstract):
     def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
         super().__init__()
 
-        optA.type_checking(QOptType())
         self.optA = optA
-
-        optB.type_checking(QOptType())
         self.optB = optB
 
     def eval(self, env: Env) -> EQOpt:
@@ -156,10 +148,7 @@ class EQOptMul(EQOptAbstract):
     def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
         super().__init__()
 
-        optA.type_checking(QOptType())
         self.optA = optA
-
-        optB.type_checking(QOptType())
         self.optB = optB
 
     def eval(self, env: Env) -> EQOpt:
@@ -185,7 +174,6 @@ class EQOptScale(EQOptAbstract):
         assert isinstance(c, (complex, float))
         self.c = c
 
-        opt.type_checking(QOptType())
         self.opt = opt
     
     def eval(self, env: Env) -> EQOpt:
@@ -209,7 +197,6 @@ class EQOptDagger(EQOptAbstract):
     def __init__(self, opt : EQOptAbstract):
         super().__init__()
 
-        opt.type_checking(QOptType())
         self.opt = opt
 
     def eval(self, env: Env) -> EQOpt:
@@ -235,10 +222,7 @@ class EQOptTensor(EQOptAbstract):
     def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
         super().__init__()
 
-        optA.type_checking(QOptType())
         self.optA = optA
-
-        optB.type_checking(QOptType())
         self.optB = optB
 
     def eval(self, env: Env) -> EQOpt:
@@ -263,10 +247,7 @@ class EQOptDisjunct(EQOptAbstract):
     def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
         super().__init__()
 
-        optA.type_checking(QOptType())
         self.optA = optA
-
-        optB.type_checking(QOptType())
         self.optB = optB
         
     def eval(self, env: Env) -> EQOpt:
@@ -290,10 +271,7 @@ class EQOptConjunct(EQOptAbstract):
     def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
         super().__init__()
 
-        optA.type_checking(QOptType())
         self.optA = optA
-
-        optB.type_checking(QOptType())
         self.optB = optB
         
     def eval(self, env: Env) -> EQOpt:
@@ -315,7 +293,6 @@ class EQOptComplement(EQOptAbstract):
     def __init__(self, opt : EQOptAbstract):
         super().__init__()
 
-        opt.type_checking(QOptType())
         self.opt = opt
     
     def eval(self, env: Env) -> EQOpt:
@@ -339,10 +316,7 @@ class EQOptSasakiImply(EQOptAbstract):
     def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
         super().__init__()
 
-        optA.type_checking(QOptType())
         self.optA = optA
-
-        optB.type_checking(QOptType())
         self.optB = optB
 
 
@@ -367,10 +341,7 @@ class EQOptSasakiConjunct(EQOptAbstract):
     def __init__(self, optA : EQOptAbstract, optB : EQOptAbstract):
         super().__init__()
 
-        optA.type_checking(QOptType())
         self.optA = optA
-
-        optB.type_checking(QOptType())
         self.optB = optB
             
     def eval(self, env) -> EQOpt:
@@ -393,10 +364,7 @@ class EQSOptApply(EQOptAbstract):
     def __init__(self, so : EQSOptAbstract, opt : EQOptAbstract):
         super().__init__()
 
-        so.type_checking(QSOptType())
         self.so = so
-
-        opt.type_checking(QOptType())
         self.opt = opt
 
     

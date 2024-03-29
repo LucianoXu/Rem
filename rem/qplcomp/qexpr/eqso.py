@@ -54,11 +54,9 @@ class EQSOptAdd(EQSOptAbstract):
         super().__init__()
 
         assert isinstance(soA, EQSOptAbstract)
-        soA.type_checking(QSOptType())
         self.soA = soA
 
         assert isinstance(soB, EQSOptAbstract)
-        soB.type_checking(QSOptType())
         self.soB = soB
 
     def eval(self, env: Env) -> EQSOpt:

@@ -68,11 +68,9 @@ class EQVecAdd(EQVecAbstract):
         super().__init__()
 
         assert isinstance(vec1, EQVecAbstract)
-        vec1.type_checking(QVecType())
         self.vec1 = vec1
 
         assert isinstance(vec2, EQVecAbstract)
-        vec1.type_checking(QVecType())
         self.vec2 = vec2
 
     def eval(self, env: Env) -> EQVec:
@@ -103,7 +101,6 @@ class EQVecScale(EQVecAbstract):
 
         assert isinstance(vec, EQVecAbstract)
         
-        vec.type_checking(QVecType())
         self.vec = vec
 
     def eval(self, env: Env) -> EQVec:

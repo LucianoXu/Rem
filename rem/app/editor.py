@@ -4,10 +4,11 @@ from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
 from textual.widgets import Header, Footer, TextArea
-from ..qplcomp import prepare_env
 from textual.app import ComposeResult # type: ignore
 
-from ..qrefine.prover import mls
+from ..qplcomp import prepare_env
+
+from ..qrefine import mls
 
 
 
@@ -107,7 +108,11 @@ class Editor(Screen):
     @on(TextArea.SelectionChanged)
     def show_frame(self, event: TextArea.SelectionChanged) -> None:
         if event.text_area.id == 'verified-area':
-
+            
+            # avoid the empty selection
+            if self.verified_area.text == "":
+                return
+            
             # calculate the pos of the cursor 
             pos = len(self.verified_area.get_text_range((0,0), event.selection.end)) + 1
             
