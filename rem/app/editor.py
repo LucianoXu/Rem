@@ -3,9 +3,12 @@ from textual.binding import Binding
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, Container, ScrollableContainer
 from textual.screen import Screen
-from textual.widgets import Header, Footer, TextArea, Button, Static, Switch, Label, TabbedContent, TabPane, Placeholder, Checkbox, ListView, ListItem
+from textual.widgets import Header, Footer, TextArea, Button, Static, Switch, Label, TabbedContent, TabPane, Placeholder, Checkbox, ListView, ListItem, Input
 from textual.app import ComposeResult
 from textual.reactive import reactive
+from textual.events import Event
+
+from rem.mTLC.env import TermError
 
 from ..mTLC import Env
 
@@ -33,15 +36,42 @@ class GoalBar(Static):
 
 
 class EnvTabs(Static):
-    def reload_defs(self, env: Env):
+
+    env = reactive(Env)
+
+    class EnvTabChanged(Event):
+        def __init__(self, gen_env: Env, gen_rules: tuple[str, ...]) -> None:
+            super().__init__()
+            self.gen_env = gen_env
+            self.gen_rules = gen_rules
+
+    def watch_env(self, env: Env) -> None:
         '''
         reload the definitions in the environment
         '''
+
+        # stash the excluded names
+        excluded_names = set()
+
+        list_view = self.get_widget_by_id("defs_list", ListView)
+        for item in list_view.children:
+            assert isinstance(item, DefItem)
+            if not item.selected:
+                excluded_names.add(item.def_name)
+
         list_view = self.get_widget_by_id("defs_list", ListView)
         list_view.clear()
 
-        for def_name, def_value in env.defs.items():
-            list_view.append(DefItem(def_name, str(def_value.type), False))
+        for def_name, def_value in reversed(env.defs.items()):
+            list_view.append(
+                DefItem(
+                    def_name, 
+                    str(def_value.type), 
+                    def_name not in excluded_names,
+                )
+            )
+
+        self.post_message(self.EnvTabChanged(self.get_gen_env(), ()))
 
     def compose(self) -> ComposeResult:
         with TabbedContent():
@@ -49,6 +79,28 @@ class EnvTabs(Static):
                 yield ListView(id = "defs_list")
             with TabPane("Rules"):
                 yield ListView(id = "rules_list")
+
+    
+    def get_gen_env(self) -> Env:
+        '''
+        get the generation environment variables according to the selected items
+        '''
+        names = set()
+
+        list_view = self.get_widget_by_id("defs_list", ListView)
+        for item in list_view.children:
+            assert isinstance(item, DefItem)
+            if item.selected:
+                names.add(item.def_name)
+
+        return self.env.sub_env(names)
+    
+    @on(Switch.Changed)
+    def gen_setting_change(self, event: Switch.Changed) -> None:
+        '''
+        update the generation environment
+        '''
+        self.post_message(self.EnvTabChanged(self.get_gen_env(), ()))
 
 
 class DefItem(ListItem):
@@ -62,9 +114,11 @@ class DefItem(ListItem):
     '''
     def __init__(self, def_name: str, def_type: str, gen_selected: bool) -> None:
         super().__init__()
+
         self.def_name = def_name
         self.def_type = def_type
         self.gen_selected = gen_selected
+        self.switch = Switch(self.gen_selected)
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         editor = self.app.query_one("Editor", Editor)
@@ -80,11 +134,18 @@ class DefItem(ListItem):
             editor.push_cmd(cmd_code, record = False)
 
     def compose(self) -> ComposeResult:
-            yield Switch(self.gen_selected)
-            yield Label(f"{self.def_name} : {self.def_type}")
-            yield Button(f"SHOW", id = "show")
-            yield Button(f"EVAL", id = "eval")
+        yield self.switch
+        yield Label(f"{self.def_name} : {self.def_type}")
+        yield Button(f"SHOW", id = "show")
+        yield Button(f"EVAL", id = "eval")
 
+
+    @property
+    def selected(self) -> bool:
+        '''
+        whether the def item is selected for generation
+        '''
+        return self.switch.value
 
 
 
@@ -149,12 +210,27 @@ class Editor(Screen):
             self.error_area.text = "ERROR: " + value
 
     ############################################################
+            
+
+    ############################################################
+    # gen-machine settings
+            
+    gen_worker_num = reactive(8)
+    gen_max_depth = reactive(4)
+
+    def watch_gen_worker_num(self, value: int) -> None:
+        self.gen_machine.worker_num = value
+
+    def watch_gen_max_depth(self, value: int) -> None:
+        self.gen_machine.max_depth = value
+
+    ############################################################
 
     def compose(self) -> ComposeResult:
 
         # backend components
         self.mls = mls.MLS()
-        self.gen_machine = GenMachine()
+        self.gen_machine = GenMachine(self.mls.selected_frame.env, ())
 
         # timer
         self.gen_update_timer = self.set_interval(1 / 10, self.update_gen, pause=False)
@@ -212,7 +288,11 @@ class Editor(Screen):
                 self.apply_gen,
                 self.regen
             ),
-            Label("Auto Generation:", id='gen_switch_label'),
+            Label("Workers:"),
+            Input(str(self.gen_machine.worker_num), type = "integer", id = "gen_worker_num"),
+            Label("Depth:"),
+            Input(str(self.gen_machine.max_depth), type = "integer", id = "gen_max_depth"),
+            Label("Auto Generation:"),
             self.gen_switch
         )
         #######################################################
@@ -237,8 +317,33 @@ class Editor(Screen):
         yield Footer()
         
         # update the frame
-        self.call_later(self.update_display)
+        self.call_after_refresh(self.update_display)
 
+    @on(Input.Changed)
+    def input_changed(self, event: Input.Changed) -> None:
+        if event.input.id == 'gen_worker_num':
+            try:
+                worker_num = int(event.value)
+                if worker_num < 1:
+                    self.get_widget_by_id('gen_worker_num', Input).value = str(1)
+                elif worker_num > 16:
+                    self.get_widget_by_id('gen_worker_num', Input).value = str(16)
+                else:
+                    self.gen_worker_num = worker_num
+            except ValueError:
+                pass
+
+        elif event.input.id == 'gen_max_depth':
+            try:
+                max_depth = int(event.value)
+                if max_depth < 1:
+                    self.get_widget_by_id('gen_max_depth', Input).value = str(1)
+                elif max_depth > 8:
+                    self.get_widget_by_id('gen_max_depth', Input).value = str(8)
+                else:
+                    self.gen_max_depth = max_depth
+            except ValueError:
+                pass
 
     @on(Switch.Changed)
     def on_switch_changed(self, event: Switch.Changed) -> None:
@@ -365,13 +470,28 @@ class Editor(Screen):
         # clean the error
         self.prover_status = ''
 
+    @on(EnvTabs.EnvTabChanged)
+    def env_tabs_change_detected(self, event: EnvTabs.EnvTabChanged) -> None:
+        '''
+        update the generation environment
+        '''
 
+        # check before assigning to avoid redundant updates
+        if event.gen_env != self.gen_machine.gen_env:
+            self.gen_machine.gen_env = event.gen_env
+        
+        if event.gen_rules != self.gen_machine.gen_rules:
+            self.gen_machine.gen_rules = event.gen_rules
 
     def update_gen(self) -> None:
         '''
         Update the generation information and checks the state of gen_machine.
         '''
-        machine_str = str(self.gen_machine)
+        if self.gen_switch.value:
+            machine_str = str(self.gen_machine)
+        else:
+            machine_str = "Generation is disabled."
+
         if machine_str != self.gen_area.text:
             self.gen_area.text = machine_str
         
@@ -388,13 +508,9 @@ class Editor(Screen):
             # 3. the current goal is different from the last generated goal
             elif selected_goal != self.gen_machine.goal:
 
-                self.gen_machine.terminate()
-
                 self.gen_machine.gen(
                     goal = selected_goal,
-                    worker_num = 8,
-                    gen_env = self.mls.selected_frame.env,
-                )
+                )       
 
                 self.gen_status = "working"
 
@@ -435,7 +551,7 @@ class Editor(Screen):
             ############################################
             # Update the defs tab (only on the latest frame)
             if self.mls.latest_selected:
-                self.env_tabs.reload_defs(self.mls.selected_frame.env)
+                self.env_tabs.env = self.mls.selected_frame.env
 
 
     @on(TextArea.SelectionChanged)

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Sequence
 
+from rem.mTLC.env import TermError
+
 from ....mTLC import TypedTerm
 
 from ....qplcomp import *
@@ -45,15 +47,27 @@ class GenMachine:
 
     mp.set_start_method('fork')
 
-    def __init__(self):
+    def __init__(self, gen_env : Env, gen_rules: tuple[str, ...]):
         self.mng = mp.Manager()
-        self.goal : AstPres | None = None
         self.working : bool = False
+
+        self.goal : AstPres | None = None
+
+        # gen settings
+        self._gen_env : Env = gen_env
+        self._gen_rules : tuple[str, ...] = gen_rules
+
+        self._max_depth : int = 5
+        self._worker_num : int = 8
+
+        self.retry_times : int = 10
 
         # two proxy lists for the communication between the main process and the workers
         self.workers = self.mng.list([])
 
         self.threads : list[mp.Process] = []
+
+        self.info = "Ready to generate."
 
     @property
     def attempt_total(self) -> int:
@@ -81,41 +95,104 @@ class GenMachine:
         elif len(self.workers) > 0:
             return f"({self.attempt_total})\n{self.workers[0].current_prog}"
         else:
-            return "NO WORKERS"
+            return self.info
+        
+    @property
+    def gen_env(self) -> Env:
+        return self._gen_env
+    
+    @gen_env.setter
+    def gen_env(self, env: Env) -> None:
+        '''
+        Configure the generation on the fly.
+        '''
+        self._gen_env = env
+
+        if self.working and self.goal is not None:
+            self.gen(self.goal)
+        
+    @property
+    def gen_rules(self) -> tuple[str, ...]:
+        return self._gen_rules
+    
+    @gen_rules.setter
+    def gen_rules(self, rules: tuple[str, ...]) -> None:
+        '''
+        Configure the generation on the fly.
+        '''
+        self._gen_rules = rules
+
+        if self.working and self.goal is not None:
+            self.gen(self.goal)
+
+    @property
+    def max_depth(self) -> int:
+        return self._max_depth
+    
+    @max_depth.setter
+    def max_depth(self, depth: int) -> None:
+        '''
+        Configure the generation on the fly.
+        '''
+        self._max_depth = depth
+
+        if self.working and self.goal is not None:
+            self.gen(self.goal)
+
+    @property
+    def worker_num(self) -> int:
+        return self._worker_num
+    
+    @worker_num.setter
+    def worker_num(self, num: int) -> None:
+        '''
+        Configure the generation on the fly.
+        '''
+        self._worker_num = num
+
+        if self.working and self.goal is not None:
+            self.gen(self.goal)
+
 
     def gen(self, 
-            goal: AstPres,
-            worker_num: int, 
-            gen_env: Env, 
-            retry_times = 10, 
-            max_depth = 5) -> None:
+            goal: AstPres) -> None:
         '''
         start the generation processes
         '''
+        self.terminate()
 
         self.working = True
         self.goal = goal
         self.workers[:] = []
         self.threads: list[mp.Process] = []
 
-        ###################################
-        # collect the quantum variales
+        ############################################################################################
+        # collect the quantum variales, check whether the env is sufficient
 
-        collect_qvars = goal.P.eval(gen_env).iqopt.qvar + goal.Q.eval(gen_env).iqopt.qvar
+        try:
+            collect_qvars = goal.P.eval(self.gen_env).iqopt.qvar + goal.Q.eval(self.gen_env).iqopt.qvar
+        except TermError as e:
+            self.info = "Cannot generate, insufficient environment:\n" + str(e)
+            return
 
-        for item in gen_env.defs.values():
+        for item in self.gen_env.defs.values():
             if isinstance(item, EIQOptAbstract):
                 collect_qvars += item.all_qvar
             elif isinstance(item, QProgAst):
                 collect_qvars += item.all_qvar
 
-        ###################################
+        ############################################################################################
                 
 
 
-        for i in range(worker_num):
+        for i in range(self.worker_num):
             self.workers.append(
-                GenWorker(gen_env, collect_qvars, retry_times, max_depth))
+                GenWorker(
+                    self.gen_env, 
+                    self.gen_rules,
+                    collect_qvars, 
+                    self.retry_times, 
+                    self.max_depth))
             
             self.threads.append(
                 mp.Process(target=worker_gen, 
@@ -128,6 +205,7 @@ class GenMachine:
     def initialize(self):
         '''
         initialize the generation machine
+        (the configurations are not changed)
         '''
 
         for t in self.threads:
@@ -137,6 +215,8 @@ class GenMachine:
         self.goal = None
         self.working = False
         self.workers[:] = []
+
+        self.into = "Ready to generate."
 
 
     def terminate(self):
@@ -156,10 +236,12 @@ class GenWorker:
     - abort, prescription, assertion and while are forbidden
     - only provided operators can be utilized
     '''
-    def __init__(self, gen_env: Env, qvars: QVar, retry_times = 10, max_depth = 5):
+    def __init__(self, gen_env: Env, gen_rules: tuple[str, ...], qvars: QVar, retry_times, max_depth):
         
         # the expressions available for generation (QOpt, IQOpt, QProg)
-        self.gen_env = gen_env.copy()
+        self.gen_env = gen_env
+        self.gen_rules = gen_rules
+
         self.qvars = qvars
         self.retry_times = retry_times
         self.max_depth = max_depth

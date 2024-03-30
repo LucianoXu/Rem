@@ -107,6 +107,11 @@ class Env:
 
         self.defs : dict[str, TypedTerm] = {}
 
+    def __eq__(self, other : Env) -> bool:
+        if self is other:
+            return True
+        return self.decs == other.decs and self.defs == other.defs
+
     def copy(self) -> Env:
         '''
         Return a shallow copy of this environment.
@@ -115,6 +120,18 @@ class Env:
         res.decs = self.decs.copy()
         res.defs = self.defs.copy()
         return res
+    
+    def sub_env(self, defs: set[str]) -> Env:
+        '''
+        Return a sub-environment with the definitions in `defs`.
+        '''
+        res = Env()
+
+        for key in defs:
+            if key in self.defs:
+                res[key] = self.defs[key]
+
+        return res        
 
 
     def _get_unique_name(self, prefix : str = DEFAULT_PREFIX) -> str:
