@@ -28,7 +28,7 @@ class MLS:
         # the index of the last charactor of the command (typically, '.')
         self.code_stack: list[str] = []  
 
-        self.cur_frame_id = -1
+        self.selected_frame_id = -1
 
         self.error : str = ''
 
@@ -39,23 +39,23 @@ class MLS:
     @property
     def prover_info(self) -> str:
         # note that the prover frame is always one frame longer because of the initial one
-        return str(self.current_frame)
+        return str(self.selected_frame)
     
 
     @property
-    def current_frame(self) -> Frame:
-        return self.prover.frame_stack[self.cur_frame_id+1]
+    def selected_frame(self) -> Frame:
+        return self.prover.frame_stack[self.selected_frame_id+1]
     
     @property
-    def current_goal(self) -> AstPres | None:
-        return self.current_frame.current_goals[0] if len(self.current_frame.current_goals) > 0 else None
+    def selected_goal(self) -> AstPres | None:
+        return self.selected_frame.current_goals[0] if len(self.selected_frame.current_goals) > 0 else None
     
     @property
     def latest_selected(self) -> bool:
         '''
         Check whether the latest frame is selected.
         '''
-        return self.cur_frame_id == len(self) - 1
+        return self.selected_frame_id == len(self) - 1
     
     
     def __len__(self) -> int:
@@ -74,7 +74,7 @@ class MLS:
             if total_len >= pos:
                 break
 
-        self.cur_frame_id = new_frame_id
+        self.selected_frame_id = new_frame_id
             
 
     def step_forward(self, new_code: str) -> tuple[str, str|None] | None:
@@ -108,7 +108,7 @@ class MLS:
         self.code_stack.append(res[1])
 
         # focus on the latest frame
-        self.cur_frame_id = len(self) - 1
+        self.selected_frame_id = len(self) - 1
 
         return remaining, output
 
@@ -129,7 +129,7 @@ class MLS:
             self.cmd_stack.pop()
             self.prover.pop_frame()
 
-        # adjust cur_frame_id
-        self.cur_frame_id = len(self) - 1
+        # adjust selected_frame_id
+        self.selected_frame_id = len(self) - 1
 
         return res

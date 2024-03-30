@@ -36,46 +36,6 @@ class Definition(RemAst):
             return self.id == __value.id and self.term == __value.term
         return False
 
-class DefEIQOpt(RemAst):
-    def __init__(self, id: str, eiqopt: EIQOpt):
-        self.id = id
-        self.eiqopt = eiqopt
-
-    def __eq__(self, __value: object) -> bool:
-        if isinstance(__value, DefEIQOpt):
-            return self.id == __value.id and self.eiqopt == __value.eiqopt
-        return False
-
-class DefCalc(RemAst):
-    def __init__(self, id: str, statement: QProgAst, eiqopt: EIQOpt):
-        self.id = id
-        self.statement = statement
-        self.eiqopt = eiqopt
-
-    def __eq__(self, __value: object) -> bool:
-        if isinstance(__value, DefCalc):
-            return self.id == __value.id and self.statement == __value.statement and self.eiqopt == __value.eiqopt
-        return False
-
-class DefProg(RemAst):
-    def __init__(self, id: str, statement: QProgAst):
-        self.id = id
-        self.statement = statement
-
-    def __eq__(self, __value: object) -> bool:
-        if isinstance(__value, DefProg):
-            return self.id == __value.id and self.statement == __value.statement
-        return False
-
-class DefExtract(RemAst):
-    def __init__(self, id: str, id2: str):
-        self.id = id
-        self.id2 = id2
-
-    def __eq__(self, __value: object) -> bool:
-        if isinstance(__value, DefExtract):
-            return self.id == __value.id and self.id2 == __value.id2
-        return False
 
 class StartRefine(RemAst):
     def __init__(self, id: str, prescription: AstPres):

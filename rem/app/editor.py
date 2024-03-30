@@ -4,7 +4,7 @@ from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, Container, ScrollableContainer
 from textual.screen import Screen
 from textual.widgets import Header, Footer, TextArea, Button, Static, Switch, Label
-from textual.app import ComposeResult # type: ignore
+from textual.app import ComposeResult
 from textual.reactive import reactive
 
 from ..qrefine import mls, AstPres
@@ -16,6 +16,20 @@ import datetime
 def rem_greetings() -> str:
     now = datetime.datetime.now()
     return f"Session starts at {now.strftime('%H:%M:%S')}."
+
+
+class GoalBar(Static):
+    def __init__(self, goal: AstPres, index: int, total: int) -> None:
+        super().__init__()
+        self.goal = goal
+        self.index = index  # index starts from 1
+        self.total = total
+
+    def compose(self) -> ComposeResult:
+        yield Label(f"Goal ({self.index}/{self.total})")
+        yield TextArea(str(self.goal), read_only=True)
+
+
 
 class Editor(Screen):
 
@@ -111,7 +125,7 @@ class Editor(Screen):
         ##################################################
         # information area
 
-        self.goal_area = TextArea(read_only=True)
+        self.goal_list = ScrollableContainer()
 
         self.log_area = TextArea(read_only=True)
 
@@ -150,7 +164,7 @@ class Editor(Screen):
             ),
             Vertical(
                 Label("Refinement Goals"),
-                self.goal_area,
+                self.goal_list,
                 Label("Info from Rem"),
                 self.log_area,
                 self.error_area
@@ -184,7 +198,6 @@ class Editor(Screen):
             self.verified_area.move_cursor(self.verified_area.cursor_location)
 
 
-
     def on_button_pressed(self, event: Button.Pressed) -> None:
 
         # apply the generation result
@@ -203,7 +216,7 @@ class Editor(Screen):
                     self.append_log(res[1])
 
             self.prover_status = self.mls.error
-            self.goal_area.text = self.mls.prover_info
+
             self.verified_area.text = self.mls.verified_code
 
         # regenerate
@@ -225,7 +238,7 @@ class Editor(Screen):
                 self.append_log(res[1])
 
         self.prover_status = self.mls.error
-        self.goal_area.text = self.mls.prover_info
+
         self.verified_area.text = self.mls.verified_code
 
         return res is not None
@@ -241,7 +254,7 @@ class Editor(Screen):
             self.code_area.text = res + self.code_area.text
 
         self.prover_status = self.mls.error
-        self.goal_area.text = self.mls.prover_info
+
         self.verified_area.text = self.mls.verified_code
 
         # push the code_area cursor backwards
@@ -290,23 +303,23 @@ class Editor(Screen):
         
         if self.gen_switch.value:
 
-            current_goal = self.mls.current_goal
+            selected_goal = self.mls.selected_goal
             
-            if not self.mls.latest_selected or current_goal is None:
+            if not self.mls.latest_selected or selected_goal is None:
                 self.gen_status = "disabled"
 
             # conditions to trigger the generation
             # 1. the latest frame is selected
             # 2. there is a current goal
             # 3. the current goal is different from the last generated goal
-            elif current_goal != self.gen_machine.goal:
+            elif selected_goal != self.gen_machine.goal:
 
                 self.gen_machine.terminate()
 
                 self.gen_machine.gen(
-                    goal = current_goal,
+                    goal = selected_goal,
                     worker_num = 8,
-                    gen_env = self.mls.current_frame.env,
+                    gen_env = self.mls.selected_frame.env,
                 )
 
                 self.gen_status = "working"
@@ -337,9 +350,33 @@ class Editor(Screen):
                 
                 self.mls.set_cursor(pos)
 
-                self.goal_area.text = self.mls.prover_info
-
             except Exception:
                 pass
             
-    
+
+        ############################################
+        # Update the goal list according to the mls
+            
+        goals: list[AstPres] = self.mls.selected_frame.current_goals
+
+        # remove all childs
+        children = self.goal_list.query(None)
+        for child in children:
+            child.remove()
+
+        if len(goals) == 0:
+            if self.mls.selected_frame.refinement_mode:
+                self.goal_list.mount(
+                    Label("Goal Clear.")
+                )
+            else:
+                self.goal_list.mount(
+                    Label("Not in refinement mode.")
+                )
+        else:
+            for i, goal in enumerate(goals, start=1):
+                self.goal_list.mount(
+                    GoalBar(goal, i, len(goals))
+                )
+
+ 

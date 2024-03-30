@@ -24,12 +24,18 @@ class Frame:
         self.env : Env = env.copy()
         self.refine_proof_name = refine_proof_name
         self.refine_proof = deepcopy(refine_proof)
-        self.info : str | Exception = info
 
         if self.refine_proof is None:
             self.current_goals = []
         if self.refine_proof:
             self.current_goals = self.refine_proof.get_prescription()
+
+    @property
+    def refinement_mode(self) -> bool:
+        '''
+        return whether the frame is in refinement mode
+        '''
+        return self.refine_proof is not None
 
     @property
     def goals_str(self) -> str:
@@ -51,14 +57,10 @@ class Frame:
         return Frame(
             self.env, 
             self.refine_proof_name,
-            self.refine_proof,
-            self.info)
+            self.refine_proof)
     
     def __str__(self) -> str:
-        res = self.goals_str
-        res += "\n" + "-"*40 + "\n"
-        res += f"= Info =\n\n" + str(self.info)
-        return res
+        return self.goals_str
 
 
 class Interpreter:
