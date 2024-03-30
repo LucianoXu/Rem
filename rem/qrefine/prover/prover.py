@@ -23,13 +23,13 @@ class Prover:
         return str(self.current_frame)
 
     
-    def execute(self, cmd: RemAst) -> None:
+    def execute(self, cmd: RemAst) -> str|None:
         '''
         Push a command to the current frame.
         '''
-        self.frame_stack.append(
-            Interpreter.exe(cmd, self.current_frame)
-        )
+        frame, output = Interpreter.exe(cmd, self.current_frame)
+        self.frame_stack.append(frame)
+        return output
 
     def pop_frame(self) -> None:
         '''

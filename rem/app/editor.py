@@ -10,7 +10,12 @@ from textual.reactive import reactive
 from ..qrefine import mls, AstPres
 
 from ..qrefine.prover.gen.gen_machine import GenMachine
+import datetime
 
+
+def rem_greetings() -> str:
+    now = datetime.datetime.now()
+    return f"Session starts at {now.strftime('%H:%M:%S')}."
 
 class Editor(Screen):
 
@@ -49,6 +54,31 @@ class Editor(Screen):
     ############################################################
 
 
+    ############################################################
+    # information from rem
+    rem_log = reactive(rem_greetings())
+    prover_status = reactive('')
+
+    def append_log(self, value: str) -> None:
+        self.rem_log += f"\n\n{value}"
+
+    def watch_rem_log(self, value: str) -> None:
+        self.log_area.text = value
+
+        # set the cursor to the end
+        self.log_area.select_all()
+        self.log_area.move_cursor(self.log_area.cursor_location)
+
+    def watch_prover_status(self, value: str) -> None:
+        if value == '':
+            self.error_area.text = 'READY.'
+        elif value == 'Calculating...':
+            self.error_area.text = value
+        else:
+            self.error_area.text = "ERROR: " + value
+
+    ############################################################
+
     def compose(self) -> ComposeResult:
 
         # backend components
@@ -59,22 +89,33 @@ class Editor(Screen):
         self.gen_update_timer = self.set_interval(1 / 10, self.update_gen, pause=False)
 
         # widgets
+
+        #######################################################
+        # coding area
+
         self.verified_area = TextArea(
             "",
             id='verified-area',
             show_line_numbers=True,
             read_only=True
         )
+
         self.code_area = TextArea(
-            "// put your code here ...", 
+            "// starting coding here", 
             id='code-area',
             show_line_numbers=True,
             tab_behavior='indent'
         )
 
+
+        ##################################################
+        # information area
+
         self.goal_area = TextArea(read_only=True)
 
-        self.mls_info = TextArea(read_only=True)
+        self.log_area = TextArea(read_only=True)
+
+        self.error_area = TextArea(read_only=True)
 
 
         #######################################################
@@ -108,8 +149,11 @@ class Editor(Screen):
                 self.code_area,
             ),
             Vertical(
+                Label("Refinement Goals"),
                 self.goal_area,
-                self.mls_info,
+                Label("Info from Rem"),
+                self.log_area,
+                self.error_area
             ),
             self.gen_container,
         )
@@ -145,10 +189,20 @@ class Editor(Screen):
 
         # apply the generation result
         if event.button.id == 'apply_gen':
+
             cmd = f"\n\nStep {self.gen_machine.sol}."
+
+            # set the status
+            self.prover_status = 'Calculating...'
+
             res = self.mls.step_forward(cmd)
 
-            self.mls_info.text = self.mls.info
+            # add the logging
+            if res is not None:
+                if res[1] is not None:
+                    self.append_log(res[1])
+
+            self.prover_status = self.mls.error
             self.goal_area.text = self.mls.prover_info
             self.verified_area.text = self.mls.verified_code
 
@@ -158,12 +212,19 @@ class Editor(Screen):
 
 
     def action_step_forward(self) -> bool:
+        # set the status
+        self.prover_status = 'Calculating...'
+
         res = self.mls.step_forward(self.code_area.text)
 
         if res is not None:
-            self.code_area.text = res
+            self.code_area.text = res[0]
 
-        self.mls_info.text = self.mls.info
+            # check whether to log the output.
+            if res[1] is not None:
+                self.append_log(res[1])
+
+        self.prover_status = self.mls.error
         self.goal_area.text = self.mls.prover_info
         self.verified_area.text = self.mls.verified_code
 
@@ -171,12 +232,15 @@ class Editor(Screen):
 
 
     def action_step_backward(self) -> bool:
+        # set the status
+        self.prover_status = 'Calculating...'
+
         res = self.mls.step_backward()
 
         if res is not None:
             self.code_area.text = res + self.code_area.text
 
-        self.mls_info.text = self.mls.info
+        self.prover_status = self.mls.error
         self.goal_area.text = self.mls.prover_info
         self.verified_area.text = self.mls.verified_code
 
@@ -198,6 +262,9 @@ class Editor(Screen):
 
         self.gen_switch.value = auto_gen
 
+        # clean the error
+        self.prover_status = ''
+
     def action_play_backward(self) -> None:
         # turn off the auto-gen temporarily
         auto_gen = self.gen_switch.value
@@ -208,14 +275,18 @@ class Editor(Screen):
         
         self.gen_switch.value = auto_gen
 
-        Vertical().remove
+        # clean the error
+        self.prover_status = ''
+
 
 
     def update_gen(self) -> None:
         '''
         Update the generation information and checks the state of gen_machine.
         '''
-        self.gen_area.text = str(self.gen_machine)
+        machine_str = str(self.gen_machine)
+        if machine_str != self.gen_area.text:
+            self.gen_area.text = machine_str
         
         if self.gen_switch.value:
 
@@ -266,7 +337,6 @@ class Editor(Screen):
                 
                 self.mls.set_cursor(pos)
 
-                self.mls_info.text = self.mls.info
                 self.goal_area.text = self.mls.prover_info
 
             except Exception:

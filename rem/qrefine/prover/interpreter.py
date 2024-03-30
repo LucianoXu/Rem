@@ -67,40 +67,24 @@ class Interpreter:
     '''
 
     @staticmethod
-    def exe(cmd: RemAst, frame: Frame) -> Frame:
+    def exe(cmd: RemAst, frame: Frame) -> tuple[Frame, str|None]:
         '''
         Execute a command in the frame.
-        Return the result frame.
+        Return the result frame and the output of this command.
         '''
         new_frame = frame.copy()
+
+        output = None
 
         # VAR ID ':' ... '.'
         if isinstance(cmd, Declaration):
             new_frame.env.declare(cmd.id, cmd.type)
-            new_frame.info = f"Declared Var: {cmd.id}."
+            output = f"Declared Var: {cmd.id}."
 
         # DEF ID ASSIGN eqopt '.'
         elif isinstance(cmd, Definition):
             new_frame.env[cmd.id] = cmd.term
-            new_frame.info = f"Defined Term: {cmd.id}."
-            
-        # DEF ID ASSIGN '[' '[' statement ']' ']' '(' eiqopt ')' '.'
-        elif isinstance(cmd, DefCalc):
-            rho0 = cmd.eiqopt.eval(frame.env).iqopt
-            rho = calc(cmd.statement, rho0, frame.env)
-
-            new_frame.env[cmd.id] = EIQOptPair(EQOpt(rho.qval), EQVar(rho.qvar))
-            new_frame.info = f"Defined Calculation {cmd.id}."
-        
-
-        # DEF ID ASSIGN EXTRACT ID '.'
-        elif isinstance(cmd, DefExtract):
-            term = frame.env[cmd.id2].eval(frame.env)
-            if not isinstance(term, QProgAst):
-                raise ValueError("The term is not a While Program.")
-            
-            new_frame.env[cmd.id] = term.extract
-            new_frame.info = f"Defined Extract {cmd.id}."
+            output = f"Defined Term: {cmd.id}."
 
         # REFINE ID ':' prescription '.'
         elif isinstance(cmd, StartRefine):
@@ -115,7 +99,7 @@ class Interpreter:
             new_frame.refine_proof = cmd.prescription
             new_frame.current_goals = [cmd.prescription]
 
-            new_frame.info = f"Refinement starts."
+            output = f"Refinement starts."
 
         # STEP statement '.'
         # note: this is the direct refinement in semantics
@@ -130,7 +114,7 @@ class Interpreter:
 
             new_frame.current_goals = new_frame.current_goals[0].get_prescription() + new_frame.current_goals[1:]
             
-            new_frame.info = f"Refinement step succeeded."
+            output = f"Refinement step succeeded."
 
         # STEP REFINE_SEQ eiqopt '.'
         elif isinstance(cmd, StepRefineSeq):
@@ -144,7 +128,7 @@ class Interpreter:
 
             new_frame.current_goals = new_frame.current_goals[0].get_prescription() + new_frame.current_goals[1:]
             
-            new_frame.info = f"Refinement step succeeded."
+            output = f"Refinement step succeeded."
 
         # STEP REFINE_IF eiqopt '.'
         elif isinstance(cmd, StepRefineIf):
@@ -158,7 +142,7 @@ class Interpreter:
 
             new_frame.current_goals = new_frame.current_goals[0].get_prescription() + new_frame.current_goals[1:]
             
-            new_frame.info = f"Refinement step succeeded."
+            output = f"Refinement step succeeded."
 
         # STEP REFINE_WHILE eiqopt REFINE_INV eiqopt '.'
         elif isinstance(cmd, StepRefineWhile):
@@ -173,7 +157,7 @@ class Interpreter:
 
             new_frame.current_goals = new_frame.current_goals[0].get_prescription() + new_frame.current_goals[1:]
             
-            new_frame.info = f"Refinement step succeeded."
+            output = f"Refinement step succeeded."
 
         # STEP REFINE_WEAKEN_PRE eiqopt '.'
         elif isinstance(cmd, RefineWeakenPre):
@@ -187,7 +171,7 @@ class Interpreter:
 
             new_frame.current_goals = new_frame.current_goals[0].get_prescription() + new_frame.current_goals[1:]
             
-            new_frame.info = f"Refinement step succeeded."
+            output = f"Refinement step succeeded."
 
         # STEP REFINE_STRENGTHEN_POST eiqopt '.'
         elif isinstance(cmd, RefineStrengthenPost):
@@ -201,7 +185,7 @@ class Interpreter:
 
             new_frame.current_goals = new_frame.current_goals[0].get_prescription() + new_frame.current_goals[1:]
             
-            new_frame.info = f"Refinement step succeeded."
+            output = f"Refinement step succeeded."
 
         # CHOOSE FLOATNUM '.'
         elif isinstance(cmd, RefineChooseGoal):
@@ -211,7 +195,7 @@ class Interpreter:
             # switch the goals
             new_frame.current_goals = [new_frame.current_goals[cmd.n-1]] + new_frame.current_goals[:cmd.n-1] + new_frame.current_goals[cmd.n:]
 
-            new_frame.info = f"Goal switched."
+            output = f"Goal switched."
 
         # META_END '.'
         elif isinstance(cmd, MetaEnd):
@@ -227,55 +211,55 @@ class Interpreter:
             new_frame.refine_proof = None
             new_frame.current_goals = []
 
-            new_frame.info = f"Refinement ends."
+            output = f"Refinement ends."
 
         # SHOW ID '.'
         elif isinstance(cmd, ShowId):
-            new_frame.info = f"Show {cmd.id}:\n {frame.env[cmd.id]}"
+            output = f"Show {cmd.id}:\n {frame.env[cmd.id]}"
 
         # SHOW DEF '.'
         elif isinstance(cmd, ShowDef):
-            new_frame.info = f"Definitions: \n{frame.env.get_items()}"
+            output = f"Definitions: \n{frame.env.get_items()}"
         
         # EVAL ID '.'
         elif isinstance(cmd, EvalTerm):
             res = cmd.term.eval(frame.env)
-            new_frame.info = f"Evaluated\n\n{cmd.term}\n\nto:\n\n{res}"
+            output = f"Evaluated\n\n{cmd.term}\n\nto:\n\n{res}"
 
         # TEST eqopt '=' eqopt '.'
         elif isinstance(cmd, TestEQOptEQ):
             res = cmd.eqopt1.eval(frame.env) == cmd.eqopt2.eval(frame.env)
             if res:
-                new_frame.info = f"Test Result: {cmd.eqopt1} = {cmd.eqopt2}"
+                output = f"Test Result: {cmd.eqopt1} = {cmd.eqopt2}"
             else:
-                new_frame.info = f"Test Result: {cmd.eqopt1} ≠ {cmd.eqopt2}"
+                output = f"Test Result: {cmd.eqopt1} ≠ {cmd.eqopt2}"
 
 
         # TEST eiqopt '=' eiqopt '.'
         elif isinstance(cmd, TestEIQOptEQ):
             res = cmd.eiqopt1.eval(frame.env) == cmd.eiqopt2.eval(frame.env)
             if res:
-                new_frame.info = f"Test Result: {cmd.eiqopt1} = {cmd.eiqopt2}"
+                output = f"Test Result: {cmd.eiqopt1} = {cmd.eiqopt2}"
             else:
-                new_frame.info = f"Test Result: {cmd.eiqopt1} ≠ {cmd.eiqopt2}"
+                output = f"Test Result: {cmd.eiqopt1} ≠ {cmd.eiqopt2}"
 
         # TEST eqopt LEQ eqopt '.'
         elif isinstance(cmd, TestEQOptLEQ):
             res = cmd.eqopt1.eval(frame.env).qopt <= cmd.eqopt2.eval(frame.env).qopt
             if res:
-                new_frame.info = f"Test Result: {cmd.eqopt1} <= {cmd.eqopt1}"
+                output = f"Test Result: {cmd.eqopt1} <= {cmd.eqopt1}"
             else:
-                new_frame.info = f"Test Result: {cmd.eqopt1} </= {cmd.eqopt1}"
+                output = f"Test Result: {cmd.eqopt1} </= {cmd.eqopt1}"
 
         # TEST eiqopt LEQ eiqopt '.'
         elif isinstance(cmd, TestEIQOptLEQ):
             res = cmd.eiqopt1.eval(frame.env).iqopt <= cmd.eiqopt2.eval(frame.env).iqopt
             if res:
-                new_frame.info = f"Test Result: {cmd.eiqopt1} <= {cmd.eiqopt1}"
+                output = f"Test Result: {cmd.eiqopt1} <= {cmd.eiqopt1}"
             else:
-                new_frame.info = f"Test Result: {cmd.eiqopt1} </= {cmd.eiqopt1}"
+                output = f"Test Result: {cmd.eiqopt1} </= {cmd.eiqopt1}"
 
         else:
             raise Exception("Not Implemented Command.")
 
-        return new_frame
+        return new_frame, output

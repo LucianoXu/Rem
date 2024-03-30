@@ -30,7 +30,7 @@ class MLS:
 
         self.cur_frame_id = -1
 
-        self._info = ""
+        self.error : str = ''
 
     @property
     def verified_code(self) -> str:
@@ -57,9 +57,6 @@ class MLS:
         '''
         return self.cur_frame_id == len(self) - 1
     
-    @property
-    def info(self) -> str:
-        return str(self._info)
     
     def __len__(self) -> int:
         return len(self.cmd_stack)
@@ -80,30 +77,31 @@ class MLS:
         self.cur_frame_id = new_frame_id
             
 
-    def step_forward(self, new_code: str) -> str | None:
+    def step_forward(self, new_code: str) -> tuple[str, str|None] | None:
         '''
         step forward
 
-        If succeeded, return the unparsed code. Else return None.
+        If succeeded, return the unparsed code and output. 
+        Else return None.
         '''
 
-        self._info = ''
+        self.error = ''
         
         # STEP 1, parse the command
         res, remaining = parse_sentence(self.prover.current_frame.env, new_code)
 
         if isinstance(res, Exception):
-            self._info = res
+            self.error = str(res)
             return None
         
         # res: tuple[RemAst, str]
 
         # STEP 2, execute the command
         try:
-            self.prover.execute(res[0])
+            output = self.prover.execute(res[0])
 
         except Exception as e:
-            self._info = e
+            self.error = str(e)
             return None
 
         self.cmd_stack.append(res[0])
@@ -112,7 +110,7 @@ class MLS:
         # focus on the latest frame
         self.cur_frame_id = len(self) - 1
 
-        return remaining
+        return remaining, output
 
     def step_backward(self) -> str|None:
         '''
@@ -120,10 +118,10 @@ class MLS:
 
         if succeeded, return the code popped. Else return None.
         '''
-        self._info = ''
+        self.error = ''
 
         if len(self) == 0:
-            self._info = "No more steps to go back."
+            self.error = "No more steps to go back."
             return None
         
         else:
