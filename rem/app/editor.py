@@ -3,7 +3,7 @@ from textual.binding import Binding
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, Container, ScrollableContainer
 from textual.screen import Screen
-from textual.widgets import Header, Footer, TextArea, Button
+from textual.widgets import Header, Footer, TextArea, Button, Static, Switch, Label
 from textual.app import ComposeResult # type: ignore
 from textual.reactive import reactive
 
@@ -21,20 +21,6 @@ class Editor(Screen):
         Binding("ctrl+l", "play_forward", "▶▶", priority=True),
     ]
 
-    #############################################################
-    # auto-gen switch
-    # controls whether the generation is carried out and updated automatically
-    auto_gen = reactive(True)
-
-    def watch_auto_gen(self, value: bool) -> None:
-        if value:
-            self.gen_update_timer.resume()
-        else:
-            self.gen_update_timer.pause()
-            self.gen_machine.terminate()
-            self.gen_status = 'disabled'
-    ############################################################
-
     ############################################################ 
     # generation status
     # solved/working/disabled
@@ -42,13 +28,13 @@ class Editor(Screen):
 
     def watch_gen_status(self, value: str) -> None:
         if value == "solved":
+            self.gen_machine.terminate()
             self.apply_gen.disabled = False
             self.regen.disabled = False
 
         elif value == "working":
             self.apply_gen.disabled = True
             self.regen.disabled = True
-
 
         elif value == "disabled":
             self.gen_machine.initialize()
@@ -65,8 +51,14 @@ class Editor(Screen):
 
     def compose(self) -> ComposeResult:
 
-        self.gen_update_timer = self.set_interval(1 / 10, self.update_gen, pause=True)
+        # backend components
+        self.mls = mls.MLS()
+        self.gen_machine = GenMachine()
 
+        # timer
+        self.gen_update_timer = self.set_interval(1 / 10, self.update_gen, pause=False)
+
+        # widgets
         self.verified_area = TextArea(
             "",
             id='verified-area',
@@ -84,31 +76,29 @@ class Editor(Screen):
 
         self.mls_info = TextArea(read_only=True)
 
-        self.mls = mls.MLS()
-
 
         #######################################################
-        # area for generation
+        # area for variables/rule/generation
+
         self.gen_area = TextArea(read_only=True)
         # the button to apply generation result
         self.apply_gen = Button("APPLY", id = "apply_gen")
         # the button to regenerate
         self.regen = Button("REGEN", id = "regen")
+        # the switch to toogle generation
+        self.gen_switch = Switch(True)
+
         self.gen_container = Container(
             self.gen_area,
             Horizontal(
                 self.apply_gen,
                 self.regen
-            )
+            ),
+
+            Label("Toogle Generation: "),
+            self.gen_switch
         )
         #######################################################
-
-
-        self.gen_machine = GenMachine()
-
-        # the switch that controls whether auto generation is on
-        self.auto_gen = True
-
 
         yield Header()
 
@@ -119,16 +109,25 @@ class Editor(Screen):
             ),
             Vertical(
                 self.goal_area,
-
-                Horizontal(
-                    self.mls_info,
-                    self.gen_container,
-                )
+                self.mls_info,
             ),
-                
+            self.gen_container,
         )
 
         yield Footer()
+
+
+    @on(Switch.Changed)
+    def on_switch_changed(self, event: Switch.Changed) -> None:
+        if event.switch == self.gen_switch:
+            if event.value:
+                self.gen_update_timer.resume()
+            else:
+                self.gen_update_timer.pause()
+                self.gen_machine.terminate()
+                self.gen_status = 'disabled'
+                self.update_gen()
+
 
     @on(TextArea.Changed)
     def verified_area_scroll(self, event: TextArea.Changed):
@@ -191,36 +190,34 @@ class Editor(Screen):
 
     def action_play_forward(self) -> None:
         # turn off the auto-gen temporarily
-        auto_gen = self.auto_gen
-        self.auto_gen = False
+        auto_gen = self.gen_switch.value
+        self.gen_switch.value = False
 
         while self.action_step_forward():
             pass
 
-        self.auto_gen = auto_gen
+        self.gen_switch.value = auto_gen
 
     def action_play_backward(self) -> None:
         # turn off the auto-gen temporarily
-        auto_gen = self.auto_gen
-        self.auto_gen = False
+        auto_gen = self.gen_switch.value
+        self.gen_switch.value = False
 
         while self.action_step_backward():
             pass
         
-        self.auto_gen = auto_gen
+        self.gen_switch.value = auto_gen
 
         Vertical().remove
 
 
     def update_gen(self) -> None:
         '''
-        Update the generation area.
+        Update the generation information and checks the state of gen_machine.
         '''
-
         self.gen_area.text = str(self.gen_machine)
         
-
-        if self.auto_gen:                
+        if self.gen_switch.value:
 
             current_goal = self.mls.current_goal
             
@@ -245,13 +242,10 @@ class Editor(Screen):
 
             # terminate the generation if the solution found
             if self.gen_machine.sol is not None:
-
-                self.gen_machine.terminate()
                 self.gen_status = "solved"
 
         else:
             self.gen_status = "disabled"
-
 
     @on(TextArea.SelectionChanged)
     def show_frame(self, event: TextArea.SelectionChanged) -> None:
