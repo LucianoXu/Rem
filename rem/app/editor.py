@@ -3,9 +3,11 @@ from textual.binding import Binding
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, Container, ScrollableContainer
 from textual.screen import Screen
-from textual.widgets import Header, Footer, TextArea, Button, Static, Switch, Label
+from textual.widgets import Header, Footer, TextArea, Button, Static, Switch, Label, TabbedContent, TabPane, Placeholder, Checkbox, ListView, ListItem
 from textual.app import ComposeResult
 from textual.reactive import reactive
+
+from ..mTLC import Env
 
 from ..qrefine import mls, AstPres
 
@@ -28,6 +30,61 @@ class GoalBar(Static):
     def compose(self) -> ComposeResult:
         yield Label(f"Goal ({self.index}/{self.total})")
         yield TextArea(str(self.goal), read_only=True)
+
+
+class EnvTabs(Static):
+    def reload_defs(self, env: Env):
+        '''
+        reload the definitions in the environment
+        '''
+        list_view = self.get_widget_by_id("defs_list", ListView)
+        list_view.clear()
+
+        for def_name, def_value in env.defs.items():
+            list_view.append(DefItem(def_name, str(def_value.type), False))
+
+    def compose(self) -> ComposeResult:
+        with TabbedContent():
+            with TabPane("Defs"):
+                yield ListView(id = "defs_list")
+            with TabPane("Rules"):
+                yield ListView(id = "rules_list")
+
+
+class DefItem(ListItem):
+    '''
+    The bar for a definition.
+    '''
+    DEFAULT_CSS = '''
+    DefItem {
+        layout: horizontal;
+    }
+    '''
+    def __init__(self, def_name: str, def_type: str, gen_selected: bool) -> None:
+        super().__init__()
+        self.def_name = def_name
+        self.def_type = def_type
+        self.gen_selected = gen_selected
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        editor = self.app.query_one("Editor", Editor)
+
+        if event.button.id == "show":
+
+            cmd_code = f"Show {self.def_name}."
+            editor.push_cmd(cmd_code, record = False)
+
+            
+        elif event.button.id == "eval":
+            cmd_code = f"Eval {self.def_name}."
+            editor.push_cmd(cmd_code, record = False)
+
+    def compose(self) -> ComposeResult:
+            yield Switch(self.gen_selected)
+            yield Label(f"{self.def_name} : {self.def_type}")
+            yield Button(f"SHOW", id = "show")
+            yield Button(f"EVAL", id = "eval")
+
 
 
 
@@ -135,6 +192,8 @@ class Editor(Screen):
         #######################################################
         # area for variables/rule/generation
 
+        self.env_tabs = EnvTabs()
+
         self.gen_area = TextArea(read_only=True)
         # the button to apply generation result
         self.apply_gen = Button("APPLY", id = "apply_gen")
@@ -143,14 +202,17 @@ class Editor(Screen):
         # the switch to toogle generation
         self.gen_switch = Switch(True)
 
-        self.gen_container = Container(
+        self.gen_container = Vertical(
+            Container(
+                self.env_tabs,
+            ),
+
             self.gen_area,
             Horizontal(
                 self.apply_gen,
                 self.regen
             ),
-
-            Label("Toogle Generation: "),
+            Label("Auto Generation:", id='gen_switch_label'),
             self.gen_switch
         )
         #######################################################
@@ -173,6 +235,9 @@ class Editor(Screen):
         )
 
         yield Footer()
+        
+        # update the frame
+        self.call_later(self.update_display)
 
 
     @on(Switch.Changed)
@@ -198,26 +263,35 @@ class Editor(Screen):
             self.verified_area.move_cursor(self.verified_area.cursor_location)
 
 
+    def push_cmd(self, cmd_code: str, record: bool) -> None:
+        '''
+        push one command to the system (don't affect the code area)
+        record : whether to record this command in the verified code
+        '''
+        
+        # set the status
+        self.prover_status = 'Calculating...'
+
+        res = self.mls.step_forward(cmd_code)
+
+        # add the logging
+        if res is not None:
+            if res[1] is not None:
+                self.append_log(res[1])
+
+        self.prover_status = self.mls.error
+
+        if record:
+            self.verified_area.text = self.mls.verified_code
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
 
         # apply the generation result
         if event.button.id == 'apply_gen':
 
-            cmd = f"\n\nStep {self.gen_machine.sol}."
+            cmd_code = f"\n\nStep {self.gen_machine.sol}."
 
-            # set the status
-            self.prover_status = 'Calculating...'
-
-            res = self.mls.step_forward(cmd)
-
-            # add the logging
-            if res is not None:
-                if res[1] is not None:
-                    self.append_log(res[1])
-
-            self.prover_status = self.mls.error
-
-            self.verified_area.text = self.mls.verified_code
+            self.push_cmd(cmd_code, record = True)
 
         # regenerate
         elif event.button.id == 'regen':
@@ -331,8 +405,41 @@ class Editor(Screen):
         else:
             self.gen_status = "disabled"
 
+    def update_display(self) -> None:
+
+            ############################################
+            # Update the goal list according to the mls
+                
+            goals: list[AstPres] = self.mls.selected_frame.current_goals
+
+            # remove all childs
+            children = self.goal_list.query(None)
+            for child in children:
+                child.remove()
+
+            if len(goals) == 0:
+                if self.mls.selected_frame.refinement_mode:
+                    self.goal_list.mount(
+                        Label("Goal Clear.")
+                    )
+                else:
+                    self.goal_list.mount(
+                        Label("Not in refinement mode.")
+                    )
+            else:
+                for i, goal in enumerate(goals, start=1):
+                    self.goal_list.mount(
+                        GoalBar(goal, i, len(goals))
+                    )
+
+            ############################################
+            # Update the defs tab (only on the latest frame)
+            if self.mls.latest_selected:
+                self.env_tabs.reload_defs(self.mls.selected_frame.env)
+
+
     @on(TextArea.SelectionChanged)
-    def show_frame(self, event: TextArea.SelectionChanged) -> None:
+    def selection_changed(self, event: TextArea.SelectionChanged) -> None:
         '''
         Select the code in verified-area and show the corresponding frame.
         '''
@@ -353,30 +460,4 @@ class Editor(Screen):
             except Exception:
                 pass
             
-
-        ############################################
-        # Update the goal list according to the mls
-            
-        goals: list[AstPres] = self.mls.selected_frame.current_goals
-
-        # remove all childs
-        children = self.goal_list.query(None)
-        for child in children:
-            child.remove()
-
-        if len(goals) == 0:
-            if self.mls.selected_frame.refinement_mode:
-                self.goal_list.mount(
-                    Label("Goal Clear.")
-                )
-            else:
-                self.goal_list.mount(
-                    Label("Not in refinement mode.")
-                )
-        else:
-            for i, goal in enumerate(goals, start=1):
-                self.goal_list.mount(
-                    GoalBar(goal, i, len(goals))
-                )
-
- 
+            self.update_display()
