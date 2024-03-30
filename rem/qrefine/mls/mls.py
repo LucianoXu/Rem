@@ -50,6 +50,7 @@ class MLS:
     def current_goal(self) -> AstPres | None:
         return self.current_frame.current_goals[0] if len(self.current_frame.current_goals) > 0 else None
     
+    @property
     def latest_selected(self) -> bool:
         '''
         Check whether the latest frame is selected.

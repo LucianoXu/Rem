@@ -124,7 +124,21 @@ class GenMachine:
 
         for t in self.threads:
             t.start()
-            
+
+    def initialize(self):
+        '''
+        initialize the generation machine
+        '''
+
+        for t in self.threads:
+            t.terminate()
+        self.threads = []
+
+        self.goal = None
+        self.working = False
+        self.workers[:] = []
+
+
     def terminate(self):
         '''
         terminate all processes

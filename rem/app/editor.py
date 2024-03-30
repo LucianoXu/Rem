@@ -1,9 +1,9 @@
 from textual import on
 from textual.binding import Binding
 from textual.app import ComposeResult
-from textual.containers import Horizontal, Vertical, Container
+from textual.containers import Horizontal, Vertical, Container, ScrollableContainer
 from textual.screen import Screen
-from textual.widgets import Header, Footer, TextArea
+from textual.widgets import Header, Footer, TextArea, Button
 from textual.app import ComposeResult # type: ignore
 from textual.reactive import reactive
 
@@ -32,12 +32,40 @@ class Editor(Screen):
         else:
             self.gen_update_timer.pause()
             self.gen_machine.terminate()
+            self.gen_status = 'disabled'
+    ############################################################
+
+    ############################################################ 
+    # generation status
+    # solved/working/disabled
+    gen_status = reactive("disabled")
+
+    def watch_gen_status(self, value: str) -> None:
+        if value == "solved":
+            self.apply_gen.disabled = False
+            self.regen.disabled = False
+
+        elif value == "working":
+            self.apply_gen.disabled = True
+            self.regen.disabled = True
+
+
+        elif value == "disabled":
+            self.gen_machine.initialize()
+            self.apply_gen.disabled = True
+            self.regen.disabled = True
+
+            
+
+        else:
+            raise ValueError("Invalid Value.")
+
     ############################################################
 
 
     def compose(self) -> ComposeResult:
 
-        self.gen_update_timer = self.set_interval(1 / 60, self.update_gen, pause=True)
+        self.gen_update_timer = self.set_interval(1 / 10, self.update_gen, pause=True)
 
         self.verified_area = TextArea(
             "",
@@ -58,7 +86,23 @@ class Editor(Screen):
 
         self.mls = mls.MLS()
 
+
+        #######################################################
+        # area for generation
         self.gen_area = TextArea(read_only=True)
+        # the button to apply generation result
+        self.apply_gen = Button("APPLY", id = "apply_gen")
+        # the button to regenerate
+        self.regen = Button("REGEN", id = "regen")
+        self.gen_container = Container(
+            self.gen_area,
+            Horizontal(
+                self.apply_gen,
+                self.regen
+            )
+        )
+        #######################################################
+
 
         self.gen_machine = GenMachine()
 
@@ -78,7 +122,7 @@ class Editor(Screen):
 
                 Horizontal(
                     self.mls_info,
-                    self.gen_area,
+                    self.gen_container,
                 )
             ),
                 
@@ -86,6 +130,32 @@ class Editor(Screen):
 
         yield Footer()
 
+    @on(TextArea.Changed)
+    def verified_area_scroll(self, event: TextArea.Changed):
+        if event.text_area == self.verified_area:
+            # verified_area scroll to end
+            self.verified_area.scroll_end(animate = False)
+
+            # set the cursor to the end
+            self.verified_area.select_all()
+            self.verified_area.move_cursor(self.verified_area.cursor_location)
+
+
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+
+        # apply the generation result
+        if event.button.id == 'apply_gen':
+            cmd = f"\n\nStep {self.gen_machine.sol}."
+            res = self.mls.step_forward(cmd)
+
+            self.mls_info.text = self.mls.info
+            self.goal_area.text = self.mls.prover_info
+            self.verified_area.text = self.mls.verified_code
+
+        # regenerate
+        elif event.button.id == 'regen':
+            self.gen_machine.initialize()
 
 
     def action_step_forward(self) -> bool:
@@ -98,13 +168,6 @@ class Editor(Screen):
         self.goal_area.text = self.mls.prover_info
         self.verified_area.text = self.mls.verified_code
 
-        # verified_area scroll to end
-        self.verified_area.scroll_end(animate = False)
-
-        # set the cursor to the end
-        self.verified_area.select_all()
-        self.verified_area.move_cursor(self.verified_area.cursor_location)
-
         return res is not None
 
 
@@ -114,17 +177,9 @@ class Editor(Screen):
         if res is not None:
             self.code_area.text = res + self.code_area.text
 
-
         self.mls_info.text = self.mls.info
         self.goal_area.text = self.mls.prover_info
         self.verified_area.text = self.mls.verified_code
-
-        # verified_area scroll to end
-        self.verified_area.scroll_end(animate = False)
-
-        # set the verified_area cursor to the end
-        self.verified_area.select_all()
-        self.verified_area.move_cursor(self.verified_area.cursor_location)
 
         # push the code_area cursor backwards
         if res is not None:
@@ -154,23 +209,29 @@ class Editor(Screen):
         
         self.auto_gen = auto_gen
 
+        Vertical().remove
+
 
     def update_gen(self) -> None:
         '''
         Update the generation area.
         '''
-        self.gen_area.text = str(self.gen_machine)
 
-        if self.auto_gen:
+        self.gen_area.text = str(self.gen_machine)
+        
+
+        if self.auto_gen:                
+
             current_goal = self.mls.current_goal
             
+            if not self.mls.latest_selected or current_goal is None:
+                self.gen_status = "disabled"
+
             # conditions to trigger the generation
             # 1. the latest frame is selected
             # 2. there is a current goal
             # 3. the current goal is different from the last generated goal
-            if self.mls.latest_selected and \
-                current_goal is not None and \
-                current_goal != self.gen_machine.goal:
+            elif current_goal != self.gen_machine.goal:
 
                 self.gen_machine.terminate()
 
@@ -180,10 +241,16 @@ class Editor(Screen):
                     gen_env = self.mls.current_frame.env,
                 )
 
+                self.gen_status = "working"
+
             # terminate the generation if the solution found
-            if self.gen_machine.sol is not None and self.gen_machine.working:
+            if self.gen_machine.sol is not None:
 
                 self.gen_machine.terminate()
+                self.gen_status = "solved"
+
+        else:
+            self.gen_status = "disabled"
 
 
     @on(TextArea.SelectionChanged)
@@ -197,12 +264,18 @@ class Editor(Screen):
             if self.verified_area.text == "":
                 return
             
-            # calculate the pos of the cursor 
-            pos = len(self.verified_area.get_text_range((0,0), event.selection.end)) + 1
-            
-            self.mls.set_cursor(pos)
 
-            self.mls_info.text = self.mls.info
-            self.goal_area.text = self.mls.prover_info
+            # avoid unexpected exceptions
+            try:
+                # calculate the pos of the cursor 
+                pos = len(self.verified_area.get_text_range((0,0), event.selection.end)) + 1
+                
+                self.mls.set_cursor(pos)
+
+                self.mls_info.text = self.mls.info
+                self.goal_area.text = self.mls.prover_info
+
+            except Exception:
+                pass
             
     
