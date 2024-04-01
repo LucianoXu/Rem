@@ -75,7 +75,7 @@ class EnvTabs(Static):
         self.post_message(self.EnvTabChanged(self.get_gen_env()))
 
     def compose(self) -> ComposeResult:
-        yield Label("Definitions")
+        yield Label("Definitions", classes="header")
         yield ListView(id = "defs_list")
         
     
@@ -134,8 +134,10 @@ class DefItem(ListItem):
     def compose(self) -> ComposeResult:
         yield self.switch
         yield Label(f"{self.def_name} : {self.def_type}")
-        yield Button(f"SHOW", id = "show")
-        yield Button(f"EVAL", id = "eval")
+        yield Container(
+            Button(f"SHOW", id = "show"),
+            Button(f"EVAL", id = "eval"),
+        )
 
 
     @property
@@ -182,7 +184,7 @@ class FileScreen(ModalScreen[None|Path]):
             Label(f"({self.mode_str}) Choose a file:", id="question"),
             RemDirectoryTree("./", id = "file_tree"),
             Input("", id="file_name"),
-            Button("Commit", variant="primary", id="commit"),
+            Button("Commit", variant="success", id="commit"),
             Button("Cancel", variant="primary", id="cancel"),
             id="dialog",
         )
@@ -287,15 +289,18 @@ class Editor(Screen):
             self.gen_machine.terminate()
             self.apply_gen.disabled = False
             self.regen.disabled = False
+            self.gen_area.set_classes("solved")
 
         elif value == "working":
             self.apply_gen.disabled = True
             self.regen.disabled = True
+            self.gen_area.set_classes("working")
 
         elif value == "disabled":
             self.gen_machine.initialize()
             self.apply_gen.disabled = True
             self.regen.disabled = True
+            self.gen_area.set_classes("disabled")
 
             
 
@@ -324,10 +329,13 @@ class Editor(Screen):
     def watch_prover_status(self, value: str) -> None:
         if value == '':
             self.prover_status_area.text = 'READY.'
+            self.prover_status_area.set_classes('ready')
         elif value == 'Calculating...':
             self.prover_status_area.text = value
+            self.prover_status_area.set_classes('calculating')
         else:
             self.prover_status_area.text = "ERROR: " + value
+            self.prover_status_area.set_classes('error')
 
     ############################################################
             
@@ -384,7 +392,7 @@ class Editor(Screen):
 
         self.log_area = TextArea(read_only=True)
 
-        self.prover_status_area = TextArea(read_only=True)
+        self.prover_status_area = TextArea(read_only=True, id = "prover_status")
 
 
         #######################################################
@@ -392,7 +400,7 @@ class Editor(Screen):
 
         self.env_tabs = EnvTabs()
 
-        self.gen_area = TextArea(read_only=True)
+        self.gen_area = TextArea(read_only=True, id = "gen_area")
         # the button to apply generation result
         self.apply_gen = Button("APPLY", id = "apply_gen")
         # the button to regenerate
@@ -404,18 +412,21 @@ class Editor(Screen):
             Container(
                 self.env_tabs,
             ),
-            Label("Generation Assistant"),
+            Label("Generation Assistant", classes="header"),
             self.gen_area,
             Horizontal(
+                Label("Generation", id="gen_switch_label"),
+                self.gen_switch,
                 self.apply_gen,
                 self.regen
             ),
-            Label("Workers:"),
-            Input(str(self.gen_worker_num), type = "integer", id = "gen_worker_num"),
-            Label("Depth:"),
-            Input(str(self.gen_max_depth), type = "integer", id = "gen_max_depth"),
-            Label("Auto Generation:"),
-            self.gen_switch
+            Horizontal(
+                Label("Workers", id="workers_label"),
+                Input(str(self.gen_worker_num), type = "integer", id = "gen_worker_num"),
+                Label("Max Depth", id="max_depth_label"),
+                Input(str(self.gen_max_depth), type = "integer", id = "gen_max_depth"),
+            ),
+            id = "gen_container"
         )
         #######################################################
 
@@ -423,16 +434,16 @@ class Editor(Screen):
 
         yield Horizontal(
             Vertical(
-                Label("Code Area"),
+                Label("Code Area", classes="header"),
                 self.verified_area,
                 self.code_area,
             ),
             Vertical(
-                Label("Refinement Goals"),
+                Label("Refinement Goals", classes="header"),
                 self.goal_list,
-                Label("Info Log"),
+                Label("Info Log", classes="header"),
                 self.log_area,
-                Label("Prover status"),
+                Label("Prover status", classes="header"),
                 self.prover_status_area
             ),
             self.gen_container,

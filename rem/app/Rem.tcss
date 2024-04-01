@@ -1,3 +1,176 @@
+$rem-blue: #91bef0;
+$rem-pink: #d9a0c1;
+$rem-blue-dark: #4489d6;
+$rem-pink-dark: #aa5887;
+
+/* general */
+
+Header {
+    background: $rem-blue-dark;
+    color: white;
+}
+
+Footer {
+    background: $rem-blue;
+    color: white;
+}
+
+
+
+/* Opening */
+Opening {
+    align: center middle;
+}
+
+Opening #title {
+    background: $rem-blue;
+    color: white;
+    text-style: bold;
+    width: 55;
+}
+
+Opening Button {
+    background: $rem-pink;
+    color: white;
+    text-style: bold;
+    width: 55;
+    border: hkey white;
+}
+
+Opening Button:hover{
+    background: white;
+    color: black;
+    text-style: bold;
+}
+
+/* Editor */
+
+Editor .header {
+    width: 1fr;
+    background: $rem-pink;
+    padding: 0 1;
+    text-style: bold;
+    margin: 0 1;
+}
+
+GoalBar {
+    margin: 1 0;
+}
+
+GoalBar TextArea{
+    height: 3;
+    border: none;
+}
+
+GoalBar Label {
+    margin: 0 1;
+}
+
+#prover_status {
+    height: 7;
+}
+
+#prover_status.ready {
+    background: $rem-blue;
+    color: white;
+}
+
+#prover_status.calculating  {
+    background: $rem-pink;
+    color: white;
+}
+
+#prover_status.error {
+    background: red;
+    color: white;
+}
+
+/* generation part */
+#gen_container {
+    width: 55;
+}
+
+ListItem {
+    layout: horizontal;
+    margin: 0 1;
+}
+
+ListItem Label {
+    margin: 1
+}
+
+ListItem Button {
+    width: 8;
+    min-width: 8;
+}
+
+ListItem Container {
+    align: right middle;
+    layout: horizontal;
+}
+
+ListItem #show {
+    align: left top;
+    margin: 0 1;
+}
+
+ListItem #eval {
+    align: right bottom;
+}
+
+
+#gen_area.solved {
+    background: $rem-blue;
+}
+
+#gen_area.working {
+    background: $rem-pink;
+}
+
+#gen_area.disabled {
+    background: gray;
+}
+
+
+#gen_container Horizontal {
+    align: center bottom;
+    margin: 1 0;
+    height: 3;
+}
+
+
+#gen_switch_label {
+    margin: 1;
+}
+
+#apply_gen {
+    width: 9;
+    min-width: 9;
+    margin: 0 1;
+}
+
+#regen {
+    width: 9;
+    min-width: 9;
+    margin: 0 1;
+}
+
+#gen_container Input {
+    width: 10;
+}
+
+#workers_label {
+    margin: 1;
+}
+
+#max_depth_label {
+    margin: 1;
+}
+
+
+
+
+
 FileScreen {
     align: center middle;
 }
@@ -10,4 +183,8 @@ FileScreen {
     height: 1fr;
     width: 1fr;
     content-align: center middle;
+}
+
+Button {
+    width: 50%;
 }

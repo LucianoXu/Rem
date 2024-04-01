@@ -96,11 +96,12 @@ class GenMachine:
         '''
 
         if self.sol is not None:
-            res = str(self.goal)
-            res += f"({self.attempt_total})\nSOL FOUND:\n\n{self.sol}"
+            res = f"Goal: {self.goal}\n\n"
+            res += f"Solution found ({self.attempt_total}):\n"
+            res += f"{self.sol}"
             return res
         elif len(self.workers) > 0:
-            return f"({self.attempt_total})\n{self.workers[0].current_prog}"
+            return f"Searching ({self.attempt_total}) ...\n\n{self.workers[0].current_prog}"
         else:
             return self.info
         

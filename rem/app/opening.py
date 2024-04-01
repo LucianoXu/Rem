@@ -9,19 +9,12 @@ from textual.containers import Container
 from textual.renderables.gradient import LinearGradient
 from textual.widgets import Static, Button
 
+from .colors import *
+
 COLORS = [
-    "#881177",
-    "#aa3355",
-    "#cc6666",
-    "#ee9944",
-    "#eedd00",
-    "#99dd55",
-    "#44dd88",
-    "#22ccbb",
-    "#00bbcc",
-    "#0099cc",
-    "#3366bb",
-    "#663399",
+    rem_blue,
+    "white",
+    rem_pink,
 ]
 STOPS = [(i / (len(COLORS) - 1), color) for i, color in enumerate(COLORS)]
 
@@ -43,19 +36,19 @@ class Splash(Container):
         self.auto_refresh = 1 / 30
 
     def compose(self) -> ComposeResult:
-        yield Static("Quantum Program Refinement with Rem")
-        yield Button("Let's Go", id="lets_go")
-        yield Button("Handbook", id="handbook")
-        yield Static("created with ♥")
+        yield Static("Rem\nQuantum Program Refinement", id="title")
+        yield Button("Editor", id="to_editor")
+        yield Button("Handbook", id="to_handbook")
+        # yield Static("created with ♥")
 
     def render(self) -> RenderableType:
-        return LinearGradient(time() * 90, STOPS)
+        return LinearGradient(time(), STOPS)
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         button_id = event.button.id
-        if button_id == "lets_go":
+        if button_id == "to_editor":
             self.app.switch_mode("editor")
-        elif button_id == "handbook":
+        elif button_id == "to_handbook":
             self.app.switch_mode("handbook")
         
 
