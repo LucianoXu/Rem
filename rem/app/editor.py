@@ -336,13 +336,15 @@ class Editor(Screen):
     # gen-machine settings
             
     gen_worker_num = reactive(8)
-    gen_max_depth = reactive(4)
+    gen_max_depth = reactive(3)
 
     def watch_gen_worker_num(self, value: int) -> None:
         self.gen_machine.worker_num = value
+        self.append_log(f"Generation worker number set to {value}.")
 
     def watch_gen_max_depth(self, value: int) -> None:
         self.gen_machine.max_depth = value
+        self.append_log(f"Generation max depth set to {value}.")
 
     ############################################################
 
@@ -402,16 +404,16 @@ class Editor(Screen):
             Container(
                 self.env_tabs,
             ),
-            Label("Generation Machine"),
+            Label("Generation Assistant"),
             self.gen_area,
             Horizontal(
                 self.apply_gen,
                 self.regen
             ),
             Label("Workers:"),
-            Input(str(self.gen_machine.worker_num), type = "integer", id = "gen_worker_num"),
+            Input(str(self.gen_worker_num), type = "integer", id = "gen_worker_num"),
             Label("Depth:"),
-            Input(str(self.gen_machine.max_depth), type = "integer", id = "gen_max_depth"),
+            Input(str(self.gen_max_depth), type = "integer", id = "gen_max_depth"),
             Label("Auto Generation:"),
             self.gen_switch
         )
@@ -489,11 +491,13 @@ class Editor(Screen):
         if event.switch == self.gen_switch:
             if event.value:
                 self.gen_update_timer.resume()
+                self.append_log("Generation Assistant enabled.")
             else:
                 self.gen_update_timer.pause()
                 self.gen_machine.terminate()
                 self.gen_status = 'disabled'
                 self.update_gen()
+                self.append_log("Generation Assistant disabled.")
 
 
     @on(TextArea.Changed)
@@ -536,6 +540,8 @@ class Editor(Screen):
             cmd_code = f"\n\nStep {self.gen_machine.sol}."
 
             self.push_cmd(cmd_code, record = True)
+
+            self.append_log(f"Generation result applied. (Step {self.gen_machine.sol})")
 
         # regenerate
         elif event.button.id == 'regen':

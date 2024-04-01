@@ -45,6 +45,7 @@ class Splash(Container):
     def compose(self) -> ComposeResult:
         yield Static("Quantum Program Refinement with Rem")
         yield Button("Let's Go", id="lets_go")
+        yield Button("Handbook", id="handbook")
         yield Static("created with ♥")
 
     def render(self) -> RenderableType:
@@ -54,6 +55,9 @@ class Splash(Container):
         button_id = event.button.id
         if button_id == "lets_go":
             self.app.switch_mode("editor")
+        elif button_id == "handbook":
+            self.app.switch_mode("handbook")
+        
 
 class Opening(Screen):
     def compose(self) -> ComposeResult:
