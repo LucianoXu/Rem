@@ -217,7 +217,7 @@ class Interpreter:
 
         # SHOW ID '.'
         elif isinstance(cmd, ShowId):
-            output = f"Show {cmd.id}:\n {frame.env[cmd.id]}"
+            output = f"Show {cmd.id}:\n{frame.env[cmd.id]}"
 
         # SHOW DEF '.'
         elif isinstance(cmd, ShowDef):

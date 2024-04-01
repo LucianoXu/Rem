@@ -205,13 +205,15 @@ class FileScreen(ModalScreen[None|Path]):
 class Editor(Screen):
 
     BINDINGS = [
-        Binding("f9", "save", "💾", priority=True),
-        Binding("f10", "open", "📂", priority=True),
+        Binding("f8", "new", "🆕", priority=True),
+        Binding("f9", "open", "📂", priority=True),
+        Binding("f10", "save", "💾", priority=True),
         Binding("ctrl+j", "play_backward", "◀◀", priority=True),
         Binding("ctrl+o", "step_backward", "◀", priority=True),
         Binding("ctrl+p", "step_forward", "▶", priority=True),
         Binding("ctrl+l", "play_forward", "▶▶", priority=True),
         Binding("f1", "to_handbook", "To Handbook", priority=True),
+        Binding("f7", "screenshot", "Screenshot", priority=True),
     ]
 
     ############################################################
@@ -224,6 +226,14 @@ class Editor(Screen):
             self.title = "Rem Editor - New File"
         else:
             self.title = f"Rem Editor - {value}"
+    
+    def action_new(self) -> None:
+        self.action_play_backward()
+        self.code_area.text = ""
+        self.current_file = ""
+
+        self.append_log(f"Started a new file.")
+
 
     def action_open(self) -> None:
         def check_open(res : None|Path) -> None:
@@ -301,7 +311,8 @@ class Editor(Screen):
     prover_status = reactive('')
 
     def append_log(self, value: str) -> None:
-        self.rem_log += f"\n\n{value}"
+        now = datetime.datetime.now()
+        self.rem_log += f"\n\n({now.strftime('%H:%M:%S')}) {value}"
 
     def watch_rem_log(self, value: str) -> None:
         self.log_area.text = value
@@ -391,7 +402,7 @@ class Editor(Screen):
             Container(
                 self.env_tabs,
             ),
-
+            Label("Generation Machine"),
             self.gen_area,
             Horizontal(
                 self.apply_gen,
@@ -410,13 +421,14 @@ class Editor(Screen):
 
         yield Horizontal(
             Vertical(
+                Label("Code Area"),
                 self.verified_area,
                 self.code_area,
             ),
             Vertical(
                 Label("Refinement Goals"),
                 self.goal_list,
-                Label("Info from Rem"),
+                Label("Info Log"),
                 self.log_area,
                 Label("Prover status"),
                 self.prover_status_area
@@ -433,6 +445,18 @@ class Editor(Screen):
     # to handbook
     def action_to_handbook(self) -> None:
         self.app.switch_mode("handbook")
+
+    ############################################################
+    # take screenshot
+    def action_screenshot(self) -> None:
+        try:
+            res = self.app.save_screenshot()
+
+            self.app.bell()
+            self.append_log(f"Screenshot saved to {res}.")
+
+        except:
+            self.append_log("Error: Screenshot failed.")
 
     @on(Input.Changed)
     def input_changed(self, event: Input.Changed) -> None:
