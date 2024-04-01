@@ -1,9 +1,11 @@
+from pathlib import Path
+from typing import Iterable
 from textual import on
 from textual.binding import Binding
 from textual.app import ComposeResult
-from textual.containers import Horizontal, Vertical, Container, ScrollableContainer
-from textual.screen import Screen
-from textual.widgets import Header, Footer, TextArea, Button, Static, Switch, Label, TabbedContent, TabPane, Placeholder, Checkbox, ListView, ListItem, Input
+from textual.containers import Grid, Horizontal, Vertical, Container, ScrollableContainer
+from textual.screen import Screen, ModalScreen
+from textual.widgets import Header, Footer, TextArea, Button, Static, Switch, Label, TabbedContent, TabPane, Placeholder, Checkbox, ListView, ListItem, Input, DirectoryTree
 from textual.app import ComposeResult
 from textual.reactive import reactive
 from textual.events import Event
@@ -144,20 +146,131 @@ class DefItem(ListItem):
         return self.switch.value
 
 
+############################################################################
+# the editor
+############################################################################
+
+class RemDirectoryTree(DirectoryTree):
+    def filter_paths(self, paths: Iterable[Path]) -> Iterable[Path]:
+        return [path for path in paths if 
+                    path.is_dir() or 
+                    not path.name.startswith(".") and path.name.endswith(".rem")]
+
+
+class FileScreen(ModalScreen[None|Path]):  
+    """Screen with a dialog to quit."""
+
+    def __init__(self, mode_str : str) -> None:
+        super().__init__()
+        self.mode_str = mode_str
+
+        self.selected_path = Path("./")
+        self.selected_is_dir = True
+
+    @on(DirectoryTree.FileSelected)
+    def on_file_selected(self, event: DirectoryTree.FileSelected) -> None:
+        self.selected_path = event.path
+        self.selected_is_dir = False
+
+    @on(DirectoryTree.DirectorySelected)
+    def on_directory_selected(self, event: DirectoryTree.DirectorySelected) -> None:
+        self.selected_path = event.path
+        self.selected_is_dir = True
+
+    def compose(self) -> ComposeResult:
+        yield Grid(
+            Label(f"({self.mode_str}) Choose a file:", id="question"),
+            RemDirectoryTree("./", id = "file_tree"),
+            Input("", id="file_name"),
+            Button("Commit", variant="primary", id="commit"),
+            Button("Cancel", variant="primary", id="cancel"),
+            id="dialog",
+        )
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "commit":
+            file_name = self.get_widget_by_id("file_name", Input).value
+
+            if self.selected_is_dir:
+                if not file_name.endswith(".rem"):
+                    file_name += ".rem"
+                selected_path = self.selected_path / file_name
+            else:
+                selected_path = self.selected_path
+
+            self.dismiss(selected_path)
+        else:
+            self.dismiss(None)
 
 class Editor(Screen):
 
     BINDINGS = [
+        Binding("f9", "save", "💾", priority=True),
+        Binding("f10", "open", "📂", priority=True),
         Binding("ctrl+j", "play_backward", "◀◀", priority=True),
         Binding("ctrl+o", "step_backward", "◀", priority=True),
         Binding("ctrl+p", "step_forward", "▶", priority=True),
         Binding("ctrl+l", "play_forward", "▶▶", priority=True),
+        Binding("f1", "to_handbook", "To Handbook", priority=True),
     ]
+
+    ############################################################
+    # operation saving
+
+    current_file = reactive("")
+
+    def watch_current_file(self, value: str) -> None:
+        if value == "":
+            self.title = "Rem Editor - New File"
+        else:
+            self.title = f"Rem Editor - {value}"
+
+    def action_open(self) -> None:
+        def check_open(res : None|Path) -> None:
+            if res is not None:
+                try:
+                    
+                    self.action_play_backward()
+
+                    with open(res, "r") as f:
+                        self.code_area.text = f.read()
+
+                    self.append_log(f"File {res} opened.")
+                    self.current_file = res.as_posix()
+
+                except Exception as e:
+                    self.append_log(f"Error: {e}")
+
+        self.app.push_screen(FileScreen("open"), check_open)
+
+
+
+    def action_save(self) -> None:
+        def check_save(res: None|Path) -> None:
+            if res is not None:
+                try:
+                    with open(res, "w") as f:
+                        f.write(self.verified_area.text + self.code_area.text)
+
+                    self.append_log(f"File {res} saved.")
+                    self.current_file = res.as_posix()
+
+                except Exception as e:
+                    self.append_log(f"Error: {e}")
+
+        if self.current_file == "":
+            self.app.push_screen(FileScreen("close"), check_save)
+
+        else:
+            check_save(Path(self.current_file))
+
+
 
     ############################################################ 
     # generation status
     # solved/working/disabled
     gen_status = reactive("disabled")
+
 
     def watch_gen_status(self, value: str) -> None:
         if value == "solved":
@@ -199,11 +312,11 @@ class Editor(Screen):
 
     def watch_prover_status(self, value: str) -> None:
         if value == '':
-            self.error_area.text = 'READY.'
+            self.prover_status_area.text = 'READY.'
         elif value == 'Calculating...':
-            self.error_area.text = value
+            self.prover_status_area.text = value
         else:
-            self.error_area.text = "ERROR: " + value
+            self.prover_status_area.text = "ERROR: " + value
 
     ############################################################
             
@@ -258,7 +371,7 @@ class Editor(Screen):
 
         self.log_area = TextArea(read_only=True)
 
-        self.error_area = TextArea(read_only=True)
+        self.prover_status_area = TextArea(read_only=True)
 
 
         #######################################################
@@ -305,7 +418,8 @@ class Editor(Screen):
                 self.goal_list,
                 Label("Info from Rem"),
                 self.log_area,
-                self.error_area
+                Label("Prover status"),
+                self.prover_status_area
             ),
             self.gen_container,
         )
@@ -314,6 +428,11 @@ class Editor(Screen):
         
         # update the frame
         self.call_after_refresh(self.update_display)
+
+    ############################################################
+    # to handbook
+    def action_to_handbook(self) -> None:
+        self.app.switch_mode("handbook")
 
     @on(Input.Changed)
     def input_changed(self, event: Input.Changed) -> None:

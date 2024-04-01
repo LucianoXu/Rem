@@ -4,7 +4,7 @@ Refine init1 : < c1[], P1[q] >.
 
     Step [q]:=0.
 
-    Step X[q].
+    Step X[q];.
 
 End.
 
@@ -14,7 +14,7 @@ Refine init1' : < c1[], P1[q] >.
 
     WeakenPre P0[q].
 
-    Step X[q].
+    Step X[q];.
 
     WeakenPre P1[q].
     
