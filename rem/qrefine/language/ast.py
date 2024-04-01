@@ -71,6 +71,12 @@ class AstAbort(QProgAst):
     @property
     def all_qvar(self) -> QVar:
         return QVar([])
+    
+    def __hash__(self) -> int:
+        return hash("abort")
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, AstAbort)
 
 class AstSkip(QProgAst):
     def __init__(self):
@@ -91,6 +97,12 @@ class AstSkip(QProgAst):
     @property
     def all_qvar(self) -> QVar:
         return QVar([])
+    
+    def __hash__(self) -> int:
+        return hash("skip")
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, AstSkip)
 
 
 class AstInit(QProgAst):
@@ -113,6 +125,14 @@ class AstInit(QProgAst):
     @property
     def all_qvar(self) -> QVar:
         return self.eqvar.qvar
+    
+    def __hash__(self) -> int:
+        return hash(("init", self.eqvar))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, AstInit) and self.eqvar == other.eqvar
+
+    
 
     
 class AstUnitary(QProgAst):
@@ -141,6 +161,12 @@ class AstUnitary(QProgAst):
     @property
     def all_qvar(self) -> QVar:
         return self.U.all_qvar
+    
+    def __hash__(self) -> int:
+        return hash(("unitary", self.U))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, AstUnitary) and self.U == other.U
 
     
 class AstAssert(QProgAst):
@@ -170,6 +196,11 @@ class AstAssert(QProgAst):
     def all_qvar(self) -> QVar:
         return self.P.all_qvar
 
+    def __hash__(self) -> int:
+        return hash(("assert", self.P))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, AstAssert) and self.P == other.P
     
 
 class AstPres(QProgAst):
@@ -191,11 +222,6 @@ class AstPres(QProgAst):
             raise ValueError("The operator '" + str(self.Q) + "' for assertion statement is not projective.")
         
         return self
-        
-
-
-
-    #############################################################
 
     def definite(self, env: Env) -> bool:
         if self.SRefined is None:
@@ -226,6 +252,11 @@ class AstPres(QProgAst):
     def all_qvar(self) -> QVar:
         return self.P.all_qvar + self.Q.all_qvar
 
+    def __hash__(self) -> int:
+        return hash(("pres", self.P, self.Q))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, AstPres) and self.P == other.P and self.Q == other.Q
 
 
 class AstSeq(QProgAst):
@@ -257,6 +288,12 @@ class AstSeq(QProgAst):
     @property
     def all_qvar(self) -> QVar:
         return self.S0.all_qvar + self.S1.all_qvar
+    
+    def __hash__(self) -> int:
+        return hash(("seq", self.S0, self.S1))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, AstSeq) and self.S0 == other.S0 and self.S1 == other.S1
 
 class AstProb(QProgAst):
     def __init__(self, S0 : QProgAst, S1 : QProgAst, p : float):
@@ -293,6 +330,12 @@ class AstProb(QProgAst):
     @property
     def all_qvar(self) -> QVar:
         return self.S0.all_qvar + self.S1.all_qvar
+    
+    def __hash__(self) -> int:
+        return hash(("prob", self.S0, self.S1, self.p))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, AstProb) and self.S0 == other.S0 and self.S1 == other.S1 and self.p == other.p
 
 
 class AstIf(QProgAst):
@@ -331,6 +374,12 @@ class AstIf(QProgAst):
     @property
     def all_qvar(self) -> QVar:
         return self.P.all_qvar + self.S1.all_qvar + self.S0.all_qvar
+    
+    def __hash__(self) -> int:
+        return hash(("if", self.P, self.S1, self.S0))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, AstIf) and self.P == other.P and self.S1 == other.S1 and self.S0 == other.S0
 
     
 class AstWhile(QProgAst):
@@ -366,3 +415,9 @@ class AstWhile(QProgAst):
     @property
     def all_qvar(self) -> QVar:
         return self.P.all_qvar + self.S.all_qvar
+    
+    def __hash__(self) -> int:
+        return hash(("while", self.P, self.S))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, AstWhile) and self.P == other.P and self.S == other.S

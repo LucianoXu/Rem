@@ -102,6 +102,12 @@ class EQOptAdd(EQOptAbstract):
     def __str__(self) -> str:
         return "(" + str(self.optA) + "+" + str(self.optB) + ")"
     
+    def __hash__(self) -> int:
+        return hash(("qopt-add", self.optA, self.optB))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, EQOptAdd) and self.optA == other.optA and self.optB == other.optB
+    
 
 class EQOptNeg(EQOptAbstract):
     '''
@@ -126,6 +132,11 @@ class EQOptNeg(EQOptAbstract):
     def __str__(self) -> str:
         return "(-" + str(self.opt) + ")"
     
+    def __hash__(self) -> int:
+        return hash(("qopt-neg", self.opt))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, EQOptNeg) and self.opt == other.opt
 
 
 
@@ -156,6 +167,11 @@ class EQOptSub(EQOptAbstract):
     def __str__(self) -> str:
         return "(" + str(self.optA) + "-" + str(self.optB) + ")"
     
+    def __hash__(self) -> int:
+        return hash(("qopt-sub", self.optA, self.optB))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, EQOptSub) and self.optA == other.optA and self.optB == other.optB
 
 class EQOptMul(EQOptAbstract):
     '''
@@ -184,6 +200,11 @@ class EQOptMul(EQOptAbstract):
     def __str__(self) -> str:
         return "(" + str(self.optA) + " " + str(self.optB) + ")"
     
+    def __hash__(self) -> int:
+        return hash(("qopt-mul", self.optA, self.optB))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, EQOptMul) and self.optA == other.optA and self.optB == other.optB
 
 class EQOptScale(EQOptAbstract):
     '''
@@ -210,7 +231,12 @@ class EQOptScale(EQOptAbstract):
     def __str__(self) -> str:
         return "(" + str(self.c) + " " + str(self.opt) + ")"
     
-
+    def __hash__(self) -> int:
+        return hash(("qopt-scale", self.c, self.opt))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, EQOptScale) and self.c == other.c and self.opt == other.opt
+    
 
 class EQOptDagger(EQOptAbstract):
     '''
@@ -235,8 +261,11 @@ class EQOptDagger(EQOptAbstract):
     def __str__(self) -> str:
         return "(" + str(self.opt) + "†" + ")"
     
-
-
+    def __hash__(self) -> int:
+        return hash(("qopt-dagger", self.opt))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, EQOptDagger) and self.opt == other.opt
 
 
 class EQOptTensor(EQOptAbstract):
@@ -264,6 +293,11 @@ class EQOptTensor(EQOptAbstract):
     def __str__(self) -> str:
         return "(" + str(self.optA) + " ⊗ " + str(self.optB) + ")"
     
+    def __hash__(self) -> int:
+        return hash(("qopt-tensor", self.optA, self.optB))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, EQOptTensor) and self.optA == other.optA and self.optB == other.optB
 
 
 
@@ -295,6 +329,12 @@ class EQOptDisjunct(EQOptAbstract):
     def __str__(self) -> str:
         return "(" + str(self.optA) + " ∨ " + str(self.optB) + ")"
     
+    def __hash__(self) -> int:
+        return hash(("qopt-disjunct", self.optA, self.optB))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, EQOptDisjunct) and self.optA == other.optA and self.optB == other.optB
+    
 
 
 class EQOptConjunct(EQOptAbstract):
@@ -325,6 +365,12 @@ class EQOptConjunct(EQOptAbstract):
     def __str__(self) -> str:
         return "(" + str(self.optA) + " ∧ " + str(self.optB) + ")"
     
+    def __hash__(self) -> int:
+        return hash(("qopt-conjunct", self.optA, self.optB))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, EQOptConjunct) and self.optA == other.optA and self.optB == other.optB
+    
 class EQOptComplement(EQOptAbstract):
     '''
     The expression for complement of projective quantum operators.
@@ -347,6 +393,12 @@ class EQOptComplement(EQOptAbstract):
     
     def __str__(self) -> str:
         return "(" + str(self.opt) + "^⊥)"
+    
+    def __hash__(self) -> int:
+        return hash(("qopt-complement", self.opt))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, EQOptComplement) and self.opt == other.opt
     
 
 
@@ -379,7 +431,12 @@ class EQOptSasakiImply(EQOptAbstract):
     def __str__(self) -> str:
         return "(" + str(self.optA) + " ⇝ " + str(self.optB) + ")"
     
-
+    def __hash__(self) -> int:
+        return hash(("qopt-sasaki-imply", self.optA, self.optB))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, EQOptSasakiImply) and self.optA == other.optA and self.optB == other.optB
+    
 
 class EQOptSasakiConjunct(EQOptAbstract):
     '''
@@ -409,6 +466,11 @@ class EQOptSasakiConjunct(EQOptAbstract):
     def __str__(self) -> str:
         return "(" + str(self.optA) + " ⋒ " + str(self.optB) + ")"
     
+    def __hash__(self) -> int:
+        return hash(("qopt-sasaki-conjunct", self.optA, self.optB))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, EQOptSasakiConjunct) and self.optA == other.optA and self.optB == other.optB
 
 
 class EQSOptApply(EQOptAbstract):
@@ -438,4 +500,10 @@ class EQSOptApply(EQOptAbstract):
         
     def __str__(self) -> str:
         return "(" + str(self.so) + "(" + str(self.opt) + "))"
+    
+    def __hash__(self) -> int:
+        return hash(("qsopt-apply", self.so, self.opt))
+    
+    def __eq__(self, other : object) -> bool:
+        return isinstance(other, EQSOptApply) and self.so == other.so and self.opt == other.opt
 

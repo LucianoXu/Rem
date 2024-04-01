@@ -65,6 +65,12 @@ class TypedTerm(ABC):
         else:
             if not isinstance(self.type, type):
                 raise ValueError(f"The parameter expression '{self}' should have type '{type.symbol}', but actually has type '{self.type}'.")
+            
+    def __hash__(self) -> int:
+        return hash(str(self))
+    
+    def __eq__(self, other : Any) -> bool:
+        return isinstance(other, TypedTerm) and str(self) == str(other)
 
 class Var(TypedTerm):
     '''
@@ -92,6 +98,12 @@ class Var(TypedTerm):
     
     def __str__(self) -> str:
         return self.id
+    
+    def __hash__(self) -> int:
+        return hash(self.id)
+
+    def __eq__(self, other : Any) -> bool:
+        return isinstance(other, Var) and self.id == other.id
 
 
 class Env:

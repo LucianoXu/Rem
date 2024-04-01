@@ -24,12 +24,17 @@ def worker_gen(pres: AstPres, workers: list[GenWorker], index: int):
     # workers: list of workers pass in through ListProxy
     worker = workers[index]
 
+    tested_progs : set[TypedTerm] = set()
+
     while True:
         
         # generate a new program
         worker.prog_gen()
 
         if worker.current_prog is not None:
+            if worker.current_prog in tested_progs:
+                continue
+
             try:
 
                 # check the refinement relationship
@@ -41,8 +46,10 @@ def worker_gen(pres: AstPres, workers: list[GenWorker], index: int):
                 return
             
             except:
-                if worker.prog_count % 50 == 0:
+                if worker.gen_count % 50 == 0:
                     workers[index] = worker
+
+                tested_progs.add(worker.current_prog)
                 
 class GenMachine:
 
@@ -71,7 +78,7 @@ class GenMachine:
 
     @property
     def attempt_total(self) -> int:
-        return sum([w.prog_count for w in self.workers])
+        return sum([w.gen_count for w in self.workers])
     
     @property
     def sol(self) -> TypedTerm | None:
@@ -237,7 +244,7 @@ class GenWorker:
         self.retry_times = retry_times
         self.max_depth = max_depth
 
-        self.prog_count = 0
+        self.gen_count = 0
         self.current_prog : TypedTerm | None = None
         self.sol : TypedTerm | None = None
     
@@ -274,7 +281,7 @@ class GenWorker:
         generate a new program
         '''
         res = self.random_prog_gen(self.max_depth)
-        self.prog_count += 1
+        self.gen_count += 1
         self.current_prog = res
         return res
 

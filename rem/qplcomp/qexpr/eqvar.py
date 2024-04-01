@@ -35,3 +35,11 @@ class EQVar(TypedTerm):
     
     def __str__(self) -> str:
         return str(self.qvar)
+    
+    def __hash__(self) -> int:
+        return hash(tuple(self.qvar._qvls))
+    
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, EQVar):
+            return self.qvar == other.qvar
+        return False

@@ -86,6 +86,15 @@ class EIQOptPair(EIQOptAbstract):
     def all_qvar(self) -> QVar:
         return self.qvar.qvar
     
+    def __hash__(self) -> int:
+        return hash(("iqopt-pair", self.qopt, self.qvar))
+    
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, EIQOptPair):
+            return self.qopt == other.qopt and self.qvar == other.qvar
+        return False
+    
+    
 class EIQOptAdd(EIQOptAbstract):
     '''
     The Expression for additions of Indexed Quantum Operators.
@@ -114,7 +123,13 @@ class EIQOptAdd(EIQOptAbstract):
     def all_qvar(self) -> QVar:
         return self.ioptA.all_qvar + self.ioptB.all_qvar
 
-
+    def __hash__(self) -> int:
+        return hash(("iqopt-add", self.ioptA, self.ioptB))
+    
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, EIQOptAdd):
+            return self.ioptA == other.ioptA and self.ioptB == other.ioptB
+        return False
 
 
 class EIQOptNeg(EIQOptAbstract):
@@ -143,6 +158,14 @@ class EIQOptNeg(EIQOptAbstract):
     @property
     def all_qvar(self) -> QVar:
         return self.iopt.all_qvar
+    
+    def __hash__(self) -> int:
+        return hash(("iqopt-neg", self.iopt))
+    
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, EIQOptNeg):
+            return self.iopt == other.iopt
+        return False
 
 
 
@@ -175,6 +198,14 @@ class EIQOptSub(EIQOptAbstract):
     def all_qvar(self) -> QVar:
         return self.ioptA.all_qvar + self.ioptB.all_qvar
 
+    def __hash__(self) -> int:
+        return hash(("iqopt-sub", self.ioptA, self.ioptB))
+    
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, EIQOptSub):
+            return self.ioptA == other.ioptA and self.ioptB == other.ioptB
+        return False
+
 class EIQOptScale(EIQOptAbstract):
     '''
     The expression for scaling of quantum operators.
@@ -203,6 +234,14 @@ class EIQOptScale(EIQOptAbstract):
     @property
     def all_qvar(self) -> QVar:
         return self.iopt.all_qvar
+    
+    def __hash__(self) -> int:
+        return hash(("iqopt-scale", self.c, self.iopt))
+    
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, EIQOptScale):
+            return self.c == other.c and self.iopt == other.iopt
+        return False
 
 class EIQOptMul(EIQOptAbstract):
     '''
@@ -231,6 +270,14 @@ class EIQOptMul(EIQOptAbstract):
     @property
     def all_qvar(self) -> QVar:
         return self.ioptA.all_qvar + self.ioptB.all_qvar
+    
+    def __hash__(self) -> int:
+        return hash(("iqopt-mul", self.ioptA, self.ioptB))
+    
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, EIQOptMul):
+            return self.ioptA == other.ioptA and self.ioptB == other.ioptB
+        return False
 
 class EIQOptDagger(EIQOptAbstract):
     '''
@@ -259,6 +306,14 @@ class EIQOptDagger(EIQOptAbstract):
     @property
     def all_qvar(self) -> QVar:
         return self.iopt.all_qvar
+    
+    def __hash__(self) -> int:
+        return hash(("iqopt-dagger", self.iopt))
+    
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, EIQOptDagger):
+            return self.iopt == other.iopt
+        return False
 
 class EIQOptTensor(EIQOptAbstract):
     '''
@@ -289,6 +344,14 @@ class EIQOptTensor(EIQOptAbstract):
     @property
     def all_qvar(self) -> QVar:
         return self.ioptA.all_qvar + self.ioptB.all_qvar
+    
+    def __hash__(self) -> int:
+        return hash(("iqopt-tensor", self.ioptA, self.ioptB))
+    
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, EIQOptTensor):
+            return self.ioptA == other.ioptA and self.ioptB == other.ioptB
+        return False
 
 class EIQOptDisjunct(EIQOptAbstract):
     '''
@@ -319,6 +382,14 @@ class EIQOptDisjunct(EIQOptAbstract):
     def all_qvar(self) -> QVar:
         return self.ioptA.all_qvar + self.ioptB.all_qvar
     
+    def __hash__(self) -> int:
+        return hash(("iqopt-disjunct", self.ioptA, self.ioptB))
+    
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, EIQOptDisjunct):
+            return self.ioptA == other.ioptA and self.ioptB == other.ioptB
+        return False
+    
 class EIQOptConjunct(EIQOptAbstract):
     '''
     The expression for conjunction of projective indexed quantum operators.
@@ -348,6 +419,14 @@ class EIQOptConjunct(EIQOptAbstract):
     @property
     def all_qvar(self) -> QVar:
         return self.ioptA.all_qvar + self.ioptB.all_qvar
+    
+    def __hash__(self) -> int:
+        return hash(("iqopt-conjunct", self.ioptA, self.ioptB))
+    
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, EIQOptConjunct):
+            return self.ioptA == other.ioptA and self.ioptB == other.ioptB
+        return False
 
 class EIQOptComplement(EIQOptAbstract):
     '''
@@ -375,6 +454,14 @@ class EIQOptComplement(EIQOptAbstract):
     @property
     def all_qvar(self) -> QVar:
         return self.iopt.all_qvar
+    
+    def __hash__(self) -> int:
+        return hash(("iqopt-complement", self.iopt))
+    
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, EIQOptComplement):
+            return self.iopt == other.iopt
+        return False
 
 class EIQOptSasakiImply(EIQOptAbstract):
     '''
@@ -405,6 +492,14 @@ class EIQOptSasakiImply(EIQOptAbstract):
     @property
     def all_qvar(self) -> QVar:
         return self.ioptA.all_qvar + self.ioptB.all_qvar
+    
+    def __hash__(self) -> int:
+        return hash(("iqopt-sasaki-imply", self.ioptA, self.ioptB))
+    
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, EIQOptSasakiImply):
+            return self.ioptA == other.ioptA and self.ioptB == other.ioptB
+        return False
 
 class EIQOptSasakiConjunct(EIQOptAbstract):
     '''
@@ -435,3 +530,11 @@ class EIQOptSasakiConjunct(EIQOptAbstract):
     @property
     def all_qvar(self) -> QVar:
         return self.ioptA.all_qvar + self.ioptB.all_qvar
+    
+    def __hash__(self) -> int:
+        return hash(("iqopt-sasaki-conjunct", self.ioptA, self.ioptB))
+    
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, EIQOptSasakiConjunct):
+            return self.ioptA == other.ioptA and self.ioptB == other.ioptB
+        return False
