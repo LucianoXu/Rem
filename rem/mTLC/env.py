@@ -96,6 +96,12 @@ class Var(TypedTerm):
         
         return val
     
+    def prefix_str(self, prefix="") -> str:
+        '''
+        An ad-hoc solution for printing subprograms
+        '''
+        return prefix + self.id
+
     def __str__(self) -> str:
         return self.id
     

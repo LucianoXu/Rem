@@ -55,6 +55,7 @@ precedence = (
     ('left', 'CONJUNCT'),
     ('left', '*', 'OTIMES'),
     ('left', 'DAGGER'),
+    ('nonassoc', '['),
 )
 
 def p_term(p):
@@ -74,6 +75,12 @@ def p_variable(p):
     '''
     p[0] = Var(p[1], ParserState.env)
 
+from ...qrefine.prover.ast import ImportQOpt
+def p_import(p):
+    '''
+    term    : IMPORT PATH
+    '''
+    p[0] = ImportQOpt(p[2])
 
 from ...qplcomp.qexpr.eiqopt import *
 def p_1(p):
@@ -390,7 +397,7 @@ def p_calc_iqopt(p):
 from ..language.semantics.extract import QProgExtract
 def p_extract_prog(p):
     '''
-    term    : EXTRACT statement
+    statement   : EXTRACT statement
     '''
     p[0] = QProgExtract(p[2])
 

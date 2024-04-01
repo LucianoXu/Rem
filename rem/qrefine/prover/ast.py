@@ -2,12 +2,47 @@
 
 from __future__ import annotations
 
+from ...qplcomp.qexpr.eqopt import EQOptAbstract
+
 from ...mTLC import TypedTerm, Types
 from ...qplcomp import *
 from ..language import QProgAst, AstPres
 
 from abc import ABC, abstractmethod
+
+import numpy as np
         
+
+#################################################
+# Special Term for importing numpy array
+#
+
+class ImportQOpt(EQOptAbstract):
+    def __init__(self, path: str):
+
+        try:
+            data = np.load(path)
+
+        except FileNotFoundError:
+            raise ValueError(f"File '{path}' not found.")
+        
+        self.loaded_term = EQOpt(QOpt(data))
+
+        super().__init__(self.loaded_term.qopt.qnum)
+        self.path = path
+
+    def eval(self, env: Env) -> EQOptAbstract:
+        return self.loaded_term
+        
+
+    def __str__(self) -> str:
+        return f'Import "{self.path}"'
+    
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, ImportQOpt):
+            return self.path == other.path
+        return False
+    
 
 class RemAst(ABC):
     

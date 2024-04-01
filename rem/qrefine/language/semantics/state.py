@@ -42,6 +42,11 @@ class EIQOptCalc(EIQOptAbstract):
     
     def __str__(self) -> str:
         return f"[[{self.prog}]]({self.rho})"
+    
+    @property
+    def all_qvar(self) -> QVar:
+        return QVar([])
+
 
 
 def calc(prog : QProgAst, rho : IQOpt, env: Env) -> IQOpt:

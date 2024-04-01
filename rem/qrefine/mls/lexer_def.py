@@ -39,6 +39,7 @@ reserved = {
     'Def'       : 'DEF',
 
     'Extract'   : 'EXTRACT',
+    'Import'    : 'IMPORT',
 
     'Show'      : 'SHOW',
     'Eval'      : 'EVAL',
@@ -53,6 +54,7 @@ reserved = {
 tokens = [
     'ID',
     'ASSIGN',
+    'PATH',
 
     'OTIMES',
     'DAGGER',
@@ -90,6 +92,11 @@ t_LEQ = r"<="
 def t_ID(t):
     r'[a-zA-Z\'][a-zA-Z\'0-9]*'
     t.type = reserved.get(t.value, 'ID')
+    return t
+
+def t_PATH(t):
+    r'".*"'
+    t.value = t.value[1:-1]
     return t
 
 # note this token will not include real numbers
