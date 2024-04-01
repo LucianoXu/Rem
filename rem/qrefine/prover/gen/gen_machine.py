@@ -57,7 +57,7 @@ class GenMachine:
         # gen settings
         self._gen_env : Env = gen_env
 
-        self._max_depth : int = 5
+        self._max_depth : int = 3
         self._worker_num : int = 8
 
         self.retry_times : int = 10
@@ -221,9 +221,16 @@ class GenWorker:
     - abort, prescription, assertion and while are forbidden
     - only provided operators can be utilized
     '''
-    def __init__(self, gen_env: Env, qvars: QVar, retry_times, max_depth):
+
+    def __init__(self, gen_env: Env, qvars: QVar, retry_times: int, max_depth):
         
         # the expressions available for generation (QOpt, IQOpt, QProg)
+
+        self._gen_env : Env
+        self._opt_qnum_map : dict[int, list[str]]
+        self._iopts : list[str]
+        self._progs : list[str]
+
         self.gen_env = gen_env
 
         self.qvars = qvars
@@ -233,6 +240,34 @@ class GenWorker:
         self.prog_count = 0
         self.current_prog : TypedTerm | None = None
         self.sol : TypedTerm | None = None
+    
+    @property
+    def gen_env(self) -> Env:
+        return self._gen_env
+    
+    @gen_env.setter
+    def gen_env(self, env: Env) -> None:
+        self._gen_env = env
+
+        # scan for operator/program information
+        self._opt_qnum_map = {}
+        self._iopts = []
+        self._progs = []
+
+        for key in env.defs:
+            val = env.defs[key]
+            if isinstance(val.type, QOptType):
+                qnum = val.type.qnum
+                if qnum in self._opt_qnum_map:
+                    self._opt_qnum_map[qnum].append(key)
+                else:
+                    self._opt_qnum_map[qnum] = [key]
+            elif isinstance(val.type, IQOptType):
+                self._iopts.append(key)
+            elif isinstance(val.type, QProgType):
+                self._progs.append(key)
+
+
 
     def prog_gen(self) -> TypedTerm|None:
         '''
@@ -257,6 +292,24 @@ class GenWorker:
     # operator generation
     #############################################################
 
+    opt_gen_choices = ([
+            "opt_gen_def"
+        ] * 30 +
+        [
+            "opt_gen_add",
+            "opt_gen_sub",
+            "opt_gen_mul",
+            "opt_gen_dagger",
+            "opt_gen_tensor",
+        ] * 5 +
+        [
+            "opt_gen_disjunct",
+            "opt_gen_conjunct",
+            "opt_gen_complement",
+            "opt_gen_sasaki_imply",
+            "opt_gen_sasaki_conjunct"
+        ] * 1)
+
 
     def random_opt_gen(self, qubit_num: int, depth: int) -> TypedTerm|None:
         '''
@@ -265,21 +318,10 @@ class GenWorker:
         for i in range(self.retry_times):
 
             # randomly execute one generation rule
-            res = random.choice(
-                [self.opt_gen_def] * 10 +
-                [
-                    self.opt_gen_add,
-                    self.opt_gen_sub,
-                    self.opt_gen_mul,
-                    self.opt_gen_dagger,
-                    self.opt_gen_tensor,
-                    self.opt_gen_disjunct,
-                    self.opt_gen_conjunct,
-                    self.opt_gen_complement,
-                    self.opt_gen_sasaki_imply,
-                    self.opt_gen_sasaki_conjunct
-                 ]
-            )(qubit_num, depth)
+            gen_rule_name = random.choice(
+                self.opt_gen_choices
+            )
+            res = GenWorker.__dict__[gen_rule_name](self, qubit_num, depth)
 
             if res is not None:
                 return res
@@ -288,15 +330,12 @@ class GenWorker:
         '''
         Terminal symbol for the random generation of operators.
         '''
-        keys = list(self.gen_env.defs.keys())
-        for i in range(self.retry_times):
-            key = random.choice(keys)
-            item = self.gen_env[key]
-            if item.type == QOptType(qubit_num):
-                return Var(key, self.gen_env)
-            
-        # give up for this time
-        return None
+        if qubit_num in self._opt_qnum_map:
+            key = random.choice(self._opt_qnum_map[qubit_num])
+            return Var(key, self.gen_env)
+        else:
+            return None
+        
     
     def opt_gen_add(self, qubit_num: int, depth: int) -> EQOptAbstract|None:
         '''
@@ -450,15 +489,12 @@ class GenWorker:
         '''
         Terminal symbol for the random generation of indexed operators.
         '''
-        keys = list(self.gen_env.defs.keys())
-        for i in range(self.retry_times):
-            key = random.choice(keys)
-            item = self.gen_env[key]
-            if item.type == IQOptType():
-                return Var(key, self.gen_env)
-            
-        # give up for this time
-        return None
+        if len(self._iopts) == 0:
+            return None
+        else:
+            key = random.choice(self._iopts)
+            return Var(key, self.gen_env)
+
 
     def iopt_gen_pair(self, depth: int) -> EIQOptAbstract|None:
         '''
@@ -478,6 +514,15 @@ class GenWorker:
     # program generation
     #############################################################
 
+    prog_gen_choices = ([
+        "prog_gen_def",
+        "prog_gen_skip",
+        "prog_gen_init",
+        "prog_gen_unitary",
+        "prog_gen_if",
+        "prog_gen_seq",
+        ])
+
     def random_prog_gen(self, depth: int) -> TypedTerm|None:
         '''
         Randomly generate a program.
@@ -485,16 +530,11 @@ class GenWorker:
         for i in range(self.retry_times):
 
             # randomly execute one generation rule
-            res = random.choice(
-                [
-                    self.prog_gen_def,
-                    self.prog_gen_skip,
-                    self.prog_gen_init,
-                    self.prog_gen_unitary,
-                    self.prog_gen_if,
-                    #self.prog_gen_while
-                 ]
-            )(depth)
+            gen_rule_name = random.choice(
+                self.prog_gen_choices
+            )
+
+            res = GenWorker.__dict__[gen_rule_name](self, depth)
 
             if res is not None:
                 return res
@@ -503,15 +543,12 @@ class GenWorker:
         '''
         Terminal symbol for the random generation of programs.
         '''
-        keys = list(self.gen_env.defs.keys())
-        for i in range(len(keys)):
-            key = random.choice(keys)
-            item = self.gen_env[key]
-            if item.type == QProgType():
-                return Var(key, self.gen_env)
-            
-        # give up for this time
-        return None
+        if len(self._progs) == 0:
+            return None
+        else:
+            key = random.choice(self._progs)
+            return Var(key, self.gen_env)
+
 
     def prog_gen_skip(self, depth: int) -> QProgAst|None:
         '''
@@ -551,6 +588,19 @@ class GenWorker:
 
         if P is not None and S1 is not None and S0 is not None:
             return AstIf(P, S1, S0)   # type: ignore
+        
+    def prog_gen_seq(self, depth: int) -> QProgAst|None:
+        '''
+        The generation rule for seq.
+        '''
+        if depth <= 0:
+            return None
+        
+        S1 = self.random_prog_gen(depth - 1)
+        S2 = self.random_prog_gen(depth - 1)
+
+        if S1 is not None and S2 is not None:
+            return AstSeq(S1, S2)   # type: ignore
     
     def prog_gen_while(self, depth: int) -> QProgAst|None:
         '''
