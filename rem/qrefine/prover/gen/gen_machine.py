@@ -41,13 +41,14 @@ def worker_gen(pres: AstPres, workers: list[GenWorker], index: int):
                 return
             
             except:
-                workers[index] = worker
+                if worker.prog_count % 50 == 0:
+                    workers[index] = worker
                 
 class GenMachine:
 
     mp.set_start_method('fork')
 
-    def __init__(self, gen_env : Env, gen_rules: tuple[str, ...]):
+    def __init__(self, gen_env : Env):
         self.mng = mp.Manager()
         self.working : bool = False
 
@@ -55,7 +56,6 @@ class GenMachine:
 
         # gen settings
         self._gen_env : Env = gen_env
-        self._gen_rules : tuple[str, ...] = gen_rules
 
         self._max_depth : int = 5
         self._worker_num : int = 8
@@ -111,20 +111,6 @@ class GenMachine:
         if self.working and self.goal is not None:
             self.gen(self.goal)
         
-    @property
-    def gen_rules(self) -> tuple[str, ...]:
-        return self._gen_rules
-    
-    @gen_rules.setter
-    def gen_rules(self, rules: tuple[str, ...]) -> None:
-        '''
-        Configure the generation on the fly.
-        '''
-        self._gen_rules = rules
-
-        if self.working and self.goal is not None:
-            self.gen(self.goal)
-
     @property
     def max_depth(self) -> int:
         return self._max_depth
@@ -189,9 +175,8 @@ class GenMachine:
             self.workers.append(
                 GenWorker(
                     self.gen_env, 
-                    self.gen_rules,
                     collect_qvars, 
-                    self.retry_times, 
+                    self.retry_times,
                     self.max_depth))
             
             self.threads.append(
@@ -236,11 +221,10 @@ class GenWorker:
     - abort, prescription, assertion and while are forbidden
     - only provided operators can be utilized
     '''
-    def __init__(self, gen_env: Env, gen_rules: tuple[str, ...], qvars: QVar, retry_times, max_depth):
+    def __init__(self, gen_env: Env, qvars: QVar, retry_times, max_depth):
         
         # the expressions available for generation (QOpt, IQOpt, QProg)
         self.gen_env = gen_env
-        self.gen_rules = gen_rules
 
         self.qvars = qvars
         self.retry_times = retry_times

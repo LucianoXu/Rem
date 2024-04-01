@@ -56,27 +56,12 @@ optlib = {
         [0., 0., 1., 0.]]
     ).reshape((2,2,2,2)),
 
-    "CZ" : np.array(
-        [[1., 0., 0., 0.],
-        [0., 1., 0., 0.],
-        [0., 0., 1., 0.],
-        [0., 0., 0., -1.]]
-    ).reshape((2,2,2,2)),
-
-    "CH" : np.array(
-        [[1., 0., 0., 0.],
-        [0., 1., 0., 0.,],
-        [0., 0., 1./np.sqrt(2), 1./np.sqrt(2)],
-        [0., 0., 1./np.sqrt(2), -1./np.sqrt(2)]]
-    ).reshape((2,2,2,2)),
-
     "SWAP" : np.array(
         [[1., 0., 0., 0.],
         [0., 0., 1., 0.],
         [0., 1., 0., 0.],
         [0., 0., 0., 1.]]
     ).reshape((2,2,2,2)),
-
 
     "CCX" : np.array(       # it is also called the "Toffolli gate"
         [[1., 0., 0., 0., 0., 0., 0., 0.],
@@ -150,25 +135,6 @@ optlib = {
          [0., -0.5, 0.5, 0.],
          [0., 0., 0., 0.]]
     ),
-    
-    #####################################################
-    # Kraus operator
-    "E10" : np.array(
-        [[0., 1.],
-         [0., 0.]]
-    )
-}
-
-
-soptlib = {
-    "E'P0" :
-    [optlib["P0"]],
-    "E'P1" :
-    [optlib["P1"]],
-    "E'DP" :
-    [optlib["P0"], optlib["P1"]],
-    "E'Set0" : 
-    [optlib["P0"], optlib["E10"]],
 }
 
 # some functions
@@ -186,8 +152,3 @@ from .qso import QSOpt
 qvallib : dict[str, QVal]= {}
 for key in optlib:
     qvallib[key] = QOpt(optlib[key])
-
-for key in soptlib:
-    m_kraus = soptlib[key]
-    opt_kraus = [QOpt(E) for E in m_kraus]
-    qvallib[key] = QSOpt(opt_kraus)

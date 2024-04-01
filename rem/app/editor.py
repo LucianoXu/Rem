@@ -40,10 +40,9 @@ class EnvTabs(Static):
     env = reactive(Env)
 
     class EnvTabChanged(Event):
-        def __init__(self, gen_env: Env, gen_rules: tuple[str, ...]) -> None:
+        def __init__(self, gen_env: Env) -> None:
             super().__init__()
             self.gen_env = gen_env
-            self.gen_rules = gen_rules
 
     def watch_env(self, env: Env) -> None:
         '''
@@ -71,15 +70,12 @@ class EnvTabs(Static):
                 )
             )
 
-        self.post_message(self.EnvTabChanged(self.get_gen_env(), ()))
+        self.post_message(self.EnvTabChanged(self.get_gen_env()))
 
     def compose(self) -> ComposeResult:
-        with TabbedContent():
-            with TabPane("Defs"):
-                yield ListView(id = "defs_list")
-            with TabPane("Rules"):
-                yield ListView(id = "rules_list")
-
+        yield Label("Definitions")
+        yield ListView(id = "defs_list")
+        
     
     def get_gen_env(self) -> Env:
         '''
@@ -100,7 +96,7 @@ class EnvTabs(Static):
         '''
         update the generation environment
         '''
-        self.post_message(self.EnvTabChanged(self.get_gen_env(), ()))
+        self.post_message(self.EnvTabChanged(self.get_gen_env()))
 
 
 class DefItem(ListItem):
@@ -230,7 +226,7 @@ class Editor(Screen):
 
         # backend components
         self.mls = mls.MLS()
-        self.gen_machine = GenMachine(self.mls.selected_frame.env, ())
+        self.gen_machine = GenMachine(self.mls.selected_frame.env)
 
         # timer
         self.gen_update_timer = self.set_interval(1 / 10, self.update_gen, pause=False)
@@ -479,9 +475,6 @@ class Editor(Screen):
         # check before assigning to avoid redundant updates
         if event.gen_env != self.gen_machine.gen_env:
             self.gen_machine.gen_env = event.gen_env
-        
-        if event.gen_rules != self.gen_machine.gen_rules:
-            self.gen_machine.gen_rules = event.gen_rules
 
     def update_gen(self) -> None:
         '''
