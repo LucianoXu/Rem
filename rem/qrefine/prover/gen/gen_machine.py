@@ -74,7 +74,7 @@ class GenMachine:
 
         self.threads : list[mp.Process] = []
 
-        self.info = "Ready to generate."
+        self.info = "// Ready to generate."
 
     @property
     def attempt_total(self) -> int:
@@ -96,12 +96,13 @@ class GenMachine:
         '''
 
         if self.sol is not None:
-            res = f"Goal: {self.goal}\n\n"
-            res += f"Solution found ({self.attempt_total}):\n"
+            res = f"// Goal:\n"
+            res += str(self.goal) + ".\n\n"
+            res += f"// Solution found ({self.attempt_total}):\n"
             res += f"{self.sol}"
             return res
         elif len(self.workers) > 0:
-            return f"Searching ({self.attempt_total}) ...\n\n{self.workers[0].current_prog}"
+            return f"// Searching ({self.attempt_total}) ...\n\n{self.workers[0].current_prog}"
         else:
             return self.info
         
@@ -209,7 +210,7 @@ class GenMachine:
         self.working = False
         self.workers[:] = []
 
-        self.into = "Ready to generate."
+        self.info = "// Ready to generate."
 
 
     def terminate(self):

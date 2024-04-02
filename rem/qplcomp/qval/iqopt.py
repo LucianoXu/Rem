@@ -319,7 +319,7 @@ class IQOpt(IQVal):
         Parameters: `self`, `other` : IQOpt, projectors with the same number of qubits.
         Returns: IQOpt, a projector, representing the subspace of Sasaki implication.
         
-        Note: Sasaki implication P -> R := P^\\bot \vee (P \\wedge R)
+        Note: Sasaki implication P -> R := P^\\perp \vee (P \\wedge R)
         '''
         return (~ self) | (self & other)
     
@@ -331,7 +331,7 @@ class IQOpt(IQVal):
         Parameters: `self`, `other` : QOpt, projectors with the same number of qubits.
         Returns: QOpt, a projector, representing the subspace of Sasaki conjunction.
         
-        Note: Sasaki conjunction P -> R := P \\wedge (P^\\bot \\vee R)
+        Note: Sasaki conjunction P -> R := P \\wedge (P^\\perp \\vee R)
         '''
         return self & ((~ self) | other)
 

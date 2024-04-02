@@ -19,6 +19,8 @@ from ..qrefine import mls, AstPres
 from ..qrefine.prover.gen.gen_machine import GenMachine
 import datetime
 
+from .rem_syntax import PY_REM, rem_highlight_query, REM_THEME, REM_THEME_VERIFIED
+
 
 def rem_greetings() -> str:
     now = datetime.datetime.now()
@@ -34,7 +36,14 @@ class GoalBar(Static):
 
     def compose(self) -> ComposeResult:
         yield Label(f"Goal ({self.index}/{self.total})")
-        yield TextArea(str(self.goal), read_only=True)
+        goal_area = TextArea(str(self.goal), read_only=True)
+
+        goal_area.register_language(PY_REM, rem_highlight_query)
+        goal_area.language = "rem"
+        goal_area.register_theme(REM_THEME)
+        goal_area.theme = "subaru"
+
+        yield goal_area
 
 
 class EnvTabs(Static):
@@ -278,7 +287,7 @@ class Editor(Screen):
                     self.append_log(f"Error: {e}")
 
         if self.current_file == "":
-            self.app.push_screen(FileScreen("close"), check_save)
+            self.app.push_screen(FileScreen("save"), check_save)
 
         else:
             check_save(Path(self.current_file))
@@ -381,15 +390,25 @@ class Editor(Screen):
             "",
             id='verified-area',
             show_line_numbers=True,
-            read_only=True
+            read_only=True,
+            soft_wrap=False
         )
+        self.verified_area.register_language(PY_REM, rem_highlight_query)
+        self.verified_area.language = "rem"
+        self.verified_area.register_theme(REM_THEME_VERIFIED)
+        self.verified_area.theme = "subaru-verified"
 
         self.code_area = TextArea(
             "// starting coding here", 
             id='code-area',
             show_line_numbers=True,
-            tab_behavior='indent'
+            tab_behavior='indent',
+            soft_wrap=False
         )
+        self.code_area.register_language(PY_REM, rem_highlight_query)
+        self.code_area.language = "rem"
+        self.code_area.register_theme(REM_THEME)
+        self.code_area.theme = "subaru"
 
 
         ##################################################
@@ -408,6 +427,13 @@ class Editor(Screen):
         self.env_tabs = EnvTabs()
 
         self.gen_area = TextArea(read_only=True, id = "gen_area")
+        self.gen_area.register_language(PY_REM, rem_highlight_query)
+        self.gen_area.language = "rem"
+        self.gen_area.register_theme(REM_THEME)
+        self.gen_area.theme = "subaru"
+
+
+
         # the button to apply generation result
         self.apply_gen = Button("APPLY", id = "apply_gen")
         # the button to regenerate
@@ -444,13 +470,14 @@ class Editor(Screen):
                 Label("Code Area", classes="header"),
                 self.verified_area,
                 self.code_area,
+                id = "code-container",
             ),
             Vertical(
                 Label("Refinement Goals", classes="header"),
                 self.goal_list,
                 Label("Info Log", classes="header"),
                 self.log_area,
-                Label("Prover status", classes="header"),
+                Label("Prover Status", classes="header"),
                 self.prover_status_area
             ),
             self.gen_container,
@@ -650,7 +677,7 @@ class Editor(Screen):
         if self.gen_switch.value:
             machine_str = str(self.gen_machine)
         else:
-            machine_str = "Generation is disabled."
+            machine_str = "// Generation is disabled."
 
         if machine_str != self.gen_area.text:
             self.gen_area.text = machine_str
@@ -696,11 +723,11 @@ class Editor(Screen):
             if len(goals) == 0:
                 if self.mls.selected_frame.refinement_mode:
                     self.goal_list.mount(
-                        Label("Goal Clear.")
+                        Label("Goal Clear.", classes="refinement_status")
                     )
                 else:
                     self.goal_list.mount(
-                        Label("Not in refinement mode.")
+                        Label("Not in refinement mode.", classes="refinement_status")
                     )
             else:
                 for i, goal in enumerate(goals, start=1):

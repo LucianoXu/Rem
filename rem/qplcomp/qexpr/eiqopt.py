@@ -432,7 +432,7 @@ class EIQOptComplement(EIQOptAbstract):
     '''
     The expression for complement of projective quantum operators.
 
-    EIQOptComplement ::= (a : IQOpt) '^\\bot'
+    EIQOptComplement ::= (a : IQOpt) '^\\perp'
                     | (a : IQOpt) '^⊥'
     
     Nonterminal.

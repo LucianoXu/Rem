@@ -168,7 +168,7 @@ In the following introduction of syntax, $C$ denotes an identifier for a constan
   
     (refinement mode) Apply the refinement rule 
     $$
-    [P,Q]_{\bar{q}}\equiv if \ R[\bar{q}]\ then \ [R\doublecap P, Q]_{\bar{q}}\ else \ [R^\bot\doublecap P, Q]_{\bar{q}} end
+    [P,Q]_{\bar{q}}\equiv if \ R[\bar{q}]\ then \ [R\doublecap P, Q]_{\bar{q}}\ else \ [R^\perp\doublecap P, Q]_{\bar{q}} end
     $$ 
     to the current goal, where $R$ is specified by $oi$.
     
@@ -176,7 +176,7 @@ In the following introduction of syntax, $C$ denotes an identifier for a constan
     
     (refinement mode) Apply the refinement rule 
     $$
-    [Inv, P^\bot \doublecap Inv]_{\bar{q}}\le while\ P[\bar{q}]\ do\ [P\doublecap Inv, Inv]_{\bar{q}}\ end
+    [Inv, P^\perp \doublecap Inv]_{\bar{q}}\le while\ P[\bar{q}]\ do\ [P\doublecap Inv, Inv]_{\bar{q}}\ end
     $$
     to the current goal, where $P$, $Inv$ are specified by $oi_1$, $oi_2$ respectively.
 
@@ -259,7 +259,7 @@ $$
         & |\ c * o\ |\ c\ o\ \\
         & |\ o * o\ |\ o\dagger \\
         & |\ o \otimes o\ \\
-        & |\ o \vee o\ |\ o \wedge o\ |\ o\ \^{} \bot \\
+        & |\ o \vee o\ |\ o \wedge o\ |\ o\ \^{} \perp \\
         & |\ o \rightsquigarrow o\ |\ o \Cap o.
 \end{aligned}
 $$
@@ -277,9 +277,9 @@ $$
         & |\ c*oi\ |\ c\ oi\\
         & |\ oi * oi\ |\ oi\dagger\\
         & |\ oi \otimes oi\\
-        & |\ oi \vee oi\ |\ oi \wedge oi\ |\ oi\ \^{}\bot\\
+        & |\ oi \vee oi\ |\ oi \wedge oi\ |\ oi\ \^{}\perp\\
         & |\ oi \rightsquigarrow oi\ |\ oi \Cap oi.
 \end{aligned}
 $$
 The Unicode characters can be replaced by ASCII strings:
-$\dagger$ by \\dagger, $\otimes$ by \\otimes, $\vee$ by \\vee, $\wedge$ by \\wedge, $\bot$ by \\bot, $\rightsquigarrow$ by \\SasakiImply and $\Cap$ by \\SasakiConjunct.
+$\dagger$ by \\dagger, $\otimes$ by \\otimes, $\vee$ by \\vee, $\wedge$ by \\wedge, $\perp$ by \\perp, $\rightsquigarrow$ by \\SasakiImply and $\Cap$ by \\SasakiConjunct.

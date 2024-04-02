@@ -60,6 +60,20 @@ Editor .header {
     margin: 0 1;
 }
 
+#code-container {
+    width: 1.2fr;
+}
+
+#code-area {
+    background: white;
+}
+
+.refinement_status {
+    content-align: center middle;
+    width: 1fr;
+    height: 1fr;
+}
+
 GoalBar {
     margin: 1 0;
 }
@@ -126,11 +140,11 @@ ListItem #eval {
 
 
 #gen_area.solved {
-    background: $rem-pink;
+    background: white;
 }
 
 #gen_area.working {
-    background: $rem-blue;
+    background: white;
 }
 
 #gen_area.disabled {

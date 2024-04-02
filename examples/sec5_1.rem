@@ -32,7 +32,7 @@ Show rho1.
 
 // The example in the draft.
 Def P00 := [|00>].
-Def Pnot00 := P00^\bot.
+Def Pnot00 := P00^\perp.
 
 Def pCircuit :=
     H[q0]; H[q1];

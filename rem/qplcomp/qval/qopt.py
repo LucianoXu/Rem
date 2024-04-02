@@ -560,7 +560,7 @@ class QOpt(QVal):
         ================================================================
         Note: the subtraction of self and other is defined by:
 
-        { v \\in self: \\forall u \\in other, v \\bot u },
+        { v \\in self: \\forall u \\in other, v \\perp u },
 
         which is proved to be equivalent to `self & (~ other)`.
 
@@ -618,7 +618,7 @@ class QOpt(QVal):
         Parameters: `self`, `other` : QOpt, projectors with the same number of qubits.
         Returns: QOpt, a projector, representing the subspace of Sasaki implication.
         
-        Note: Sasaki implication P -> R := P^\\bot \vee (P \\wedge R)
+        Note: Sasaki implication P -> R := P^\\perp \vee (P \\wedge R)
         '''
         return (~ self) | (self & other)
     
@@ -629,7 +629,7 @@ class QOpt(QVal):
         Parameters: `self`, `other` : QOpt, projectors with the same number of qubits.
         Returns: QOpt, a projector, representing the subspace of Sasaki conjunction.
         
-        Note: Sasaki conjunction P -> R := P \\wedge (P^\\bot \\vee R)
+        Note: Sasaki conjunction P -> R := P \\wedge (P^\\perp \\vee R)
         '''
         return self & ((~ self) | other)
 

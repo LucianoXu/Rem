@@ -375,7 +375,7 @@ class EQOptComplement(EQOptAbstract):
     '''
     The expression for complement of projective quantum operators.
 
-    EQOptComplement ::= (a : QOpt) '^\\bot'
+    EQOptComplement ::= (a : QOpt) '^\\perp'
                     | (a : QOpt) '^⊥'
     
     Nonterminal.

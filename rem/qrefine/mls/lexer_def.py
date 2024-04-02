@@ -80,7 +80,7 @@ t_OTIMES = r"⊗|\\otimes"
 t_DAGGER = r"†|\^\\dagger"
 t_DISJUNCT = r"∨|\\vee"
 t_CONJUNCT = r"∧|\\wedge"
-t_COMPLEMENT = r"\^⊥|\^\\bot"
+t_COMPLEMENT = r"\^⊥|\^\\perp"
 t_SASAKI_IMPLY = r"⇝|\\SasakiImply"
 t_SASAKI_CONJUNCT = r"⋒|\\SasakiConjunct"
 
