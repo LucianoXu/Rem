@@ -172,20 +172,27 @@ class FileScreen(ModalScreen[None|Path]):
     @on(DirectoryTree.FileSelected)
     def on_file_selected(self, event: DirectoryTree.FileSelected) -> None:
         self.selected_path = event.path
+        self.get_widget_by_id("file_name", Input).value = event.path.name
         self.selected_is_dir = False
 
     @on(DirectoryTree.DirectorySelected)
     def on_directory_selected(self, event: DirectoryTree.DirectorySelected) -> None:
         self.selected_path = event.path
+        self.get_widget_by_id("file_name", Input).value = ""
         self.selected_is_dir = True
 
     def compose(self) -> ComposeResult:
-        yield Grid(
+        yield Vertical(
             Label(f"({self.mode_str}) Choose a file:", id="question"),
             RemDirectoryTree("./", id = "file_tree"),
-            Input("", id="file_name"),
-            Button("Commit", variant="success", id="commit"),
-            Button("Cancel", variant="primary", id="cancel"),
+            Horizontal(
+                Label("file name:", id="file_name_label"),
+                Input("", id="file_name"),
+            ),
+            Horizontal(
+                Button("Cancel", variant="primary", id="cancel"),
+                Button("Commit", variant="success", id="commit"),
+            ),
             id="dialog",
         )
 
@@ -215,7 +222,7 @@ class Editor(Screen):
         Binding("ctrl+p", "step_forward", "▶", priority=True),
         Binding("ctrl+l", "play_forward", "▶▶", priority=True),
         Binding("f1", "to_handbook", "To Handbook", priority=True),
-        Binding("f7", "screenshot", "Screenshot", priority=True),
+        Binding("f2", "screenshot", "Screenshot", priority=True),
     ]
 
     ############################################################

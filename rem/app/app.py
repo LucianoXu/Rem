@@ -19,6 +19,7 @@ class Rem(App):
     def on_mount(self) -> None:
 
         self.switch_mode("opening")
+        self.dark = False
 
 def app_run(opts: dict[str, np.ndarray]):
     rem = Rem()
