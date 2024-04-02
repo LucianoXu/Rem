@@ -131,7 +131,6 @@ class DefItem(ListItem):
         editor = self.app.query_one("Editor", Editor)
 
         if event.button.id == "show":
-
             cmd_code = f"Show {self.def_name}."
             editor.push_cmd(cmd_code, record = False)
 
@@ -576,6 +575,8 @@ class Editor(Screen):
 
         if record:
             self.verified_area.text = self.mls.verified_code
+        else:
+            self.mls.step_backward()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
 
