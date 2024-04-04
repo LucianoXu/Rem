@@ -15,7 +15,10 @@ class QProgExtract(QProgAst):
 
     def __str__(self) -> str:
         return f"Extract {self.prog}"
-        
+    
+    @property
+    def all_qvar(self) -> QVar:
+        return QVar([])
         
 def extract(prog: QProgAst) -> QProgAst:
     if isinstance(prog, (AstAbort, AstSkip, AstInit, AstUnitary, AstAssert)):

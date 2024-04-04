@@ -21,13 +21,21 @@ Refine Rep : < Pe[q1 q2 q3 a], Pe0[q1 q2 q3 a] >.
 	WeakenPre Pe1[q1 q2 q3 a]. Step X[q1];.
 	WeakenPre Pe2[q1 q2 q3 a]. Step X[q2];.
 End.
-
+// extract the program from the refinement result
 Def RepExtr := Extract Rep.
 Show RepExtr.
 
+// define a noisy channel
 Def Noise :=
 	{X[q1]; [\oplus 0.5] {X[q2]; [\oplus 0.5] {X[q3]; [\oplus 0.5] skip}}}.
 
-Def noisy := [[Noise]]([0.6|000> + 0.8|111>][q1 q2 q3]).
-Def recovered := [[RepExtr]](noisy).
-Eval recovered.
+// define the initial state
+Def initState := [0.6|000> + 0.8|111>][q1 q2 q3].
+Eval initState.
+
+// apply the noisy channel and recover
+Def noisyState := [[Noise]](initState).
+Eval noisyState.
+
+Def recoveredState := [[RepExtr]](noisyState).
+Test recoveredState = initState.

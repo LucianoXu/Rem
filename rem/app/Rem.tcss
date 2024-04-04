@@ -88,7 +88,7 @@ GoalBar Label {
 }
 
 #prover_status {
-    height: 7;
+    height: 9;
 }
 
 #prover_status.ready {

@@ -57,6 +57,14 @@ class EIQOpt(EIQOptAbstract):
     def all_qvar(self) -> QVar:
         return self.iqopt.qvar
     
+    def __hash__(self) -> int:
+        return hash(("iqopt", self.iqopt))
+    
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, EIQOpt):
+            return self.iqopt == other.iqopt
+        return False
+    
 class EIQOptPair(EIQOptAbstract):
     '''
     The Expression of Indexed Quantum Operators.
