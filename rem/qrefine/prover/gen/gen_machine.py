@@ -509,11 +509,9 @@ class GenWorker:
         '''
         The generation rule for pairing indexed operators.
         '''
-        if depth <= 0:
-            return None
         
         qnum = random.randint(0, self.qvars.qnum)
-        O = self.random_opt_gen(qnum, depth - 1)
+        O = self.random_opt_gen(qnum, depth)
         qv = self.random_qvar_gen(qnum)
 
         if O is not None:
