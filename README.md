@@ -15,7 +15,12 @@ Besides, we use `ply` for parsing and `NumPy` for numerical calculations. As men
 
 ## Installation
 
-After cloning the repository, navigate to its root folder and run
+Create a virtual environment of Python 3.11, for example:
+```
+conda create -n rem python=3.11
+conda activate rem
+```
+Then clone the repository, navigate to its root folder and run
 ```
 pip install -r requirements.txt
 ```
