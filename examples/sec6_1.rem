@@ -1,0 +1,67 @@
+
+Show Def.
+
+// Computing operators
+
+Def II := I \otimes I.
+
+Test CX[p q] * CX[q p] * CX[p q] = SWAP[p q].
+
+Test P0 \otimes P1 <= II.
+
+Test P0[p] \vee Pp[q] = I[p].
+
+
+// Subprograms and proofs.
+
+Def prog := X[x];.
+Show prog.
+
+Refine pfsub : < P0[x], P1[x] >.
+
+    Step prog.
+
+End.
+Show pfsub.
+
+Def rho1 := [[pfsub]](P0[x]).
+Show rho1.
+
+
+
+
+// The example in the draft.
+Def P00 := [|00>].
+Def Pnot00 := P00^\perp.
+
+Def pCircuit :=
+    H[q0]; H[q1];
+    CCX[q0 q1 t]; S[t]; CCX[q0 q1 t];
+    H[q0]; H[q1];
+    if Pnot00[q0 q1] then Z[t]; else skip end.
+
+Def Rz := Import "examples/5_1_Rz.npy".
+
+Def Inv0 := (Pnot00[q0 q1] \otimes Omega[t t']) \vee (P00[q0 q1] \otimes (Rz[t] * Omega[t t'] * Rz[t]^\dagger)).
+
+Refine pf : < Omega[t t'], Rz[t] * Omega[t t'] * Rz[t]^\dagger >.
+
+    Step Seq Pnot00[q0 q1] * Omega[t t'].
+    
+    Step 
+        [q0 q1] :=0 
+        X[q0];.
+
+
+    Step While Pnot00[q0 q1] Inv Inv0.
+
+    Step Seq P00[q0 q1] \otimes Omega[t t'].
+    
+    Step [q0 q1] :=0.
+
+    Step pCircuit.
+End.
+Show pf.
+
+Eval Extract pf.
+Eval [[Extract pf]](Pp[t]).

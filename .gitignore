@@ -11,3 +11,10 @@ parsetab.py
 *.synctex.gz
 
 output.txt
+
+build
+
+# Node packages
+node_modules/
+npm-debug.log
+package-lock.json

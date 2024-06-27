@@ -1,0 +1,260 @@
+$rem-blue: #91bef0;
+$rem-pink: #d9a0c1;
+$rem-blue-dark: #4489d6;
+$rem-pink-dark: #aa5887;
+
+/* general */
+
+Header {
+    background: $rem-blue-dark;
+    color: white;
+}
+
+Footer {
+    background: $rem-blue-dark;
+    color: white;
+}
+
+.switch--slider {
+    color: $rem-pink;
+}
+
+TextArea:focus {
+}
+
+
+
+/* Opening */
+Opening {
+    align: center middle;
+}
+
+Opening #title {
+    background: $rem-blue;
+    color: white;
+    text-style: bold;
+    width: 55;
+}
+
+Opening Button {
+    background: $rem-pink;
+    color: white;
+    text-style: bold;
+    width: 55;
+    border: hkey white;
+}
+
+Opening Button:hover{
+    background: white;
+    color: black;
+    text-style: bold;
+}
+
+/* Editor */
+
+Editor .header {
+    width: 1fr;
+    background: $rem-blue;
+    padding: 0 1;
+    text-style: bold;
+    margin: 0 1;
+}
+
+#code-container {
+    width: 1.2fr;
+}
+
+#code-area {
+    background: white;
+}
+
+.refinement_status {
+    content-align: center middle;
+    width: 1fr;
+    height: 1fr;
+}
+
+GoalBar {
+    margin: 1 0;
+}
+
+GoalBar TextArea{
+    height: 3;
+    border: none;
+}
+
+GoalBar Label {
+    margin: 0 1;
+}
+
+#prover_status {
+    height: 9;
+}
+
+#prover_status.ready {
+    background: white;
+}
+
+#prover_status.calculating  {
+    background: $rem-blue;
+    color: white;
+}
+
+#prover_status.error {
+    background: $rem-pink;
+    color: white;
+}
+
+/* generation part */
+#gen_container {
+    width: 55;
+}
+
+ListItem {
+    layout: horizontal;
+    margin: 0 1;
+}
+
+ListItem Label {
+    margin: 1
+}
+
+ListItem Button {
+    width: 8;
+    min-width: 8;
+}
+
+ListItem Container {
+    align: right middle;
+    layout: horizontal;
+}
+
+ListItem #show {
+    align: left top;
+    margin: 0 1;
+}
+
+ListItem #eval {
+    align: right bottom;
+}
+
+
+#gen_area.solved {
+    background: white;
+}
+
+#gen_area.working {
+    background: white;
+}
+
+#gen_area.disabled {
+    background: white;
+}
+
+
+#gen_container Horizontal {
+    align: center bottom;
+    margin: 1 0;
+    height: 3;
+}
+
+
+#gen_switch_label {
+    margin: 1;
+}
+
+#apply_gen {
+    width: 9;
+    min-width: 9;
+    margin: 0 1;
+}
+
+#regen {
+    width: 9;
+    min-width: 9;
+    margin: 0 1;
+}
+
+#gen_container Input {
+    width: 10;
+}
+
+#workers_label {
+    margin: 1;
+}
+
+#max_depth_label {
+    margin: 1;
+}
+
+
+
+
+
+FileScreen {
+    align: center middle;
+}
+
+RemDirectoryTree {
+    width: 1fr;
+    height: 2fr;
+    margin: 1;
+}
+
+FileScreen #dialog {
+    align: center middle;
+    width: 70;
+    height: 30;
+    border: thick $rem-blue 80%;
+    background: white;
+    padding: 1;
+}
+
+#question {
+    column-span: 2;
+    height: 0.5fr;
+    width: 1fr;
+    content-align: center middle;
+}
+
+FileScreen Horizontal {
+    align: center middle;
+    height: 5;
+}
+
+FileScreen #file_name_label {
+    align: center bottom;
+    height: 1fr;
+    content-align: center middle;
+}
+
+FileScreen Button {
+    width: 30%;
+    margin: 0 1;
+}
+
+FileScreen Input {
+    margin: 1;
+    width: 80%;
+    background: white;
+}
+
+FileScreen #commit {
+    background: $rem-pink;
+    border: hkey $rem-pink-dark;
+    color: white;
+}
+
+FileScreen #commit:hover {
+    background: $rem-pink-dark;
+}
+
+FileScreen #cancel {
+    background: $rem-blue;
+    border: hkey $rem-blue-dark;
+    color: white;
+}
+
+FileScreen #cancel:hover {
+    background: $rem-blue-dark;
+}

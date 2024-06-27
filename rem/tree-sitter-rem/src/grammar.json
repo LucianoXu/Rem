@@ -1,0 +1,315 @@
+{
+  "name": "rem",
+  "rules": {
+    "document": {
+      "type": "REPEAT",
+      "content": {
+        "type": "SYMBOL",
+        "name": "cmd"
+      }
+    },
+    "cmd": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "line_comment"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "block_comment"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "prog_keyword"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "keyword"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "operator"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "identifier"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "types"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "full_stop"
+        }
+      ]
+    },
+    "full_stop": {
+      "type": "STRING",
+      "value": "."
+    },
+    "line_comment": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "//"
+        },
+        {
+          "type": "PATTERN",
+          "value": ".*"
+        }
+      ]
+    },
+    "block_comment": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "/*"
+        },
+        {
+          "type": "PATTERN",
+          "value": "[^*]*\\*+([^/*][^*]*\\*+)*"
+        },
+        {
+          "type": "STRING",
+          "value": "/"
+        }
+      ]
+    },
+    "prog_keyword": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "abort"
+        },
+        {
+          "type": "STRING",
+          "value": "skip"
+        },
+        {
+          "type": "STRING",
+          "value": "assert"
+        },
+        {
+          "type": "STRING",
+          "value": "if"
+        },
+        {
+          "type": "STRING",
+          "value": "then"
+        },
+        {
+          "type": "STRING",
+          "value": "else"
+        },
+        {
+          "type": "STRING",
+          "value": "end"
+        },
+        {
+          "type": "STRING",
+          "value": "while"
+        },
+        {
+          "type": "STRING",
+          "value": "do"
+        }
+      ]
+    },
+    "keyword": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "Refine"
+        },
+        {
+          "type": "STRING",
+          "value": "End"
+        },
+        {
+          "type": "STRING",
+          "value": "Choose"
+        },
+        {
+          "type": "STRING",
+          "value": "Step"
+        },
+        {
+          "type": "STRING",
+          "value": "Seq"
+        },
+        {
+          "type": "STRING",
+          "value": "If"
+        },
+        {
+          "type": "STRING",
+          "value": "While"
+        },
+        {
+          "type": "STRING",
+          "value": "Inv"
+        },
+        {
+          "type": "STRING",
+          "value": "WeakenPre"
+        },
+        {
+          "type": "STRING",
+          "value": "StrengthenPost"
+        },
+        {
+          "type": "STRING",
+          "value": "Var"
+        },
+        {
+          "type": "STRING",
+          "value": "Def"
+        },
+        {
+          "type": "STRING",
+          "value": "Extract"
+        },
+        {
+          "type": "STRING",
+          "value": "Import"
+        },
+        {
+          "type": "STRING",
+          "value": "Show"
+        },
+        {
+          "type": "STRING",
+          "value": "Eval"
+        },
+        {
+          "type": "STRING",
+          "value": "Test"
+        }
+      ]
+    },
+    "operator": {
+      "type": "PREC",
+      "value": 2,
+      "content": {
+        "type": "CHOICE",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "⊕"
+          },
+          {
+            "type": "PATTERN",
+            "value": "\\\\oplus"
+          },
+          {
+            "type": "STRING",
+            "value": "+"
+          },
+          {
+            "type": "STRING",
+            "value": "-"
+          },
+          {
+            "type": "STRING",
+            "value": "*"
+          },
+          {
+            "type": "STRING",
+            "value": "⊗"
+          },
+          {
+            "type": "PATTERN",
+            "value": "\\\\otimes"
+          },
+          {
+            "type": "STRING",
+            "value": "†"
+          },
+          {
+            "type": "PATTERN",
+            "value": "\\^\\\\dagger"
+          },
+          {
+            "type": "STRING",
+            "value": "∨"
+          },
+          {
+            "type": "PATTERN",
+            "value": "\\\\vee"
+          },
+          {
+            "type": "STRING",
+            "value": "∧"
+          },
+          {
+            "type": "PATTERN",
+            "value": "\\\\wedge"
+          },
+          {
+            "type": "STRING",
+            "value": "^⊥"
+          },
+          {
+            "type": "PATTERN",
+            "value": "\\^\\\\perp"
+          },
+          {
+            "type": "STRING",
+            "value": "⇝"
+          },
+          {
+            "type": "PATTERN",
+            "value": "\\\\SasakiImply"
+          },
+          {
+            "type": "STRING",
+            "value": "⋒"
+          },
+          {
+            "type": "PATTERN",
+            "value": "\\\\SasakiConjunct"
+          }
+        ]
+      }
+    },
+    "identifier": {
+      "type": "PATTERN",
+      "value": "[a-zA-Z\\'][a-zA-Z\\'0-9]*"
+    },
+    "types": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "IQOpt"
+        },
+        {
+          "type": "STRING",
+          "value": "QOpt"
+        },
+        {
+          "type": "STRING",
+          "value": "QProg"
+        }
+      ]
+    }
+  },
+  "extras": [
+    {
+      "type": "PATTERN",
+      "value": "\\s"
+    }
+  ],
+  "conflicts": [],
+  "precedences": [],
+  "externals": [],
+  "inline": [],
+  "supertypes": []
+}
+

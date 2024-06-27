@@ -1,0 +1,270 @@
+[
+  {
+    "type": "block_comment",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "cmd",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "block_comment",
+          "named": true
+        },
+        {
+          "type": "full_stop",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "keyword",
+          "named": true
+        },
+        {
+          "type": "line_comment",
+          "named": true
+        },
+        {
+          "type": "operator",
+          "named": true
+        },
+        {
+          "type": "prog_keyword",
+          "named": true
+        },
+        {
+          "type": "types",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "document",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "cmd",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "keyword",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "line_comment",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "operator",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "prog_keyword",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "types",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "*",
+    "named": false
+  },
+  {
+    "type": "+",
+    "named": false
+  },
+  {
+    "type": "-",
+    "named": false
+  },
+  {
+    "type": "/",
+    "named": false
+  },
+  {
+    "type": "/*",
+    "named": false
+  },
+  {
+    "type": "//",
+    "named": false
+  },
+  {
+    "type": "Choose",
+    "named": false
+  },
+  {
+    "type": "Def",
+    "named": false
+  },
+  {
+    "type": "End",
+    "named": false
+  },
+  {
+    "type": "Eval",
+    "named": false
+  },
+  {
+    "type": "Extract",
+    "named": false
+  },
+  {
+    "type": "IQOpt",
+    "named": false
+  },
+  {
+    "type": "If",
+    "named": false
+  },
+  {
+    "type": "Import",
+    "named": false
+  },
+  {
+    "type": "Inv",
+    "named": false
+  },
+  {
+    "type": "QOpt",
+    "named": false
+  },
+  {
+    "type": "QProg",
+    "named": false
+  },
+  {
+    "type": "Refine",
+    "named": false
+  },
+  {
+    "type": "Seq",
+    "named": false
+  },
+  {
+    "type": "Show",
+    "named": false
+  },
+  {
+    "type": "Step",
+    "named": false
+  },
+  {
+    "type": "StrengthenPost",
+    "named": false
+  },
+  {
+    "type": "Test",
+    "named": false
+  },
+  {
+    "type": "Var",
+    "named": false
+  },
+  {
+    "type": "WeakenPre",
+    "named": false
+  },
+  {
+    "type": "While",
+    "named": false
+  },
+  {
+    "type": "^⊥",
+    "named": false
+  },
+  {
+    "type": "abort",
+    "named": false
+  },
+  {
+    "type": "assert",
+    "named": false
+  },
+  {
+    "type": "do",
+    "named": false
+  },
+  {
+    "type": "else",
+    "named": false
+  },
+  {
+    "type": "end",
+    "named": false
+  },
+  {
+    "type": "full_stop",
+    "named": true
+  },
+  {
+    "type": "identifier",
+    "named": true
+  },
+  {
+    "type": "if",
+    "named": false
+  },
+  {
+    "type": "skip",
+    "named": false
+  },
+  {
+    "type": "then",
+    "named": false
+  },
+  {
+    "type": "while",
+    "named": false
+  },
+  {
+    "type": "†",
+    "named": false
+  },
+  {
+    "type": "⇝",
+    "named": false
+  },
+  {
+    "type": "∧",
+    "named": false
+  },
+  {
+    "type": "∨",
+    "named": false
+  },
+  {
+    "type": "⊕",
+    "named": false
+  },
+  {
+    "type": "⊗",
+    "named": false
+  },
+  {
+    "type": "⋒",
+    "named": false
+  }
+]
