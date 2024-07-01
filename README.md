@@ -1,6 +1,8 @@
 # Rem
 ![aaa](rem_screenshot_jpg.png)
 
+YouTube Tutorial: https://www.youtube.com/watch?v=cFOUQpx2vx0
+
 `Rem` is a langauge and the software implementation for quantum program refinement.
 It aims to help by automation in the development procedure, and highlights in program synthesis. 
 `Rem` performs common work like parsing, checking of well-formedness and computing the classical simulation. 
