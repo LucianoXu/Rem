@@ -19,7 +19,12 @@ from ..qrefine import mls, AstPres
 from ..qrefine.prover.gen.gen_machine import GenMachine
 import datetime
 
-from .rem_syntax import PY_REM, rem_highlight_query, REM_THEME, REM_THEME_VERIFIED
+import platform
+
+is_windows = platform.system()=="Windows"
+
+if not is_windows:
+    from .rem_syntax import PY_REM, rem_highlight_query, REM_THEME, REM_THEME_VERIFIED
 
 
 def rem_greetings() -> str:
@@ -38,10 +43,12 @@ class GoalBar(Static):
         yield Label(f"Goal ({self.index}/{self.total})")
         goal_area = TextArea(str(self.goal), read_only=True)
 
-        goal_area.register_language(PY_REM, rem_highlight_query)
-        goal_area.language = "rem"
-        goal_area.register_theme(REM_THEME)
-        goal_area.theme = "subaru"
+        if not is_windows:
+            goal_area.register_language(PY_REM, rem_highlight_query)
+            goal_area.language = "rem"
+            goal_area.register_theme(REM_THEME)
+            goal_area.theme = "subaru"
+
 
         yield goal_area
 
@@ -392,10 +399,12 @@ class Editor(Screen):
             read_only=True,
             soft_wrap=False
         )
-        self.verified_area.register_language(PY_REM, rem_highlight_query)
-        self.verified_area.language = "rem"
-        self.verified_area.register_theme(REM_THEME_VERIFIED)
-        self.verified_area.theme = "subaru-verified"
+
+        if not is_windows:
+            self.verified_area.register_language(PY_REM, rem_highlight_query)
+            self.verified_area.language = "rem"
+            self.verified_area.register_theme(REM_THEME_VERIFIED)
+            self.verified_area.theme = "subaru-verified"
 
         self.code_area = TextArea(
             "// starting coding here", 
@@ -404,10 +413,12 @@ class Editor(Screen):
             tab_behavior='indent',
             soft_wrap=False
         )
-        self.code_area.register_language(PY_REM, rem_highlight_query)
-        self.code_area.language = "rem"
-        self.code_area.register_theme(REM_THEME)
-        self.code_area.theme = "subaru"
+
+        if not is_windows:
+            self.code_area.register_language(PY_REM, rem_highlight_query)
+            self.code_area.language = "rem"
+            self.code_area.register_theme(REM_THEME)
+            self.code_area.theme = "subaru"
 
 
         ##################################################
@@ -426,10 +437,12 @@ class Editor(Screen):
         self.env_tabs = EnvTabs()
 
         self.gen_area = TextArea(read_only=True, id = "gen_area")
-        self.gen_area.register_language(PY_REM, rem_highlight_query)
-        self.gen_area.language = "rem"
-        self.gen_area.register_theme(REM_THEME)
-        self.gen_area.theme = "subaru"
+
+        if not is_windows:
+            self.gen_area.register_language(PY_REM, rem_highlight_query)
+            self.gen_area.language = "rem"
+            self.gen_area.register_theme(REM_THEME)
+            self.gen_area.theme = "subaru"
 
 
 

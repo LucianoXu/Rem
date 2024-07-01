@@ -14,8 +14,9 @@ The software is implemented in Python as a terminal program, with a beautiful gr
 Besides, we use `ply` for parsing and `NumPy` for numerical calculations. As mentioned before, we adhere to variable-free operator expressions so that they can be converted into matrices for calculations. The editor window is divided into the coding area, the display of refinement goals, the list of existing definitions and the panel to control program generation (synthesis).
 
 ## Installation
-Tested on MacOS and Linux. Not working for Windows yet.
-Create a virtual environment of Python 3.11, for example:
+Tested on MacOS and Linux. Language syntax highlight is disabled for Windows for now.
+
+To install, create a virtual environment of Python 3.11, for example:
 ```
 conda create -n rem python=3.11
 conda activate rem
