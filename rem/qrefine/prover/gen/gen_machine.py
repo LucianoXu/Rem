@@ -16,6 +16,7 @@ from ...language.ast import *
 from ...language.refine import wlp_check
 
 import random
+import platform
 
 import multiprocessing as mp
 
@@ -53,7 +54,8 @@ def worker_gen(pres: AstPres, workers: list[GenWorker], index: int):
                 
 class GenMachine:
 
-    mp.set_start_method('fork')
+    if platform.system() == "Linux" or platform.system() == "Darwin":
+        mp.set_start_method('fork')
 
     def __init__(self, gen_env : Env):
         self.mng = mp.Manager()
