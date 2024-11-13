@@ -25,7 +25,7 @@ class Handbook(Screen):
         return self.query_one(MarkdownViewer)
 
     def compose(self) -> ComposeResult:
-        self.title = "Rem Handbook"
+        self.title = "QRefine Handbook"
         yield Header()
         yield Footer()
         yield MarkdownViewer()

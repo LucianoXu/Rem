@@ -1,11 +1,11 @@
-# Rem
+# QRefine
 ![aaa](rem_screenshot_jpg.png)
 
 YouTube Tutorial: https://www.youtube.com/watch?v=cFOUQpx2vx0
 
-`Rem` is a langauge and the software implementation for quantum program refinement.
+`QRefine` is a langauge and the software implementation for quantum program refinement.
 It aims to help by automation in the development procedure, and highlights in program synthesis. 
-`Rem` performs common work like parsing, checking of well-formedness and computing the classical simulation. 
+`QRefine` performs common work like parsing, checking of well-formedness and computing the classical simulation. 
 It also verifies adherence to specified prescriptions and aids in the refinement of programs in the sense of projection based partial correctness, and generate correct programs for simple prescriptions. 
 
 ## Language
@@ -34,11 +34,11 @@ python boot.py
 
 
 ## User Interface
-`Rem` is a terminal program with a graphic user interface. The interface of the editor is divided into several areas:
+`QRefine` is a terminal program with a graphic user interface. The interface of the editor is divided into several areas:
 
-- **Code Area**: the code area is separated into two parts. The top half contains the code executed by `Rem`, and the bottom half is the input area for subsequent codes. Click and select the processed command, and other areas will display the information at that frame.
+- **Code Area**: the code area is separated into two parts. The top half contains the code executed by `QRefine`, and the bottom half is the input area for subsequent codes. Click and select the processed command, and other areas will display the information at that frame.
 
-- **Refinement Goals**: when `Rem` enters refinement mode, the goals of program prescriptions to fulfill will be displayed here.
+- **Refinement Goals**: when `QRefine` enters refinement mode, the goals of program prescriptions to fulfill will be displayed here.
 
 - **Info Log**: a logging of operations and information output.
 
@@ -61,25 +61,25 @@ The buttons at the footer are:
 - **Step Backward**(`Ctrl+o`): revert one step of command execution.
 - **Step Forward**(`Ctrl+p`): execute one command in the input area.
 - **Play Forward**(`Ctrl+l`): execute all the commands in the input area in a sequence.
-- **To Handbook**(`F1`): go to the handbook of `Rem`.
+- **To Handbook**(`F1`): go to the handbook of `QRefine`.
 - **Screenshot**(`F2`): take a screenshot of the current window.
 
 ## Documentation
-This section explains the language and commands of `Rem`.
+This section explains the language and commands of `QRefine`.
 
 ### Variables
-Variables in `Rem` are identifiers following the regular expression 
+Variables in `QRefine` are identifiers following the regular expression 
 `[a-zA-Z\'][a-zA-Z\'0-9]*`.
 
 ### Quantum Registers
-In `Rem`, the whole quantum system consists of qubits, and every qubit is denoted by an identifier. A quantum register is an ordered list of unique qubit identifiers. For example, valid quantum registers include:
+In `QRefine`, the whole quantum system consists of qubits, and every qubit is denoted by an identifier. A quantum register is an ordered list of unique qubit identifiers. For example, valid quantum registers include:
 - `[]`, `[p]`, `[p q r']`, ...
   
 And invalid quantum registers include:
 - `[p p]`, `[1p 2q]`, ...
 
 ### Types
-There are three data types in `Rem`: 
+There are three data types in `QRefine`: 
 - `IQOpt`: indexed quantum operators.
 - `QOpt[n]`: n-qubit quantum operators. 
 - `QProg`: quantum programs.
@@ -126,7 +126,7 @@ The language for quantum programs are as follows.
 - `prog := Extract prog`: the program extracted from a refinement result
 
 ### Commands
-`Rem` use a command language to operate the environment and refinement procedure. The command syntax is defined as follows.
+`QRefine` use a command language to operate the environment and refinement procedure. The command syntax is defined as follows.
 
 - `Var var : type`: declaring the type for a variable.
 - `Def var := term .`: make a definition.

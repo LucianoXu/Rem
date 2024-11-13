@@ -36,7 +36,7 @@ class Splash(Container):
         self.auto_refresh = 1 / 30
 
     def compose(self) -> ComposeResult:
-        yield Static("Rem\nQuantum Program Refinement", id="title")
+        yield Static("QRefine\nQuantum Program Refinement", id="title")
         yield Button("Editor", id="to_editor")
         yield Button("Handbook", id="to_handbook")
         # yield Static("created with ♥")

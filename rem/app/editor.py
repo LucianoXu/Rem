@@ -247,9 +247,9 @@ class Editor(Screen):
 
     def watch_current_file(self, value: str) -> None:
         if value == "":
-            self.title = "Rem Editor - New File"
+            self.title = "QRefine Editor - New File"
         else:
-            self.title = f"Rem Editor - {value}"
+            self.title = f"QRefine Editor - {value}"
     
     def action_new(self) -> None:
         self.action_play_backward()
